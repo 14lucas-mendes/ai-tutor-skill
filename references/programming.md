@@ -10,6 +10,8 @@ Require a student-created Git commit only when the project is a writable Git rep
 
 Without Git, record file paths, the executed test and a SHA-256 content hash. This fallback preserves traceability without blocking learning.
 
+When implementation is the assessed capability, code supplied by the tutor that performs the essential part of the task makes that attempt guided practice. Explaining or retyping a near-identical supplied implementation does not turn it into an independent application. Collect a later reconstruction or a substantially different task in which the learner implements the cognitive core before receiving that code.
+
 ## Code review
 
 Check only relevant items:

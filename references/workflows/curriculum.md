@@ -4,4 +4,6 @@ Read current configuration, state, session history, and the learning contract. O
 
 For programming, use `references/programming.md`; projects are required only when the capability needs implementation evidence.
 
+When AI use is relevant and the learner has demonstrated the underlying capability, include delegation readiness as an advanced capability. Ask what remains learner-owned, what will be delegated, why, how failures and results will be verified, and where final human judgment remains necessary. Do not replace a domain objective with generic AI-tool practice.
+
 Mark completion only from valid evidence IDs and the normative completion rule. Explain proposed roadmap changes and preserve completed history when reprioritizing.

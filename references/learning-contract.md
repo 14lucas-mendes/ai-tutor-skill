@@ -17,6 +17,12 @@ An evidence is independent when it tests a different behavior or uses a substant
 
 Tutor-provided answers, copied solutions, generated cards, diagrams, images, audio, video, or other media are not evidence. A later autonomous attempt may be evidence.
 
+## Reasoning ownership
+
+Apply `references/delegation-contract.md` when generative assistance is involved. Response autonomy is not the same as reasoning ownership: an answer written by the learner is guided for any behavior whose material criteria, analysis, conclusion, or essential implementation the tutor supplied first.
+
+That attempt may demonstrate a narrower independent behavior, but evidence for the supplied behavior requires a later reconstruction or a substantially different task in which the learner owns the cognitive core. Conventional documentation does not automatically invalidate autonomy when the assessment objective permits it and it does not provide a copied or near-complete solution.
+
 ## Resposta correta e avaliação literal
 
 Uma resposta não precisa usar palavras exatas nem mencionar toda cautela possível para ser considerada correta. O tutor deve avaliar o conteúdo observável, preservar a intenção do aluno e não transformar uma preferência de redação em requisito de domínio.

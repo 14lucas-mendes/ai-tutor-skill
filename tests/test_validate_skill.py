@@ -85,6 +85,12 @@ class ValidateSkillTests(unittest.TestCase):
             "select_output_by_learning_need",
             "literal_response_assessment",
             "response_feedback_and_omission",
+            "protect_cognitive_core",
+            "reasoning_ownership",
+            "residual_capability",
+            "generated_core_is_guided",
+            "delegation_readiness",
+            "earned_performance_mode",
         }, identifiers)
 
 

@@ -58,5 +58,35 @@
     "id": "response_feedback_and_omission",
     "request": "O aluno escolhe o ambiente adequado, justifica a decisão e, após feedback, corrige uma imprecisão; uma cautela opcional não foi mencionada.",
     "expected": ["classify the core response as correct when no material error exists", "separate optional omission from material error", "recognize autonomous correction as possible evidence when the help level permits"]
+  },
+  {
+    "id": "protect_cognitive_core",
+    "request": "Um iniciante em SQL, sob prazo, pede que o tutor escreva a consulta que constitui a habilidade da lição antes de ele formular a abordagem.",
+    "expected": ["identify query formulation as the cognitive core", "require learner effort before generative execution of that core", "treat any supplied core solution as guided practice"]
+  },
+  {
+    "id": "reasoning_ownership",
+    "request": "O tutor fornece critérios, trade-offs e a recomendação arquitetural; o aluno apenas escolhe a recomendação e redige a justificativa final.",
+    "expected": ["distinguish response autonomy from reasoning ownership", "do not count the supplied analysis as independent judgment evidence", "require a later task where the learner formulates material criteria and analysis"]
+  },
+  {
+    "id": "residual_capability",
+    "request": "Depois de sessões com revisão de código por IA, avalie o que o aluno consegue fazer quando a assistência generativa é retirada.",
+    "expected": ["use a new representative task", "collect the learner response before teaching or revealing the cognitive core", "prevent generative assistance from performing the cognitive core", "allow conventional documentation when the objective permits it"]
+  },
+  {
+    "id": "generated_core_is_guided",
+    "request": "O tutor forneceu a implementação essencial; o aluno a estudou e reescreveu uma solução quase igual sem olhar.",
+    "expected": ["classify the implementation attempt as guided", "preserve learning progress without treating it as independent application", "require reconstruction or a substantially different autonomous task"]
+  },
+  {
+    "id": "delegation_readiness",
+    "request": "Em nível avançado, peça ao aluno que planeje o uso de IA em uma tarefa sem terceirizar o julgamento crítico.",
+    "expected": ["ask what remains learner-owned", "ask what is delegated and why", "ask how the learner will verify failures and the final result"]
+  },
+  {
+    "id": "earned_performance_mode",
+    "request": "O aluno já demonstrou mastery 100 e quer usar IA para gerar boilerplate e testes iniciais com mais velocidade.",
+    "expected": ["allow aggressive assistance for productivity", "do not require a new autonomous attempt for already demonstrated parts", "route an unproven new cognitive core back to learning or assessment", "retain learner verification and final judgment", "do not lower demonstrated mastery merely because AI is used"]
   }
 ]
