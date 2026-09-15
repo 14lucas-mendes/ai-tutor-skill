@@ -67,6 +67,16 @@ class ValidateSkillTests(unittest.TestCase):
             errors = validate_skill(root)
             self.assertTrue(any("domain 60" in error for error in errors), errors)
 
+    def test_rejects_non_object_json_template_without_crashing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "package"
+            shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+            (root / "assets" / "templates" / "state.json").write_text("[]", encoding="utf-8")
+
+            errors = validate_skill(root)
+
+            self.assertTrue(any("root must be an object" in error for error in errors), errors)
+
     def test_behavioral_scenario_catalog_covers_risky_flows(self):
         scenarios = json.loads(
             (ROOT / "tests" / "scenarios" / "behavioral.json").read_text(encoding="utf-8")
@@ -92,6 +102,23 @@ class ValidateSkillTests(unittest.TestCase):
             "delegation_readiness",
             "earned_performance_mode",
         }, identifiers)
+
+    def test_adaptive_programming_scenarios_have_expected_and_forbidden_behaviors(self):
+        scenarios = json.loads(
+            (ROOT / "tests" / "scenarios" / "adaptive-programming.json").read_text(encoding="utf-8")
+        )
+        self.assertGreaterEqual(len(scenarios), 7)
+        identifiers = [scenario["id"] for scenario in scenarios]
+        self.assertEqual(len(identifiers), len(set(identifiers)))
+        for scenario in scenarios:
+            self.assertTrue(scenario["context"])
+            self.assertTrue(scenario["expected"])
+            self.assertTrue(scenario["forbidden"])
+
+        self.assertIn("fast_mastery_omits_exposition", identifiers)
+        self.assertIn("difficulty_increases_scaffolding", identifiers)
+        self.assertIn("mixed_modes_within_session", identifiers)
+        self.assertIn("time_pressure_protects_learning", identifiers)
 
 
 if __name__ == "__main__":

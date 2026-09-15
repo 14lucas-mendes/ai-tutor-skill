@@ -55,6 +55,8 @@ Uma melhoria opcional pode ser recomendada sem rebaixar a classificação. A ava
 
 Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requires attempts after only the prompt was supplied.
 
+After an assisted success, reduce support and present a related variation. Guided success informs the next teaching decision but does not establish independent evidence for the supplied cognitive core. A later attempt with only the prompt supplied, or a substantially different task, is required before recording the corresponding autonomous behavior.
+
 ## Retention
 
 `retention` is `unknown`, `low`, `medium`, or `high`. Review failure changes retention and schedules practice; it does not erase demonstrated mastery. Reduce mastery only after two recent autonomous evidences show consistent loss of the previously demonstrated capability.
@@ -64,6 +66,8 @@ Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requir
 Create a weak point when the same category recurs twice or blocks required evidence. Categories are `conceptual`, `procedural`, `application`, `precision`, and `execution`.
 
 Resolve it after two correct autonomous evidences in different sessions. For mastery 80+, one must be transfer. Record its ID, topic, cause, supporting evidence IDs, entry date, exit condition, and status.
+
+During a v1 migration only, an unclassified point may use `category: "unclassified"` with `migration_pending_classification: true`. It remains a pending learner-owned classification and does not count as evidence; classify it before using it in a current learning decision.
 
 ## Curriculum completion
 
