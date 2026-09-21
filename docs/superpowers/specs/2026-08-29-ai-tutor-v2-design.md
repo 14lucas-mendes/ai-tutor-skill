@@ -65,6 +65,8 @@ ai-tutor/
 │   └── templates/
 │       ├── study-config.json
 │       ├── state.json
+│       ├── cards.json
+│       ├── sources.json
 │       ├── curriculum.md
 │       ├── session-log.md
 │       ├── flashcards.md
@@ -73,6 +75,9 @@ ai-tutor/
 │   ├── init_study.py
 │   ├── validate_skill.py
 │   ├── validate_study.py
+│   ├── projections.py
+│   ├── state_io.py
+│   ├── create_learning_pack.py
 │   └── migrate_state.py
 └── tests/
     ├── test_init_study.py
@@ -102,6 +107,8 @@ Cada estudo usará:
 ├── .ai-tutor/
 │   ├── study-config.json
 │   ├── state.json
+│   ├── cards.json
+│   ├── sources.json
 │   ├── media-index.json
 │   └── migrations/
 ├── curriculum.md

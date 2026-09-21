@@ -6,4 +6,4 @@ Collect only persisted fields: topic, concrete goal, initial level, weekly hours
 
 Summarize the proposed configuration and obtain confirmation before writing. Run `scripts/init_study.py` using the absolute study root and structured JSON. Never overwrite an existing `.ai-tutor/`; use migration when v1 state exists.
 
-After initialization, create an initial curriculum with observable outcomes but do not mark evidence or mastery. Validate the study and show created paths.
+After initialization, offer `/diagnostic` as an optional next step. If accepted, run the diagnostic workflow before finalizing the starting order; if declined, create the initial curriculum with observable outcomes as before. In both cases, do not mark evidence or mastery from setup or diagnosis. Validate the study and show created paths.

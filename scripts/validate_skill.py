@@ -15,19 +15,29 @@ REQUIRED_FILES = (
     "references/architecture.md",
     "references/learning-contract.md",
     "references/state-contract.md",
+    "references/diagnostic-contract.md",
     "references/output-contract.md",
     "references/media-providers.md",
     "references/programming.md",
     "assets/templates/study-config.json",
     "assets/templates/state.json",
     "assets/templates/media-index.json",
+    "assets/templates/cards.json",
+    "assets/templates/sources.json",
     "assets/templates/curriculum.md",
     "assets/templates/session-log.md",
     "assets/templates/flashcards.md",
+    "scripts/init_study.py",
+    "scripts/validate_study.py",
+    "scripts/migrate_state.py",
+    "scripts/create_learning_pack.py",
+    "scripts/state_io.py",
+    "scripts/projections.py",
 )
 
 WORKFLOWS = (
     "setup",
+    "diagnostic",
     "session",
     "curriculum",
     "lesson",
@@ -105,6 +115,9 @@ def _validate_assets(root: Path, errors: list[str]) -> None:
                 payload = json.loads(text)
             except json.JSONDecodeError as exc:
                 errors.append(f"invalid JSON {path.relative_to(root)}: {exc}")
+                continue
+            if not isinstance(payload, dict):
+                errors.append(f"invalid JSON {path.relative_to(root)}: root must be an object")
                 continue
             if payload.get("schema_version") != 2:
                 errors.append(f"{path.relative_to(root)}: schema_version must be 2")

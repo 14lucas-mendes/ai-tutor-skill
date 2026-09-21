@@ -17,6 +17,8 @@ An evidence is independent when it tests a different behavior or uses a substant
 
 Tutor-provided answers, copied solutions, generated cards, diagrams, images, audio, video, or other media are not evidence. A later autonomous attempt may be evidence.
 
+Diagnostic observations are not learning evidence. They may position the curriculum and expose prerequisite hypotheses, but they never populate `evidences`, attach to `evidence_ids`, or raise `mastery` without the normal autonomous evidence requirements below.
+
 ## Reasoning ownership
 
 Apply `references/delegation-contract.md` when generative assistance is involved. Response autonomy is not the same as reasoning ownership: an answer written by the learner is guided for any behavior whose material criteria, analysis, conclusion, or essential implementation the tutor supplied first.

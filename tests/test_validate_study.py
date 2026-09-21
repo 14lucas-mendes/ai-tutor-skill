@@ -36,8 +36,17 @@ def base_state():
             "evidence_ids": [],
         }],
         "evidences": [],
-        "sessions": [],
-        "lessons": [{"lesson_id": "lesson_a", "status": "planned", "session_ids": []}],
+        "sessions": [{
+            "session_id": "session_a",
+            "status": "completed",
+            "transitions": ["in_progress", "completed"],
+            "lesson_ids": ["lesson_a"],
+            "started_at": "2026-08-29T12:00:00Z",
+            "ended_at": "2026-08-29T13:00:00Z",
+            "checkpoint": None,
+            "resumable": False,
+        }],
+        "lessons": [{"lesson_id": "lesson_a", "topic_id": "topic_a", "status": "planned", "session_ids": ["session_a"]}],
         "weak_points": [],
         "projects": [],
         "next_focus": None,
@@ -106,12 +115,42 @@ class ValidateStudyTests(unittest.TestCase):
         }]
         self.assertTrue(any("invalid session transition" in error for error in validate_state(state)))
 
+    def test_completed_session_cannot_be_resumable(self):
+        state = base_state()
+        state["sessions"][0]["resumable"] = True
+
+        errors = validate_state(state)
+
+        self.assertTrue(any("completed session cannot be resumable" in error for error in errors), errors)
+
     def test_media_cannot_be_evidence(self):
         state = base_state()
         item = evidence("evidence_m", "application", reference_type="media")
         state["evidences"] = [item]
         state["topics"][0]["evidence_ids"] = [item["evidence_id"]]
         self.assertTrue(any("media cannot be evidence" in error for error in validate_state(state)))
+
+    def test_malformed_evidence_reference_returns_error(self):
+        state = base_state()
+        item = evidence("evidence_bad_reference", "application")
+        item["reference"] = None
+        state["evidences"] = [item]
+        state["topics"][0]["evidence_ids"] = [item["evidence_id"]]
+
+        errors = validate_state(state)
+
+        self.assertTrue(any("reference must contain type and id" in error for error in errors), errors)
+
+    def test_rejects_evidence_reference_to_unknown_lesson(self):
+        state = base_state()
+        item = evidence("evidence_dangling", "application")
+        item["reference"]["id"] = "lesson_absent"
+        state["evidences"] = [item]
+        state["topics"][0]["evidence_ids"] = [item["evidence_id"]]
+
+        errors = validate_state(state)
+
+        self.assertTrue(any("reference points to unknown lesson" in error for error in errors), errors)
 
     def test_rejects_duplicate_ids_and_dangling_references(self):
         state = base_state()
@@ -121,6 +160,116 @@ class ValidateStudyTests(unittest.TestCase):
         errors = validate_state(state)
         self.assertTrue(any("duplicate id" in error for error in errors), errors)
         self.assertTrue(any("unknown evidence" in error for error in errors), errors)
+
+    def test_rejects_lesson_with_unknown_topic(self):
+        state = base_state()
+        state["lessons"][0]["topic_id"] = "topic_missing"
+        errors = validate_state(state)
+        self.assertTrue(any("unknown topic" in error for error in errors), errors)
+
+    def test_rejects_evidence_with_unknown_session(self):
+        state = base_state()
+        item = evidence("evidence_a", "application", session_id="session_missing")
+        state["evidences"] = [item]
+        state["topics"][0]["evidence_ids"] = [item["evidence_id"]]
+        errors = validate_state(state)
+        self.assertTrue(any("unknown session" in error for error in errors), errors)
+
+    def test_rejects_orphan_evidence_not_attached_to_topic(self):
+        state = base_state()
+        item = evidence("evidence_a", "application")
+        state["evidences"] = [item]
+        errors = validate_state(state)
+        self.assertTrue(any("not referenced by topic" in error for error in errors), errors)
+
+    def test_rejects_completed_lesson_without_mastery(self):
+        state = base_state()
+        state["lessons"][0]["status"] = "completed"
+        errors = validate_state(state)
+        self.assertTrue(any("completed lesson" in error for error in errors), errors)
+
+    def test_rejects_malformed_state_collection(self):
+        state = base_state()
+        state["topics"] = {}
+        errors = validate_state(state)
+        self.assertTrue(any("topics must be a list" in error for error in errors), errors)
+
+    def test_malformed_collections_return_errors_instead_of_raising(self):
+        for field, value in (("topics", None), ("lessons", 4)):
+            with self.subTest(field=field):
+                state = base_state()
+                state[field] = value
+                errors = validate_state(state)
+                self.assertTrue(any(f"{field} must be a list" in error for error in errors), errors)
+
+    def test_malformed_nested_values_return_errors_instead_of_raising(self):
+        state = base_state()
+        state["topics"][0]["evidence_ids"] = None
+        state["topics"][0]["mastery"] = {"bad": True}
+        state["topics"][0]["retention"] = {"bad": True}
+        state["lessons"][0]["session_ids"] = None
+        state["lessons"][0]["status"] = {"bad": True}
+        state["sessions"][0]["transitions"] = ["in_progress", {"bad": True}]
+        state["sessions"][0]["status"] = {"bad": True}
+
+        errors = validate_state(state)
+
+        self.assertTrue(errors)
+
+    def test_unhashable_ids_return_errors_instead_of_raising(self):
+        state = base_state()
+        state["topics"][0]["evidence_ids"] = [{}]
+        state["evidences"] = [{"evidence_id": {"bad": True}}]
+        state["lessons"][0]["topic_id"] = {}
+        state["lessons"][0]["session_ids"] = [{}]
+        state["sessions"][0]["lesson_ids"] = [{}]
+
+        errors = validate_state(state)
+
+        self.assertTrue(errors)
+
+    def test_rejects_invalid_weak_point_contract(self):
+        state = base_state()
+        state["weak_points"] = [{
+            "weak_point_id": "weak_a",
+            "topic_id": "topic_missing",
+            "category": "made_up",
+            "cause": "",
+            "supporting_evidence_ids": ["evidence_missing"],
+            "entered_at": "not-a-date",
+            "exit_condition": "",
+            "status": "active",
+        }]
+
+        errors = validate_state(state)
+
+        self.assertTrue(any("unknown topic" in error for error in errors), errors)
+        self.assertTrue(any("invalid weak point category" in error for error in errors), errors)
+        self.assertTrue(any("unknown evidence" in error for error in errors), errors)
+
+    def test_rejects_unsupported_evidence_reference_type(self):
+        state = base_state()
+        item = evidence("evidence_bad_type", "application")
+        item["reference"] = {"type": "unsupported", "id": "lesson_a"}
+        state["evidences"] = [item]
+        state["topics"][0]["evidence_ids"] = [item["evidence_id"]]
+
+        errors = validate_state(state)
+
+        self.assertTrue(any("unsupported evidence reference type" in error for error in errors), errors)
+
+    def test_unhashable_evidence_fields_do_not_crash_mastery_validation(self):
+        state = base_state()
+        state["topics"][0].update(mastery=100, status="mastered", evidence_ids=["evidence_a"])
+        item = evidence("evidence_a", "application", transfer=True)
+        item["kind"] = {"bad": True}
+        item["session_id"] = {"bad": True}
+        item["context"] = ["bad"]
+        state["evidences"] = [item]
+
+        errors = validate_state(state)
+
+        self.assertTrue(errors)
 
 
 if __name__ == "__main__":

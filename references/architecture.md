@@ -16,6 +16,8 @@ Initialize with `python <skill_root>/scripts/init_study.py --study-root <study_r
 │   ├── study-config.json
 │   ├── state.json
 │   ├── media-index.json
+│   ├── cards.json
+│   ├── sources.json
 │   └── migrations/
 ├── curriculum.md
 ├── session-log.md
@@ -34,8 +36,11 @@ Structured files are canonical. Markdown is a readable projection and carries st
 3. Check IDs, references, transitions, and learning invariants.
 4. Write a temporary file beside each destination.
 5. Replace canonical files atomically.
-6. Update Markdown projections.
-7. Run `python <skill_root>/scripts/validate_study.py <study_root>`.
+6. For concurrent writers, acquire the sibling `.lock` through the `scripts/state_io.py` helpers with an expected `revision` (CAS); abort on `RevisionConflict`.
+7. Update Markdown projections explicitly.
+8. Run `python -m scripts.validate_study <study_root>` (or `python <skill_root>/scripts/validate_study.py <study_root>`).
+
+Markdown projections are deliberately explicit: run `python -m scripts.projections <study_root>` after a canonical update when the readable `flashcards.md` or `session-log.md` should change. Initialization never overwrites an existing projection.
 
 Do not leave a partially updated state. If validation fails, report the exact invariant and retain the last valid revision.
 

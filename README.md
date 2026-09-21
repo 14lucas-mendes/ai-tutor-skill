@@ -93,7 +93,8 @@ python .\scripts\init_study.py `
   --study-root 'C:\Estudos\meu-ai-tutor' `
   --config-json $config
 
-python .\scripts\validate_study.py 'C:\Estudos\meu-ai-tutor'
+python -m scripts.validate_study 'C:\Estudos\meu-ai-tutor'
+python -m scripts.projections 'C:\Estudos\meu-ai-tutor'
 ```
 
 Depois, carregue a skill no seu ambiente de chat e peça para iniciar ou continuar o estudo. O diretório de estudo pode ficar fora do repositório da skill.
@@ -106,7 +107,7 @@ ai-tutor-skill/
 ├── agents/openai.yaml               # metadados de invocação
 ├── references/                      # contratos e workflows
 ├── assets/templates/                # templates sem estado fictício
-├── scripts/                         # inicialização, validação e migração
+├── scripts/                         # inicialização, validação, projeções e migração
 ├── tests/                           # testes determinísticos e cenários
 ├── docs/superpowers/specs/          # decisões arquiteturais
 └── README.md                        # esta documentação

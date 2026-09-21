@@ -1,6 +1,6 @@
 # Curriculum Workflow
 
-Read current configuration, state, session history, and the learning contract. Organize phases around observable capabilities and prerequisites. Every checklist item carries a stable topic or lesson ID, required evidence types, and explicit delivery criteria. For programming capabilities, also record the project anchor, the earlier capability to revisit, the new constraint or context for that revisit, and the transfer behavior expected later.
+Read current configuration, state, session history, the latest completed diagnostic when present, and the learning contract. Organize phases around observable capabilities and prerequisites. Use diagnostic estimates only to choose the initial order and entry point; do not mark a topic complete or raise mastery from them. Every checklist item carries a stable topic or lesson ID, required evidence types, and explicit delivery criteria. For programming capabilities, also record the project anchor, the earlier capability to revisit, the new constraint or context for that revisit, and the transfer behavior expected later.
 
 For programming, use `references/programming.md`; projects are required when the capability needs implementation evidence, and every programming lesson still records an explicit project connection or preparatory artifact.
 

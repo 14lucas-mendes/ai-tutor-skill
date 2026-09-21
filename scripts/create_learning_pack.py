@@ -7,9 +7,15 @@ import argparse
 import hashlib
 import json
 import uuid
+from datetime import date, datetime, timezone
 from pathlib import Path
 
-from scripts.init_study import atomic_write
+try:
+    from scripts.init_study import atomic_write
+    from scripts.state_io import atomic_update_json
+except ModuleNotFoundError:  # direct execution: ``python scripts/create_learning_pack.py``
+    from init_study import atomic_write
+    from state_io import atomic_update_json
 
 
 SUPPORTED_FORMATS = {
@@ -26,6 +32,7 @@ SUPPORTED_FORMATS = {
 }
 VISUAL_FORMATS = {"mind_map", "chart", "image", "infographic", "slides"}
 TRANSCRIPT_FORMATS = {"audio", "video"}
+MEDIA_STATUSES = {"prepared", "generated", "verified", "failed", "archived"}
 
 FORMAT_INSTRUCTIONS = {
     "cards": "Create concise flashcards with one retrievable claim each and cite source IDs.",
@@ -42,23 +49,32 @@ FORMAT_INSTRUCTIONS = {
 
 
 def _source_hash(source: dict) -> str:
-    content = source.get("content", "").encode("utf-8")
+    content = str(source.get("content", "")).encode("utf-8")
     return hashlib.sha256(content).hexdigest()
 
 
 def _validate_sources(sources: list[dict]) -> None:
-    if not sources:
+    if not isinstance(sources, list) or not sources:
         raise ValueError("at least one verified source is required")
     required = {"source_id", "title", "url", "content"}
+    source_ids: set[str] = set()
     for index, source in enumerate(sources):
+        if not isinstance(source, dict):
+            raise ValueError(f"source {index} must be an object")
         missing = sorted(required - source.keys())
         if missing:
             raise ValueError(f"source {index} missing fields: {', '.join(missing)}")
-        if not all(str(source[field]).strip() for field in required):
+        if not all(isinstance(source[field], str) and source[field].strip() for field in required):
             raise ValueError(f"source {index} contains an empty required field")
+        source_id = source["source_id"]
+        if source_id in source_ids:
+            raise ValueError(f"duplicate source_id: {source_id}")
+        source_ids.add(source_id)
 
 
 def validate_formats(formats: list[str]) -> list[str]:
+    if not isinstance(formats, list) or not all(isinstance(value, str) for value in formats):
+        raise ValueError("formats must be a list of strings")
     requested = list(dict.fromkeys(formats))
     unknown = sorted(set(requested) - SUPPORTED_FORMATS)
     if unknown:
@@ -76,7 +92,7 @@ def build_manifest(
 ) -> dict:
     _validate_sources(sources)
     requested = validate_formats(formats)
-    if not lesson_id.strip() or not objective.strip():
+    if not isinstance(lesson_id, str) or not lesson_id.strip() or not isinstance(objective, str) or not objective.strip():
         raise ValueError("lesson_id and objective are required")
     return {
         "schema_version": 2,
@@ -98,16 +114,80 @@ def build_manifest(
     }
 
 
+def _is_timestamp(value: object, *, allow_none: bool = False) -> bool:
+    if value is None:
+        return allow_none
+    if not isinstance(value, str) or not value.strip():
+        return False
+    try:
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        try:
+            date.fromisoformat(value)
+        except ValueError:
+            return False
+    return True
+
+
 def validate_media_item(item: dict) -> list[str]:
+    if not isinstance(item, dict):
+        return ["media artifact must be an object"]
     errors: list[str] = []
+    required = {
+        "artifact_id", "lesson_id", "type", "provider", "source_ids", "objective",
+        "local_path", "url", "status", "verified", "created_at", "verified_at",
+        "accessibility", "evidence_eligible",
+    }
+    errors.extend(f"media artifact missing field: {field}" for field in sorted(required - item.keys()))
     artifact_type = item.get("type")
-    if not item.get("artifact_id"):
+    artifact_id = item.get("artifact_id")
+    if not isinstance(artifact_id, str) or not artifact_id.strip():
         errors.append("artifact_id is required")
+    elif not artifact_id.startswith("media_"):
+        errors.append("artifact_id must start with media_")
     if item.get("evidence_eligible") is not False:
         errors.append("evidence_eligible must be false")
-    if artifact_type in VISUAL_FORMATS and not str(item.get("alt_text", "")).strip():
+    if not isinstance(item.get("lesson_id"), str) or not item["lesson_id"].strip():
+        errors.append("lesson_id is required")
+    for field in ("type", "provider", "objective", "status"):
+        if not isinstance(item.get(field), str) or not item[field].strip():
+            errors.append(f"{field} is required")
+    if not isinstance(item.get("source_ids"), list) or not all(
+        isinstance(value, str) and value.strip() for value in item.get("source_ids", [])
+    ):
+        errors.append("source_ids must be a list of non-empty strings")
+    local_path = item.get("local_path")
+    url = item.get("url")
+    if local_path is not None and not isinstance(local_path, str):
+        errors.append("local_path must be a string or null")
+    if url is not None and not isinstance(url, str):
+        errors.append("url must be a string or null")
+    if not (
+        isinstance(local_path, str) and local_path.strip()
+        or isinstance(url, str) and url.strip()
+    ):
+        errors.append("local_path or url is required")
+    if not isinstance(item.get("status"), str) or item.get("status") not in MEDIA_STATUSES:
+        errors.append("status must be a supported media status")
+    if not isinstance(item.get("verified"), bool):
+        errors.append("verified must be boolean")
+    for field in ("created_at", "verified_at"):
+        value = item.get(field)
+        if field == "verified_at" and value is None:
+            continue
+        if not _is_timestamp(value, allow_none=field == "verified_at"):
+            errors.append(f"{field} is required as an ISO timestamp")
+    if item.get("verified") is True and not _is_timestamp(item.get("verified_at")):
+        errors.append("verified_at is required when media is verified")
+    if not isinstance(item.get("accessibility"), dict):
+        errors.append("accessibility must be an object")
+    if isinstance(artifact_type, str) and artifact_type in VISUAL_FORMATS and not isinstance(item.get("alt_text"), str):
         errors.append(f"alt_text is required for {artifact_type}")
-    if artifact_type in TRANSCRIPT_FORMATS and not str(item.get("transcript", "")).strip():
+    elif isinstance(artifact_type, str) and artifact_type in VISUAL_FORMATS and not item["alt_text"].strip():
+        errors.append(f"alt_text is required for {artifact_type}")
+    if isinstance(artifact_type, str) and artifact_type in TRANSCRIPT_FORMATS and not isinstance(item.get("transcript"), str):
+        errors.append(f"transcript is required for {artifact_type}")
+    elif isinstance(artifact_type, str) and artifact_type in TRANSCRIPT_FORMATS and not item["transcript"].strip():
         errors.append(f"transcript is required for {artifact_type}")
     return errors
 
@@ -185,9 +265,9 @@ def _register_pack(study_root: Path, pack: Path, manifest: dict) -> None:
     index_path = study_root / ".ai-tutor" / "media-index.json"
     if not index_path.is_file():
         return
-    index = json.loads(index_path.read_text(encoding="utf-8"))
     relative_path = pack.relative_to(study_root).as_posix()
-    index.setdefault("artifacts", []).append({
+
+    artifact = {
         "artifact_id": manifest["artifact_id"],
         "lesson_id": manifest["lesson_id"],
         "type": "learning_pack",
@@ -199,13 +279,25 @@ def _register_pack(study_root: Path, pack: Path, manifest: dict) -> None:
         "url": None,
         "status": "prepared",
         "verified": False,
+        "created_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "verified_at": None,
         "accessibility": {
             "visuals_require_alt_text": True,
             "audio_video_require_transcript": True,
         },
         "evidence_eligible": False,
-    })
-    atomic_write(index_path, json.dumps(index, ensure_ascii=False, indent=2) + "\n")
+    }
+
+    def append_artifact(index: dict) -> dict:
+        artifacts = index.get("artifacts")
+        if not isinstance(artifacts, list):
+            raise ValueError("media-index artifacts must be a list")
+        if any(item.get("artifact_id") == artifact["artifact_id"] for item in artifacts if isinstance(item, dict)):
+            return index
+        artifacts.append(artifact)
+        return index
+
+    atomic_update_json(index_path, append_artifact)
 
 
 def create_learning_pack(

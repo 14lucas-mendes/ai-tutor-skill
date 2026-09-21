@@ -23,6 +23,7 @@ Load only the workflow needed for the current intent.
 | Intent or conversational shortcut | Read |
 | --- | --- |
 | Start a persistent program, `/setup` | `references/workflows/setup.md` |
+| Diagnose prior knowledge, `/diagnostic` | `references/workflows/diagnostic.md` |
 | Continue, resume, or conduct a session | `references/workflows/session.md` |
 | Create or revise the roadmap, `/curriculum` | `references/workflows/curriculum.md` |
 | Create the next eligible lesson, `/licao` | `references/workflows/lesson.md` |

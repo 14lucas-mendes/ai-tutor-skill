@@ -57,6 +57,14 @@ class LearningPackTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 create_learning_pack(Path(tmp), "lesson_a", [], ["cards"], objective="Learn")
 
+    def test_rejects_malformed_formats_and_duplicate_sources(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ValueError):
+                create_learning_pack(Path(tmp), "lesson_a", SOURCES, None, objective="Learn")
+            duplicate_sources = [SOURCES[0], dict(SOURCES[0])]
+            with self.assertRaises(ValueError):
+                create_learning_pack(Path(tmp), "lesson_a", duplicate_sources, ["cards"], objective="Learn")
+
     def test_visual_artifacts_require_accessibility(self):
         errors = validate_media_item({
             "artifact_id": "media_a",
@@ -86,6 +94,16 @@ class LearningPackTests(unittest.TestCase):
             "evidence_eligible": True,
         })
         self.assertTrue(any("evidence_eligible" in error for error in errors), errors)
+
+    def test_media_item_requires_canonical_metadata(self):
+        errors = validate_media_item({
+            "artifact_id": "media_a",
+            "type": "learning_pack",
+            "evidence_eligible": False,
+        })
+        self.assertTrue(any("provider" in error for error in errors), errors)
+        self.assertTrue(any("source_ids" in error for error in errors), errors)
+        self.assertTrue(any("accessibility" in error for error in errors), errors)
 
     def test_source_pack_preserves_citations(self):
         with tempfile.TemporaryDirectory() as tmp:
