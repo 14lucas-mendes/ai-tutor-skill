@@ -10,8 +10,12 @@ from pathlib import Path
 
 try:
     from scripts.create_learning_pack import validate_media_item
+    from scripts.learner_profile import validate_profile
+    from scripts.representation import validate_representation
 except ModuleNotFoundError:  # direct execution: ``python scripts/validate_study.py``
     from create_learning_pack import validate_media_item
+    from learner_profile import validate_profile
+    from representation import validate_representation
 
 
 MASTERY_LEVELS = {0, 20, 40, 60, 80, 100}
@@ -44,6 +48,8 @@ SESSION_STATUSES = set(SESSION_TRANSITIONS)
 EVIDENCE_RESULTS = {"correct", "partial", "incorrect", "failed"}
 CARD_STATUSES = {"new", "learning", "review", "suspended"}
 CARD_RESULTS = {"correct", "partial", "incorrect", "failed"}
+RETRIEVAL_OUTCOMES = {"correct", "partial", "incorrect", "not_attempted"}
+SPACING_MODES = {"fixed", "adaptive"}
 CARD_DIFFICULTIES = {"easy", "medium", "hard"}
 WEAK_POINT_CATEGORIES = {"conceptual", "procedural", "application", "precision", "execution"}
 WEAK_POINT_STATUSES = {"active", "resolved", "archived"}
@@ -164,6 +170,13 @@ def _validate_config(config: object) -> list[str]:
     for field in ("source_policy", "external_consents"):
         if not isinstance(config.get(field), dict):
             errors.append(f"study config {field} must be an object")
+    spacing_policy = config.get("spacing_policy", {"mode": "fixed", "target_horizon_days": None})
+    if not isinstance(spacing_policy, dict) or spacing_policy.get("mode") not in SPACING_MODES:
+        errors.append("study config spacing_policy.mode must be fixed or adaptive")
+    elif spacing_policy.get("target_horizon_days") is not None:
+        horizon = spacing_policy.get("target_horizon_days")
+        if isinstance(horizon, bool) or not isinstance(horizon, int) or horizon <= 0:
+            errors.append("study config target_horizon_days must be a positive integer or null")
     return errors
 
 
@@ -467,6 +480,26 @@ def _validate_sessions(state: dict, indexes: dict[str, set[str]]) -> list[str]:
         for lesson_id in lesson_ids:
             if not _known_id(lesson_id, indexes["lessons"]):
                 errors.append(f"session references unknown lesson: {lesson_id}")
+        practice_strategy = session.get("practice_strategy")
+        if practice_strategy is not None:
+            if not isinstance(practice_strategy, dict):
+                errors.append(f"session practice_strategy must be an object: {session.get('session_id')}")
+            else:
+                if practice_strategy.get("mode") not in {"blocked", "interleaved"}:
+                    errors.append(f"invalid practice strategy mode: {session.get('session_id')}")
+                topic_ids = practice_strategy.get("topic_ids")
+                if not isinstance(topic_ids, list) or not all(isinstance(item, str) for item in topic_ids):
+                    errors.append(f"practice strategy topic_ids must be a list of strings: {session.get('session_id')}")
+                else:
+                    errors.extend(
+                        f"practice strategy references unknown topic: {topic_id}"
+                        for topic_id in topic_ids
+                        if topic_id not in indexes["topics"]
+                    )
+                if not isinstance(practice_strategy.get("topic_label_visible"), bool):
+                    errors.append(f"practice strategy topic_label_visible must be boolean: {session.get('session_id')}")
+                if not _is_string(practice_strategy.get("reason")):
+                    errors.append(f"practice strategy reason must be a non-empty string: {session.get('session_id')}")
     return errors
 
 
@@ -689,6 +722,43 @@ def _validate_diagnostics(state: dict, indexes: dict[str, set[str]]) -> list[str
     return errors
 
 
+def _validate_retrieval_attempts(state: dict, indexes: dict[str, set[str]]) -> list[str]:
+    attempts = state.get("retrieval_attempts", [])
+    if attempts is None:
+        return ["retrieval_attempts must be a list"]
+    if not isinstance(attempts, list):
+        return ["retrieval_attempts must be a list"]
+    errors: list[str] = []
+    ids: set[str] = set()
+    for position, attempt in enumerate(attempts):
+        if not isinstance(attempt, dict):
+            errors.append(f"retrieval_attempts[{position}] must be an object")
+            continue
+        retrieval_id = attempt.get("retrieval_id")
+        if not _is_string(retrieval_id) or not retrieval_id.startswith("retrieval_"):
+            errors.append(f"retrieval id is invalid: {retrieval_id}")
+        elif retrieval_id in ids:
+            errors.append(f"duplicate retrieval id: {retrieval_id}")
+        else:
+            ids.add(retrieval_id)
+        session_id = attempt.get("session_id")
+        topic_id = attempt.get("topic_id")
+        if session_id not in indexes["sessions"]:
+            errors.append(f"retrieval references unknown session: {session_id}")
+        if topic_id not in indexes["topics"]:
+            errors.append(f"retrieval references unknown topic: {topic_id}")
+        if not _is_string(attempt.get("prompt")):
+            errors.append(f"retrieval prompt must be a non-empty string: {retrieval_id}")
+        if attempt.get("outcome") not in RETRIEVAL_OUTCOMES:
+            errors.append(f"invalid retrieval outcome: {retrieval_id}")
+        support_level = attempt.get("support_level")
+        if isinstance(support_level, bool) or not isinstance(support_level, int) or not 0 <= support_level <= 5:
+            errors.append(f"retrieval support_level must be from 0 to 5: {retrieval_id}")
+        if not _is_timestamp(attempt.get("recorded_at")):
+            errors.append(f"retrieval recorded_at must be an ISO date/time: {retrieval_id}")
+    return errors
+
+
 def _validate_sources(payload: object, state_indexes: dict[str, set[str]]) -> tuple[list[str], set[str]]:
     if not isinstance(payload, dict):
         return ["sources.json must be an object"], set()
@@ -816,8 +886,11 @@ def _validate_cards(
     return errors
 
 
-def _validate_media_item_contract(item: object) -> list[str]:
-    return validate_media_item(item)
+def _validate_media_item_contract(item: object, siblings: list[dict] | None = None) -> list[str]:
+    errors = validate_media_item(item)
+    if siblings is not None and isinstance(item, dict):
+        errors.extend(validate_representation(item, siblings))
+    return errors
 
 
 def validate_state(state: dict) -> list[str]:
@@ -840,6 +913,7 @@ def validate_state(state: dict) -> list[str]:
     errors.extend(_validate_weak_points(working_state, indexes))
     errors.extend(_validate_mastery(working_state, indexes))
     errors.extend(_validate_diagnostics(working_state, indexes))
+    errors.extend(_validate_retrieval_attempts(working_state, indexes))
     errors.extend(_validate_cross_references(working_state, indexes))
     return sorted(set(errors))
 
@@ -853,6 +927,7 @@ def validate_study(study_root: Path) -> list[str]:
         "media-index.json",
         "cards.json",
         "sources.json",
+        "learner-profile.json",
     )
     for name in required_files:
         if not (metadata / name).is_file():
@@ -875,6 +950,7 @@ def validate_study(study_root: Path) -> list[str]:
     state = payloads["state.json"]
     config = payloads["study-config.json"]
     media_index = payloads["media-index.json"]
+    learner_profile = payloads["learner-profile.json"]
     errors.extend(_validate_config(config))
     errors.extend(validate_state(state))
     expected_study_id = state.get("study_id")
@@ -884,7 +960,7 @@ def validate_study(study_root: Path) -> list[str]:
         if payload.get("study_id") != expected_study_id:
             errors.append(f"study_id mismatch: {name}")
 
-    for name in ("media-index.json", "cards.json", "sources.json"):
+    for name in ("media-index.json", "cards.json", "sources.json", "learner-profile.json"):
         revision = payloads[name].get("revision")
         if isinstance(revision, bool) or not isinstance(revision, int) or revision < 0:
             errors.append(f"{name[:-5]} revision must be a non-negative integer")
@@ -894,6 +970,12 @@ def validate_study(study_root: Path) -> list[str]:
         if not isinstance(normalized_state.get(collection), list):
             normalized_state[collection] = []
     state_indexes, _ = _unique_ids(normalized_state)
+    errors.extend(
+        validate_profile(
+            learner_profile,
+            state_indexes={"topics": state_indexes["topics"], "sessions": state_indexes["sessions"]},
+        )
+    )
     lessons_by_id = {
         item.get("lesson_id"): item
         for item in normalized_state.get("lessons", [])
@@ -917,7 +999,7 @@ def validate_study(study_root: Path) -> list[str]:
             errors.append(f"duplicate media artifact id: {artifact_id}")
         if isinstance(artifact_id, str) and artifact_id:
             seen_artifacts.add(artifact_id)
-        errors.extend(_validate_media_item_contract(item))
+        errors.extend(_validate_media_item_contract(item, artifacts))
     for relative in ("curriculum.md", "session-log.md", "flashcards.md"):
         if not (study_root.resolve() / relative).is_file():
             errors.append(f"missing study projection: {relative}")

@@ -142,6 +142,24 @@ class MigrationTests(unittest.TestCase):
             self.assertTrue((metadata / "migrations").is_dir())
             self.assertEqual(0, json.loads((metadata / "media-index.json").read_text())["revision"])
 
+    def test_v2_upgrade_adds_fixed_spacing_policy_without_changing_learning_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "v2 study"
+            initialize_study(ROOT, study, CONFIG)
+            metadata = study / ".ai-tutor"
+            config_path = metadata / "study-config.json"
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            config.pop("spacing_policy", None)
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            state_before = json.loads((metadata / "state.json").read_text(encoding="utf-8"))
+
+            report = migrate(study)
+
+            self.assertTrue(report.valid)
+            migrated_config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual({"mode": "fixed", "target_horizon_days": None}, migrated_config["spacing_policy"])
+            self.assertEqual(state_before, json.loads((metadata / "state.json").read_text(encoding="utf-8")))
+
     def test_rejects_invalid_v2_support_files_without_writing(self):
         with tempfile.TemporaryDirectory() as tmp:
             study = Path(tmp) / "v2 study"

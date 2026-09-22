@@ -1,7 +1,26 @@
 import copy
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
+from scripts.init_study import initialize_study
+from scripts.validate_study import validate_study
 from scripts.validate_study import validate_state
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CONFIG = {
+    "topic": "Python",
+    "goal": "Aprender",
+    "deadline": None,
+    "weekly_hours": 2,
+    "preferred_times": ["flexível"],
+    "initial_level": "básico",
+    "language": "pt-BR",
+    "accessibility": [],
+    "source_policy": {},
+}
 
 
 def evidence(evidence_id, kind, *, session_id="session_a", transfer=False, autonomous=True, reference_type="lesson"):
@@ -54,6 +73,44 @@ def base_state():
 
 
 class ValidateStudyTests(unittest.TestCase):
+    def test_validate_study_accepts_one_complementary_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "study"
+            initialize_study(ROOT, study, CONFIG)
+            media_path = study / ".ai-tutor" / "media-index.json"
+            media = json.loads(media_path.read_text(encoding="utf-8"))
+            primary = {
+                "artifact_id": "media_primary",
+                "lesson_id": "lesson_a",
+                "type": "learning_pack",
+                "provider": "local",
+                "source_ids": [],
+                "objective": "Explain loops",
+                "local_path": "media/lesson_a/primary",
+                "url": None,
+                "status": "prepared",
+                "verified": False,
+                "created_at": "2026-09-22T12:00:00Z",
+                "verified_at": None,
+                "accessibility": {},
+                "evidence_eligible": False,
+            }
+            complementary = dict(primary)
+            complementary.update({
+                "artifact_id": "media_complement",
+                "local_path": "media/lesson_a/diagram",
+                "representation": {
+                    "role": "complementary",
+                    "complements_artifact_id": "media_primary",
+                    "rationale": "O diagrama mostra a sequência.",
+                    "distinct_contribution": "Explicita o fluxo entre itens.",
+                },
+            })
+            media["artifacts"] = [primary, complementary]
+            media_path.write_text(json.dumps(media), encoding="utf-8")
+
+            self.assertEqual([], validate_study(study))
+
     def test_domain_60_needs_feynman_and_application(self):
         state = base_state()
         item = evidence("evidence_f", "feynman")

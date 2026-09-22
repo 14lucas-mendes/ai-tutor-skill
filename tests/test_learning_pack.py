@@ -128,6 +128,28 @@ class LearningPackTests(unittest.TestCase):
             self.assertFalse(index["artifacts"][0]["evidence_eligible"])
             self.assertEqual("prepared", index["artifacts"][0]["status"])
 
+    def test_persists_representation_metadata_in_manifest_and_index(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "study"
+            initialize_study(ROOT, study, CONFIG)
+            pack = create_learning_pack(
+                study,
+                "lesson_a",
+                SOURCES,
+                ["image"],
+                objective="Explain loops",
+                representation={
+                    "role": "primary",
+                    "complements_artifact_id": None,
+                    "rationale": "A imagem é a representação principal.",
+                    "distinct_contribution": "Mostra o sistema concreto.",
+                },
+            )
+            manifest = json.loads((pack / "manifest.json").read_text(encoding="utf-8"))
+            index = json.loads((study / ".ai-tutor" / "media-index.json").read_text(encoding="utf-8"))
+            self.assertEqual("primary", manifest["representation"]["role"])
+            self.assertEqual("primary", index["artifacts"][0]["representation"]["role"])
+
     def test_every_format_has_a_local_fallback(self):
         expected = {
             "cards.json",

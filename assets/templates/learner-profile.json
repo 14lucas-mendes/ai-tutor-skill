@@ -1,0 +1,14 @@
+{
+  "schema_version": 2,
+  "study_id": "",
+  "revision": 0,
+  "updated_at": null,
+  "declared_preferences": [],
+  "observations": [],
+  "inferences": [],
+  "summary": {
+    "autonomy": "unknown",
+    "help_dependency": "unknown",
+    "confidence_pattern": "unknown"
+  }
+}

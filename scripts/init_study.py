@@ -12,7 +12,14 @@ from copy import deepcopy
 from pathlib import Path
 
 
-JSON_ASSETS = ("study-config.json", "state.json", "media-index.json", "cards.json", "sources.json")
+JSON_ASSETS = (
+    "study-config.json",
+    "state.json",
+    "media-index.json",
+    "cards.json",
+    "sources.json",
+    "learner-profile.json",
+)
 MARKDOWN_ASSETS = ("curriculum.md", "session-log.md", "flashcards.md")
 REQUIRED_CONFIG = (
     "topic",
@@ -66,6 +73,12 @@ def _validate_config(config: dict) -> None:
         or config["weekly_hours"] <= 0
     ):
         raise ValueError("weekly_hours must be positive")
+    spacing_policy = config.get("spacing_policy", {"mode": "fixed", "target_horizon_days": None})
+    if not isinstance(spacing_policy, dict) or spacing_policy.get("mode") not in {"fixed", "adaptive"}:
+        raise ValueError("spacing_policy.mode must be fixed or adaptive")
+    horizon = spacing_policy.get("target_horizon_days")
+    if horizon is not None and (isinstance(horizon, bool) or not isinstance(horizon, int) or horizon <= 0):
+        raise ValueError("spacing_policy.target_horizon_days must be a positive integer or null")
 
 
 def initialize_study(
@@ -112,6 +125,10 @@ def initialize_study(
     for key in REQUIRED_CONFIG:
         study_config[key] = deepcopy(config[key])
     study_config["external_consents"] = deepcopy(config.get("external_consents", {}))
+    study_config["spacing_policy"] = deepcopy(config.get(
+        "spacing_policy",
+        {"mode": "fixed", "target_horizon_days": None},
+    ))
 
     for directory in (
         metadata_root,

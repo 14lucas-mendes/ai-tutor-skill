@@ -19,6 +19,8 @@ Tutor-provided answers, copied solutions, generated cards, diagrams, images, aud
 
 Diagnostic observations are not learning evidence. They may position the curriculum and expose prerequisite hypotheses, but they never populate `evidences`, attach to `evidence_ids`, or raise `mastery` without the normal autonomous evidence requirements below.
 
+Learner Profile observations and inferences are also not learning evidence. Profile confidence, autonomy, help dependency, and learner preferences never raise or lower `mastery` or replace the evidence matrix.
+
 ## Reasoning ownership
 
 Apply `references/delegation-contract.md` when generative assistance is involved. Response autonomy is not the same as reasoning ownership: an answer written by the learner is guided for any behavior whose material criteria, analysis, conclusion, or essential implementation the tutor supplied first.

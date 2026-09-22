@@ -11,6 +11,11 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 try:
+    from scripts.representation import validate_representation
+except ModuleNotFoundError:
+    from representation import validate_representation
+
+try:
     from scripts.init_study import atomic_write
     from scripts.state_io import atomic_update_json
 except ModuleNotFoundError:  # direct execution: ``python scripts/create_learning_pack.py``
@@ -89,12 +94,13 @@ def build_manifest(
     sources: list[dict],
     formats: list[str],
     objective: str,
+    representation: dict | None = None,
 ) -> dict:
     _validate_sources(sources)
     requested = validate_formats(formats)
     if not isinstance(lesson_id, str) or not lesson_id.strip() or not isinstance(objective, str) or not objective.strip():
         raise ValueError("lesson_id and objective are required")
-    return {
+    manifest = {
         "schema_version": 2,
         "artifact_id": f"media_{uuid.uuid4()}",
         "lesson_id": lesson_id,
@@ -112,6 +118,18 @@ def build_manifest(
         "status": "prepared",
         "outputs": [],
     }
+    if representation is not None:
+        structural_errors = [
+            error for error in validate_representation(
+                {"artifact_id": manifest["artifact_id"], "objective": objective, "representation": representation},
+                [],
+            )
+            if "sibling artifact" not in error and "primary artifact" not in error
+        ]
+        if structural_errors:
+            raise ValueError("invalid representation: " + "; ".join(structural_errors))
+        manifest["representation"] = representation
+    return manifest
 
 
 def _is_timestamp(value: object, *, allow_none: bool = False) -> bool:
@@ -287,6 +305,8 @@ def _register_pack(study_root: Path, pack: Path, manifest: dict) -> None:
         },
         "evidence_eligible": False,
     }
+    if "representation" in manifest:
+        artifact["representation"] = manifest["representation"]
 
     def append_artifact(index: dict) -> dict:
         artifacts = index.get("artifacts")
@@ -307,8 +327,9 @@ def create_learning_pack(
     formats: list[str],
     *,
     objective: str,
+    representation: dict | None = None,
 ) -> Path:
-    manifest = build_manifest(lesson_id, sources, formats, objective)
+    manifest = build_manifest(lesson_id, sources, formats, objective, representation)
     pack = study_root.resolve() / "media" / lesson_id / "notebooklm"
     pack.mkdir(parents=True, exist_ok=True)
     (pack / "exports").mkdir(parents=True, exist_ok=True)

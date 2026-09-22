@@ -46,6 +46,22 @@ class InitializeStudyTests(unittest.TestCase):
             for key, value in VALID_CONFIG.items():
                 self.assertEqual(value, config[key])
 
+    def test_defaults_spacing_policy_to_fixed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "study"
+            initialize_study(ROOT, study, VALID_CONFIG)
+            config = json.loads((study / ".ai-tutor" / "study-config.json").read_text(encoding="utf-8"))
+            self.assertEqual({"mode": "fixed", "target_horizon_days": None}, config["spacing_policy"])
+
+    def test_persists_explicit_adaptive_spacing_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "adaptive study"
+            config = dict(VALID_CONFIG)
+            config["spacing_policy"] = {"mode": "adaptive", "target_horizon_days": 30}
+            initialize_study(ROOT, study, config)
+            persisted = json.loads((study / ".ai-tutor" / "study-config.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["spacing_policy"], persisted["spacing_policy"])
+
     def test_refuses_to_overwrite_existing_study(self):
         with tempfile.TemporaryDirectory() as tmp:
             study = Path(tmp) / "study"
@@ -129,6 +145,13 @@ class InitializeStudyTests(unittest.TestCase):
                     config[key] = value
                     with self.assertRaises(ValueError):
                         initialize_study(ROOT, Path(tmp) / key, config)
+
+    def test_rejects_invalid_spacing_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config = dict(VALID_CONFIG)
+            config["spacing_policy"] = {"mode": "unknown", "target_horizon_days": 0}
+            with self.assertRaises(ValueError):
+                initialize_study(ROOT, Path(tmp) / "invalid spacing", config)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@
 
 Every artifact records `artifact_id`, `lesson_id`, pedagogical objective, topic/source IDs, audience level, format, path or URL, accessibility data, and a retrieval or transfer prompt. Every artifact has `evidence_eligible: false`.
 
+When an artifact has `representation.role: "complementary"`, it must reference one primary artifact for the same objective, provide a non-empty `rationale` and `distinct_contribution`, and add information rather than repeat the primary representation.
+
 ## Format selection
 
 | Learning need | Preferred output | Local canonical form | Fallback |

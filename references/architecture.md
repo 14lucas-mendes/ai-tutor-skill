@@ -18,6 +18,7 @@ Initialize with `python <skill_root>/scripts/init_study.py --study-root <study_r
 │   ├── media-index.json
 │   ├── cards.json
 │   ├── sources.json
+│   ├── learner-profile.json
 │   └── migrations/
 ├── curriculum.md
 ├── session-log.md
@@ -28,6 +29,8 @@ Initialize with `python <skill_root>/scripts/init_study.py --study-root <study_r
 ```
 
 Structured files are canonical. Markdown is a readable projection and carries stable IDs from structured state.
+
+`learner-profile.json` is a per-study canonical file for declared preferences, factual observations, and provenance-backed inferences. It is not a mastery store.
 
 ## Safe update protocol
 

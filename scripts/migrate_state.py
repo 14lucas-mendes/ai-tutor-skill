@@ -14,9 +14,11 @@ from pathlib import Path
 try:
     from scripts.init_study import atomic_write
     from scripts.validate_study import validate_state, validate_study
+    from scripts.learner_profile import empty_profile
 except ModuleNotFoundError:  # direct execution: ``python scripts/migrate_state.py``
     from init_study import atomic_write
     from validate_study import validate_state, validate_study
+    from learner_profile import empty_profile
 
 
 LEGACY_FILES = ("progress.json", "curriculum.md", "session-log.md", "flashcards.md")
@@ -99,6 +101,7 @@ def _convert(study_root: Path) -> tuple[dict, dict, dict, list[str]]:
         "projects": [],
         "next_focus": legacy.get("proximo_foco") or None,
         "diagnostics": [],
+        "retrieval_attempts": [],
     }
     config = {
         "schema_version": 2,
@@ -112,6 +115,7 @@ def _convert(study_root: Path) -> tuple[dict, dict, dict, list[str]]:
         "language": "pt-BR",
         "accessibility": [],
         "source_policy": {"prefer_primary": True, "prefer_pt_br": True},
+        "spacing_policy": {"mode": "fixed", "target_horizon_days": None},
         "external_consents": {},
     }
     media = {"schema_version": 2, "study_id": study_id, "revision": 0, "artifacts": []}
@@ -152,7 +156,7 @@ def _upgrade_v2_support_files(
     *,
     dry_run: bool = False,
 ) -> tuple[bool, list[str]]:
-    """Add support registries to older valid v2 studies without touching state."""
+    """Add current canonical registries to older valid V2 studies atomically."""
 
     metadata = study_root / ".ai-tutor"
     pending: dict[str, dict] = {}
@@ -172,6 +176,38 @@ def _upgrade_v2_support_files(
         state = dict(state)
         state["diagnostics"] = []
         pending["state.json"] = state
+    if "retrieval_attempts" not in state:
+        state = dict(state)
+        state["retrieval_attempts"] = []
+        pending["state.json"] = state
+    config_path = metadata / "study-config.json"
+    if config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            warnings.append(f"existing study-config.json is unreadable: {exc}")
+        else:
+            if isinstance(config, dict) and "spacing_policy" not in config:
+                config["spacing_policy"] = {"mode": "fixed", "target_horizon_days": None}
+                pending["study-config.json"] = config
+    profile_path = metadata / "learner-profile.json"
+    if not profile_path.exists():
+        pending["learner-profile.json"] = empty_profile(study_id)
+    else:
+        try:
+            existing_profile = json.loads(profile_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            warnings.append(f"existing learner-profile.json is unreadable: {exc}")
+        else:
+            if (
+                not isinstance(existing_profile, dict)
+                or existing_profile.get("schema_version") != 2
+                or existing_profile.get("study_id") != study_id
+            ):
+                warnings.append("existing learner-profile.json does not satisfy the profile contract")
+            elif "revision" not in existing_profile:
+                existing_profile["revision"] = 0
+                pending["learner-profile.json"] = existing_profile
     for name, collection in (("cards.json", "cards"), ("sources.json", "sources")):
         path = metadata / name
         if not path.exists():
@@ -221,7 +257,14 @@ def _upgrade_v2_support_files(
         return False, warnings
 
     candidate_payloads: dict[str, dict] = {}
-    for name in ("study-config.json", "state.json", "media-index.json", "cards.json", "sources.json"):
+    for name in (
+        "study-config.json",
+        "state.json",
+        "media-index.json",
+        "cards.json",
+        "sources.json",
+        "learner-profile.json",
+    ):
         if name in pending:
             candidate_payloads[name] = pending[name]
         else:
@@ -291,6 +334,7 @@ def migrate(study_root: Path, dry_run: bool = False) -> MigrationReport:
         return MigrationReport(changed=False, valid=False, warnings=(f"legacy state is unreadable: {exc}",))
     cards = {"schema_version": 2, "study_id": state["study_id"], "revision": 0, "cards": []}
     sources = {"schema_version": 2, "study_id": state["study_id"], "revision": 0, "sources": []}
+    profile = empty_profile(state["study_id"])
     candidate_errors = _candidate_errors(
         study_root,
         {
@@ -299,6 +343,7 @@ def migrate(study_root: Path, dry_run: bool = False) -> MigrationReport:
             "media-index.json": media,
             "cards.json": cards,
             "sources.json": sources,
+            "learner-profile.json": profile,
         },
     )
     if candidate_errors:
@@ -314,6 +359,7 @@ def migrate(study_root: Path, dry_run: bool = False) -> MigrationReport:
         ("media-index.json", media),
         ("cards.json", cards),
         ("sources.json", sources),
+        ("learner-profile.json", profile),
     ):
         atomic_write(metadata / name, json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
     return MigrationReport(changed=True, valid=True, warnings=tuple(warnings))

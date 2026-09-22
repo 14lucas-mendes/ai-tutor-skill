@@ -28,6 +28,21 @@ class ValidateSkillTests(unittest.TestCase):
         for clause in required_clauses:
             self.assertIn(clause, contract)
 
+    def test_learning_strategies_contract_is_required_and_consumed(self):
+        contract_path = ROOT / "references" / "learning-strategies.md"
+        self.assertTrue(contract_path.is_file())
+        contract = contract_path.read_text(encoding="utf-8").lower()
+        for strategy in (
+            "retrieval_first",
+            "adaptive_spacing",
+            "conditional_interleaving",
+            "representational_complementarity",
+        ):
+            self.assertIn(strategy, contract)
+        for workflow in ("session.md", "review.md", "media.md"):
+            text = (ROOT / "references" / "workflows" / workflow).read_text(encoding="utf-8").lower()
+            self.assertIn("learning-strategies.md", text)
+
     def test_rejects_nested_discoverable_skills(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "package"

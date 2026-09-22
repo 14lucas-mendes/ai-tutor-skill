@@ -18,9 +18,24 @@ Use confiança `low`, `medium` ou `high`. A confiança descreve a qualidade do s
 
 ## Registro canônico
 
-`state.json.diagnostics` é uma lista append-only. Cada execução tem `diagnostic_id`, objetivo, escopo, status, timestamps, observações, resumo e `entry_topic_id`. Uma observação registra a pergunta ou tarefa, a resposta do aluno, o tópico, a estimativa, a confiança, a direção da sondagem, eventual lacuna de pré-requisito e uma justificativa factual.
+`state.json.diagnostics` é uma lista append-only. Os nomes de campo abaixo são os mesmos exigidos por `scripts/validate_study.py`.
 
-Os status são `not_started`, `in_progress`, `interrupted` e `completed`. Uma execução concluída precisa de `completed_at`. Re-diagnósticos criam uma nova execução; não sobrescrevem o histórico.
+Cada execução tem:
+
+| Campo | Tipo | Notas |
+| --- | --- | --- |
+| `diagnostic_id` | string | prefixo `diagnostic_` |
+| `goal` | string | objetivo da sondagem |
+| `scope_topic_ids` | list[str] | tópicos no escopo |
+| `status` | string | `not_started`, `in_progress`, `interrupted`, `completed` |
+| `started_at` / `completed_at` | ISO date/time ou null | `completed` exige `completed_at` |
+| `observations` | list | ver abaixo |
+| `summary` | list | itens `{topic_id, estimate, confidence, observation_ids}` |
+| `entry_topic_id` | string ou omitido | tópico de entrada recomendado |
+
+Cada observação tem `observation_id` (prefixo `diagnostic_observation_`), `prompt`, `response`, `topic_id`, `estimate`, `confidence`, `direction`, `prerequisite_gap` (boolean), `reason` (justificativa factual) e `recorded_at`.
+
+Uma execução concluída precisa de `completed_at`. Re-diagnósticos criam uma nova execução; não sobrescrevem o histórico. O `summary` é estruturado por tópico e referencia `observation_ids` da mesma execução.
 
 ## Regras pedagógicas
 

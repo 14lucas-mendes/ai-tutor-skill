@@ -16,6 +16,8 @@ REQUIRED_FILES = (
     "references/learning-contract.md",
     "references/state-contract.md",
     "references/diagnostic-contract.md",
+    "references/learner-profile-contract.md",
+    "references/learning-strategies.md",
     "references/output-contract.md",
     "references/media-providers.md",
     "references/programming.md",
@@ -31,6 +33,10 @@ REQUIRED_FILES = (
     "scripts/validate_study.py",
     "scripts/migrate_state.py",
     "scripts/create_learning_pack.py",
+    "scripts/retrieval.py",
+    "scripts/spaced_repetition.py",
+    "scripts/practice_strategy.py",
+    "scripts/representation.py",
     "scripts/state_io.py",
     "scripts/projections.py",
 )
@@ -38,6 +44,7 @@ REQUIRED_FILES = (
 WORKFLOWS = (
     "setup",
     "diagnostic",
+    "profile",
     "session",
     "curriculum",
     "lesson",
