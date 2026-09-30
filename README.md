@@ -1,5 +1,4 @@
-
-🎓 AI Tutor
+# 🎓 AI Tutor
 
 Transforme seu agente de IA em um tutor que acompanha seus estudos ao longo do tempo.
 
@@ -14,19 +13,21 @@ O AI Tutor segue o padrão de Agent Skills e pode ser usado em diferentes ambien
 - Cursor
 - OpenCode
 
+> **Sobre a autoria:** o projeto foi concebido por mim (Lucas Mendes): os requisitos, as regras de aprendizagem e o funcionamento da skill são decisões minhas. A implementação (texto da skill, scripts e testes) foi gerada com ajuda de IA a partir dessas especificações, e eu conduzi e revisei o resultado. Sou iniciante em programação, então encare o código como um projeto educacional em evolução.
+
 ---
 
-🚀 Comece aqui
+## 🚀 Comece aqui
 
 Você não precisa entender como a skill funciona por dentro para começar.
 
 O caminho é simples:
 
-1. Instale a skill → 2. Escolha o que quer aprender → 3. Comece a estudar
+**1. Instale a skill → 2. Escolha o que quer aprender → 3. Comece a estudar**
 
 ---
 
-1. O que você precisa
+## 1. O que você precisa
 
 Antes de começar, tenha:
 
@@ -38,230 +39,244 @@ O Python é usado internamente pelo AI Tutor para salvar e validar seu progresso
 
 Você pode verificar sua versão executando:
 
+```bash
 python --version
+```
 
 ou:
 
+```bash
 python3 --version
+```
 
 ---
 
-2. Instale o AI Tutor
+## 2. Instale o AI Tutor
 
 Escolha abaixo o ambiente que você utiliza.
 
----
+### 🤖 Codex
 
-🤖 Codex
-
-macOS ou Linux
+**macOS ou Linux**
 
 Abra o terminal e execute:
 
+```bash
 mkdir -p ~/.codex/skills
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill \
   ~/.codex/skills/ai-tutor
+```
 
 Depois reinicie o Codex.
 
 Para usar:
 
+```text
 $ai-tutor
+```
 
 Por exemplo:
 
+```text
 $ai-tutor
 
 Quero aprender Python do zero.
+```
 
----
+**Windows PowerShell**
 
-Windows PowerShell
-
-Execute:
-
+```powershell
 New-Item -ItemType Directory -Force "$HOME\.codex\skills"
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill `
   "$HOME\.codex\skills\ai-tutor"
+```
 
 Depois reinicie o Codex.
 
 ---
 
-🟠 Claude Code
+### 🟠 Claude Code
 
 O Claude Code procura skills pessoais dentro de:
 
+```text
 ~/.claude/skills/
+```
 
-macOS ou Linux
+**macOS ou Linux**
 
-Execute:
-
+```bash
 mkdir -p ~/.claude/skills
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill \
   ~/.claude/skills/ai-tutor
+```
 
 Depois abra ou reinicie o Claude Code.
 
 Para usar diretamente:
 
+```text
 /ai-tutor
+```
 
 Por exemplo:
 
+```text
 /ai-tutor
 
 Quero aprender estatística para uma prova daqui a dois meses.
+```
 
 O Claude também pode ativar a skill automaticamente quando perceber que seu pedido corresponde ao AI Tutor.
 
----
+**Windows PowerShell**
 
-Windows PowerShell
-
-Execute:
-
+```powershell
 New-Item -ItemType Directory -Force "$HOME\.claude\skills"
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill `
   "$HOME\.claude\skills\ai-tutor"
+```
 
 Depois abra novamente o Claude Code.
 
 ---
 
-🟣 Cursor
+### 🟣 Cursor
 
-O Cursor suporta Agent Skills diretamente.
+O Cursor suporta Agent Skills diretamente. Você pode instalar o AI Tutor de duas maneiras.
 
-Você pode instalar o AI Tutor de duas maneiras.
+**Opção 1: usando o GitHub pelo próprio Cursor**
 
-Opção 1 — usando o GitHub pelo próprio Cursor
+1. Abra **Customize**.
+2. Vá até **Rules**.
+3. Clique em **Add Rule**.
+4. Escolha **Remote Rule (GitHub)**.
+5. Informe o repositório: `https://github.com/14lucas-mendes/ai-tutor-skill`
 
-No Cursor:
+Depois verifique a área **Customize → Skills** para confirmar que a skill foi reconhecida.
 
-1. Abra Customize.
-2. Vá até Rules.
-3. Clique em Add Rule.
-4. Escolha Remote Rule (GitHub).
-5. Informe o repositório:
+**Opção 2: instalação pelo terminal**
 
-https://github.com/14lucas-mendes/ai-tutor-skill
+macOS ou Linux:
 
-Depois verifique a área Customize → Skills para confirmar que a skill foi reconhecida.
-
----
-
-Opção 2 — instalação pelo terminal
-
-No macOS ou Linux:
-
+```bash
 mkdir -p ~/.cursor/skills
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill \
   ~/.cursor/skills/ai-tutor
+```
 
-No Windows PowerShell:
+Windows PowerShell:
 
+```powershell
 New-Item -ItemType Directory -Force "$HOME\.cursor\skills"
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill `
   "$HOME\.cursor\skills\ai-tutor"
+```
 
 Depois reinicie o Cursor.
 
 Para usar, abra o Agent e digite:
 
+```text
 /ai-tutor
+```
 
-Você também pode simplesmente conversar normalmente.
+Você também pode simplesmente conversar normalmente. Por exemplo:
 
-Por exemplo:
-
+```text
 Quero começar um programa de estudos de Machine Learning.
-
 Use o AI Tutor.
+```
 
 O Cursor pode carregar a skill automaticamente quando ela for relevante.
 
 ---
 
-🟦 OpenCode
+### 🟦 OpenCode
 
-O OpenCode também suporta Agent Skills baseadas em "SKILL.md".
+O OpenCode também suporta Agent Skills baseadas em `SKILL.md`.
 
 A pasta global recomendada é:
 
+```text
 ~/.config/opencode/skills/
+```
 
-macOS ou Linux
+**macOS ou Linux**
 
-Execute:
-
+```bash
 mkdir -p ~/.config/opencode/skills
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill \
   ~/.config/opencode/skills/ai-tutor
+```
 
 Depois abra novamente o OpenCode.
 
----
+**Windows PowerShell**
 
-Windows PowerShell
-
-Execute:
-
+```powershell
 New-Item -ItemType Directory -Force "$HOME\.config\opencode\skills"
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill `
   "$HOME\.config\opencode\skills\ai-tutor"
+```
 
 O OpenCode identifica as skills disponíveis e pode carregar o AI Tutor quando seu pedido corresponde à descrição da skill.
 
 Por exemplo:
 
+```text
 Use a skill ai-tutor.
 
 Quero aprender SQL para trabalhar com análise de dados.
+```
 
 Você também pode simplesmente pedir:
 
+```text
 Quero começar um programa de estudos usando o AI Tutor.
+```
 
 ---
 
-💡 Dica: Cursor + OpenCode
+### 💡 Dica: Cursor + OpenCode
 
 Cursor e OpenCode também reconhecem a pasta padrão:
 
+```text
 ~/.agents/skills/
+```
 
 Portanto, se você utiliza Cursor e OpenCode na mesma máquina, pode instalar o AI Tutor uma única vez:
 
+```bash
 mkdir -p ~/.agents/skills
 
 git clone https://github.com/14lucas-mendes/ai-tutor-skill \
   ~/.agents/skills/ai-tutor
+```
 
 Assim, os dois ambientes podem descobrir a mesma instalação.
 
 ---
 
-3. Comece seu primeiro estudo
+## 3. Comece seu primeiro estudo
 
 Depois que a skill estiver instalada, você não precisa criar arquivos, editar JSON ou configurar um currículo manualmente.
 
-Basta conversar com o AI Tutor.
+Basta conversar com o AI Tutor. Por exemplo:
 
-Por exemplo:
-
+```text
 Quero aprender Python do zero para conseguir criar pequenas automações.
-
 Tenho aproximadamente 3 horas por semana para estudar.
+```
 
 O tutor fará algumas perguntas para entender coisas como:
 
@@ -275,10 +290,11 @@ Depois disso, ele cria seu plano inicial.
 
 ---
 
-🗺️ Seu caminho com o AI Tutor
+## 🗺️ Seu caminho com o AI Tutor
 
 Depois da configuração inicial, normalmente você seguirá este ciclo:
 
+```text
 Configurar estudo
        ↓
 Criar seu plano
@@ -294,67 +310,43 @@ Revisar pontos fracos
 Acompanhar progresso
        ↓
 Próxima lição
+```
 
-Você não precisa decorar comandos.
+Você não precisa decorar comandos. Pode simplesmente conversar com o tutor. Por exemplo:
 
-Pode simplesmente conversar com o tutor.
-
-Por exemplo:
-
-Continue meus estudos.
-
-ou:
-
-O que devo estudar hoje?
-
-ou:
-
-Quero revisar o que estou esquecendo.
+- `Continue meus estudos.`
+- `O que devo estudar hoje?`
+- `Quero revisar o que estou esquecendo.`
 
 ---
 
-💬 Comandos úteis
+## 💬 Comandos úteis
 
 O AI Tutor reconhece algumas intenções específicas:
 
-Comando| Para que serve
-"/setup"| Criar um novo programa de estudos
-"/curriculum"| Ver ou ajustar seu plano
-"/licao"| Fazer a próxima lição
-"/review"| Revisar pontos fracos
-"/feynman"| Testar se você realmente consegue explicar algo
-"/flashcards"| Criar ou revisar flashcards
-"/progress"| Ver seu progresso
-"/sources"| Procurar boas fontes de estudo
-"/media"| Criar materiais visuais ou multimídia
+| Comando | Para que serve |
+| --- | --- |
+| `/setup` | Criar um novo programa de estudos |
+| `/curriculum` | Ver ou ajustar seu plano |
+| `/licao` | Fazer a próxima lição |
+| `/review` | Revisar pontos fracos |
+| `/feynman` | Testar se você realmente consegue explicar algo |
+| `/flashcards` | Criar ou revisar flashcards |
+| `/progress` | Ver seu progresso |
+| `/sources` | Procurar boas fontes de estudo |
+| `/media` | Criar materiais visuais ou multimídia |
 
-«Esses atalhos representam intenções do AI Tutor. Dependendo do ambiente, você pode digitá-los diretamente ou simplesmente pedir a mesma coisa em linguagem natural.»
+> Esses atalhos representam intenções do AI Tutor. Dependendo do ambiente, você pode digitá-los diretamente ou simplesmente pedir a mesma coisa em linguagem natural.
 
-Por exemplo:
-
-Quero ver meu progresso.
-
-tem a mesma intenção de:
-
-/progress
-
-Outro exemplo:
-
-Quero revisar os assuntos em que estou tendo mais dificuldade.
-
-tem a mesma intenção de:
-
-/review
+Por exemplo, "Quero ver meu progresso." tem a mesma intenção de `/progress`, e "Quero revisar os assuntos em que estou tendo mais dificuldade." tem a mesma intenção de `/review`.
 
 ---
 
-🧠 O que torna o AI Tutor diferente?
+## 🧠 O que torna o AI Tutor diferente?
 
 Muitos assistentes de IA conseguem explicar assuntos.
 
-O AI Tutor tenta fazer algo diferente:
-
-acompanhar se você está realmente aprendendo.
+O AI Tutor tenta fazer algo diferente: **acompanhar se você está realmente aprendendo.**
 
 Por isso, durante uma sessão ele pode pedir que você:
 
@@ -370,12 +362,11 @@ Seu progresso aumenta quando você consegue demonstrar conhecimento por conta pr
 
 ---
 
-📈 Como o progresso funciona?
+## 📈 Como o progresso funciona?
 
-O AI Tutor mantém um histórico do seu programa de estudos.
+O AI Tutor mantém um histórico do seu programa de estudos. Ele acompanha coisas como:
 
-Ele acompanha coisas como:
-
+```text
 Conteúdos estudados
         ↓
 Tentativas
@@ -385,32 +376,35 @@ Evidências
 Revisões
         ↓
 Domínio
+```
 
-Isso permite continuar seus estudos em sessões futuras.
+Isso permite continuar seus estudos em sessões futuras. Por exemplo:
 
-Por exemplo:
-
+```text
 Continue de onde paramos.
+```
 
 O tutor tenta recuperar sua última sessão e indicar o próximo passo.
 
 ---
 
-📁 Onde meus estudos ficam salvos?
+## 📁 Onde meus estudos ficam salvos?
 
 Durante a primeira configuração, o AI Tutor pergunta onde você quer guardar seu programa de estudos.
 
 Por exemplo, no Windows:
 
+```text
 C:\Estudos\python
+```
 
 No macOS ou Linux:
 
+```text
 ~/estudos/python
+```
 
-Essa pasta passa a ser seu diretório de estudos.
-
-Ela pode conter:
+Essa pasta passa a ser seu diretório de estudos. Ela pode conter:
 
 - currículo;
 - sessões;
@@ -423,15 +417,15 @@ Você normalmente não precisa editar esses arquivos manualmente.
 
 ---
 
-🧭 Posso ter mais de um programa de estudos?
+## 🧭 Posso ter mais de um programa de estudos?
 
-Sim.
+Sim. Você pode ter, por exemplo:
 
-Você pode ter, por exemplo:
-
+```text
 ~/estudos/python
 ~/estudos/ingles
 ~/estudos/estatistica
+```
 
 Cada diretório representa um programa de estudos independente.
 
@@ -439,128 +433,115 @@ Assim você pode usar o mesmo AI Tutor para aprender assuntos diferentes sem mis
 
 ---
 
-🛠️ Está tendo problemas?
+## 🛠️ Está tendo problemas?
 
-A skill não aparece
+### A skill não aparece
 
-Primeiro confirme se existe um arquivo:
-
-ai-tutor/SKILL.md
-
-dentro da pasta correta do seu ambiente.
+Primeiro confirme se existe um arquivo `ai-tutor/SKILL.md` dentro da pasta correta do seu ambiente.
 
 Os caminhos mais comuns são:
 
-Ambiente| Pasta
-Codex| "~/.codex/skills/ai-tutor/"
-Claude Code| "~/.claude/skills/ai-tutor/"
-Cursor| "~/.cursor/skills/ai-tutor/"
-OpenCode| "~/.config/opencode/skills/ai-tutor/"
-Cursor + OpenCode| "~/.agents/skills/ai-tutor/"
+| Ambiente | Pasta |
+| --- | --- |
+| Codex | `~/.codex/skills/ai-tutor/` |
+| Claude Code | `~/.claude/skills/ai-tutor/` |
+| Cursor | `~/.cursor/skills/ai-tutor/` |
+| OpenCode | `~/.config/opencode/skills/ai-tutor/` |
+| Cursor + OpenCode | `~/.agents/skills/ai-tutor/` |
 
 Depois reinicie seu agente.
 
----
+### Python não está disponível
 
-Python não está disponível
-
-Execute:
-
+```bash
 python --version
+```
 
 ou:
 
+```bash
 python3 --version
+```
 
 O AI Tutor espera Python 3.11 ou superior.
 
----
+### Git não está disponível
 
-Git não está disponível
-
-Execute:
-
+```bash
 git --version
+```
 
 Se o comando não funcionar, instale o Git antes de usar os comandos de instalação pelo terminal.
 
----
+### Quero atualizar o AI Tutor
 
-Quero atualizar o AI Tutor
+Entre na pasta onde instalou a skill. Por exemplo:
 
-Entre na pasta onde instalou a skill.
-
-Por exemplo:
-
+```bash
 cd ~/.claude/skills/ai-tutor
+```
 
 Depois execute:
 
+```bash
 git pull
+```
 
 Use o caminho correspondente ao seu ambiente.
 
----
-
-Quero começar um estudo novo
+### Quero começar um estudo novo
 
 Peça:
 
+```text
 Quero criar um novo programa de estudos.
+```
 
-ou use a intenção:
-
-/setup
-
-Depois escolha uma nova pasta.
-
-Cada pasta representa um programa separado.
+ou use a intenção `/setup`. Depois escolha uma nova pasta. Cada pasta representa um programa separado.
 
 ---
 
-🎯 Exemplos de uso
+## 🎯 Exemplos de uso
 
-Aprender programação
+**Aprender programação**
 
+```text
 Quero aprender JavaScript para conseguir criar aplicações web.
-
 Sou iniciante e tenho quatro horas por semana.
+```
 
----
+**Estudar para uma prova**
 
-Estudar para uma prova
-
+```text
 Quero estudar estatística para uma prova daqui a dois meses.
-
 Tenho dificuldade principalmente com probabilidade.
+```
 
----
+**Aprender um assunto profissional**
 
-Aprender um assunto profissional
-
+```text
 Quero aprender fundamentos de Machine Learning.
-
 Já sei Python, mas nunca trabalhei com modelos de ML.
-
 Meu objetivo é conseguir construir pequenos projetos.
+```
 
----
+**Melhorar em algo que você já conhece**
 
-Melhorar em algo que você já conhece
-
+```text
 Já trabalho com SQL, mas sinto dificuldade com consultas complexas,
 CTEs e window functions.
-
 Quero montar um programa de estudos focado nesses pontos.
+```
 
 ---
 
-🔬 Para quem quer entender como funciona por dentro
+## 🔬 Para quem quer entender como funciona por dentro
 
 Você não precisa conhecer esta parte para usar o AI Tutor.
 
 Internamente, a skill separa duas áreas:
 
+```text
 AI Tutor
 │
 ├── Skill
@@ -575,6 +556,7 @@ AI Tutor
     ├── lições
     ├── projetos
     └── progresso
+```
 
 A instalação contém as regras e ferramentas do tutor.
 
@@ -584,18 +566,19 @@ Isso significa que você pode atualizar a skill sem precisar apagar seu históri
 
 Para detalhes técnicos, consulte:
 
-- "SKILL.md"
-- "references/architecture.md"
-- "references/state-contract.md"
-- "references/learning-contract.md"
-- "references/workflows/"
+- [`SKILL.md`](SKILL.md)
+- [`references/architecture.md`](references/architecture.md)
+- [`references/state-contract.md`](references/state-contract.md)
+- [`references/learning-contract.md`](references/learning-contract.md)
+- [`references/workflows/`](references/workflows/)
 
 ---
 
-👩‍💻 Desenvolvimento
+## 👩‍💻 Desenvolvimento
 
 A estrutura principal do projeto é:
 
+```text
 ai-tutor-skill/
 ├── SKILL.md
 ├── agents/
@@ -604,37 +587,36 @@ ai-tutor-skill/
 ├── scripts/
 ├── tests/
 └── docs/
+```
 
-O arquivo "SKILL.md" é o ponto de entrada utilizado pelos agentes.
+O arquivo `SKILL.md` é o ponto de entrada utilizado pelos agentes.
 
-Os workflows e contratos técnicos ficam em "references/".
+Os workflows e contratos técnicos ficam em `references/`.
 
-Os scripts responsáveis por inicialização e validação ficam em "scripts/".
+Os scripts responsáveis por inicialização e validação ficam em `scripts/`.
 
-Se você pretende modificar a skill, criar novos workflows ou alterar a forma como o progresso é calculado, consulte primeiro a documentação técnica em:
-
-references/
-docs/
+Se você pretende modificar a skill, criar novos workflows ou alterar a forma como o progresso é calculado, consulte primeiro a documentação técnica em `references/` e `docs/`.
 
 ---
 
-🌐 Compatibilidade
+## 🌐 Compatibilidade
 
-O AI Tutor foi estruturado como uma Agent Skill baseada em "SKILL.md".
+O AI Tutor foi estruturado como uma Agent Skill baseada em `SKILL.md`.
 
 Isso permite que o mesmo projeto seja utilizado por diferentes agentes que suportam esse padrão.
 
 A forma como cada ambiente descobre ou ativa skills pode variar, mas a lógica principal do AI Tutor permanece a mesma.
 
-Ambiente| Skill| Ativação
-Codex| ✅| "$ai-tutor"
-Claude Code| ✅| "/ai-tutor" ou automática
-Cursor| ✅| "/ai-tutor" ou automática
-OpenCode| ✅| descoberta automática / skill "ai-tutor"
+| Ambiente | Skill | Ativação |
+| --- | --- | --- |
+| Codex | ✅ | `$ai-tutor` |
+| Claude Code | ✅ | `/ai-tutor` ou automática |
+| Cursor | ✅ | `/ai-tutor` ou automática |
+| OpenCode | ✅ | descoberta automática / skill `ai-tutor` |
 
 ---
 
-⚠️ Limitações
+## ⚠️ Limitações
 
 O AI Tutor ajuda a organizar e acompanhar seu aprendizado, mas não substitui professores, instituições de ensino ou especialistas.
 
@@ -646,12 +628,14 @@ O comportamento também pode variar ligeiramente entre Codex, Claude Code, Curso
 
 ---
 
-🌱 Status do projeto
+## 🌱 Status do projeto
 
 O AI Tutor é um projeto educacional em evolução.
 
-O objetivo é tornar o estudo com agentes de IA mais:
-
-estruturado, contínuo, verificável e útil na prática.
+O objetivo é tornar o estudo com agentes de IA mais **estruturado, contínuo, verificável e útil na prática**.
 
 Feedback, testes e contribuições são bem-vindos.
+
+## 📄 Licença
+
+Distribuído sob a licença [MIT](LICENSE).
