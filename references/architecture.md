@@ -43,7 +43,7 @@ Structured files are canonical. Markdown is a readable projection and carries st
 7. Update Markdown projections explicitly.
 8. Run `python -m scripts.validate_study <study_root>` (or `python <skill_root>/scripts/validate_study.py <study_root>`).
 
-Markdown projections are deliberately explicit: run `python -m scripts.projections <study_root>` after a canonical update when the readable `flashcards.md` or `session-log.md` should change. Initialization never overwrites an existing projection.
+Markdown projections are deliberately explicit: run `python -m scripts.projections <study_root>` after a canonical update when the readable `flashcards.md` or `session-log.md` should change. Initialization never overwrites an existing projection. The projection script only rewrites a file that is missing or still carries a generated marker (the `<!-- Generated from .ai-tutor/... -->` header or an init-template header). A projection the learner or tutor maintains by hand has no marker and is skipped and reported; `--force` overwrites it deliberately.
 
 Do not leave a partially updated state. If validation fails, report the exact invariant and retain the last valid revision.
 

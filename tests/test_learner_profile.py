@@ -96,26 +96,70 @@ class LearnerProfileTests(unittest.TestCase):
         profile = add_inference(profile, inference)
         self.assertEqual([], validate_profile(profile))
 
-    def test_summary_updates_only_from_repeated_observations(self):
+    def _with_observations(self, items):
         profile = empty_profile("study_a")
-        profile = record_observation(
-            profile,
-            session_id="session_1",
-            topic_id="topic_functions",
-            observation_type="autonomous_attempt",
-            value={"result": "correct"},
-            recorded_at="2026-09-21T10:00:00Z",
+        for index, (observation_type, value, session) in enumerate(items):
+            profile = record_observation(
+                profile,
+                session_id=session,
+                topic_id="topic_functions",
+                observation_type=observation_type,
+                value=value,
+                recorded_at=f"2026-09-{10 + index:02d}T10:00:00Z",
+            )
+        return profile
+
+    def test_summary_updates_only_from_repeated_observations(self):
+        profile = self._with_observations([("autonomous_attempt", {"result": "correct"}, "session_1")])
+        self.assertEqual("unknown", profile["summary"]["autonomy"])
+        profile = self._with_observations([
+            ("autonomous_attempt", {"result": "correct"}, "session_1"),
+            ("autonomous_attempt", {"result": "correct"}, "session_2"),
+        ])
+        self.assertEqual("medium", profile["summary"]["autonomy"])
+
+    def test_autonomy_summary_uses_success_rate_not_count(self):
+        mostly_failed = self._with_observations([
+            ("autonomous_attempt", {"result": "correct"}, "session_1"),
+            ("autonomous_attempt", {"result": "incorrect"}, "session_1"),
+            ("autonomous_attempt", {"result": "incorrect"}, "session_2"),
+            ("autonomous_attempt", {"result": "partial"}, "session_2"),
+        ])
+        self.assertEqual("low", mostly_failed["summary"]["autonomy"])
+        consistent = self._with_observations(
+            [("autonomous_attempt", {"result": "correct"}, f"session_{1 + index % 2}") for index in range(5)]
+            + [("autonomous_attempt", {"result": "partial"}, "session_2")]
         )
-        self.assertEqual("low", profile["summary"]["autonomy"])
-        profile = record_observation(
-            profile,
-            session_id="session_2",
-            topic_id="topic_functions",
-            observation_type="autonomous_attempt",
-            value={"result": "correct"},
-            recorded_at="2026-09-22T10:00:00Z",
+        self.assertEqual("high", consistent["summary"]["autonomy"])
+
+    def test_high_autonomy_requires_two_sessions(self):
+        profile = self._with_observations(
+            [("autonomous_attempt", {"result": "correct"}, "session_1") for _ in range(5)]
         )
         self.assertEqual("medium", profile["summary"]["autonomy"])
+
+    def test_help_dependency_counts_every_ladder_step(self):
+        profile = self._with_observations([
+            ("help_usage", {"help_level": 6}, "session_1"),
+            ("help_usage", {"help_level": 5}, "session_2"),
+        ])
+        self.assertEqual("high", profile["summary"]["help_dependency"])
+
+    def test_observation_values_are_validated(self):
+        with self.assertRaises(ValueError):
+            self._with_observations([("help_usage", {"support_level": 4}, "session_1")])
+        with self.assertRaises(ValueError):
+            self._with_observations([("autonomous_attempt", {"result": "great"}, "session_1")])
+        profile = empty_profile("study_a")
+        profile["observations"].append({
+            "observation_id": "profile_observation_a",
+            "session_id": "session_1",
+            "topic_id": None,
+            "type": "help_usage",
+            "value": {"help_level": 9},
+            "recorded_at": "2026-09-21T10:00:00Z",
+        })
+        self.assertIn("help_usage requires help_level from 0 to 6: profile_observation_a", validate_profile(profile))
 
     def test_atomic_profile_update_uses_revision(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -190,6 +234,43 @@ class LearnerProfileTests(unittest.TestCase):
             report = migrate(study)
             self.assertTrue(report.valid)
             self.assertEqual(0, json.loads(profile_path.read_text(encoding="utf-8"))["revision"])
+
+    def test_v2_migration_renames_legacy_help_key_and_refreshes_summary(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            study = Path(temporary) / "study"
+            initialize_study(ROOT, study, CONFIG)
+            profile_path = study / ".ai-tutor" / "learner-profile.json"
+            profile = json.loads(profile_path.read_text(encoding="utf-8"))
+            state_path = study / ".ai-tutor" / "state.json"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["sessions"] = [{
+                "session_id": "session_1",
+                "status": "completed",
+                "transitions": ["in_progress", "completed"],
+                "lesson_ids": [],
+                "started_at": "2026-09-21T09:00:00Z",
+                "ended_at": "2026-09-21T10:00:00Z",
+                "checkpoint": None,
+                "resumable": False,
+            }]
+            state_path.write_text(json.dumps(state), encoding="utf-8")
+            profile["observations"] = [{
+                "observation_id": "profile_observation_a",
+                "session_id": "session_1",
+                "topic_id": None,
+                "type": "help_usage",
+                "value": {"support_level": 4, "note": "pista parcial"},
+                "recorded_at": "2026-09-21T10:00:00Z",
+            }]
+            profile["summary"]["autonomy"] = "low"
+            profile_path.write_text(json.dumps(profile), encoding="utf-8")
+            report = migrate(study)
+            repaired = json.loads(profile_path.read_text(encoding="utf-8"))
+            self.assertTrue(report.changed)
+            self.assertEqual({"help_level": 4, "note": "pista parcial"}, repaired["observations"][0]["value"])
+            self.assertEqual("unknown", repaired["summary"]["autonomy"])
+            self.assertEqual(1, repaired["revision"])
+            self.assertEqual([], validate_profile(repaired))
 
 
 if __name__ == "__main__":

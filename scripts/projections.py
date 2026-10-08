@@ -85,8 +85,29 @@ def _load_json(path: Path) -> dict:
     return payload
 
 
-def sync_projections(study_root: Path) -> list[str]:
-    """Synchronize Markdown projections from canonical JSON; return errors."""
+# A projection is overwritten only if it is missing or still carries one of these
+# markers (the generated header or the init templates). Anything else was written
+# by hand and is preserved unless ``force`` is set.
+GENERATED_MARKERS = (
+    "<!-- Generated from .ai-tutor/",
+    "<!-- Sessões são projetadas de .ai-tutor/state.json",
+    "<!-- Cards são adicionados pelo workflow de revisão",
+)
+
+
+def is_generated_projection(path: Path) -> bool:
+    if not path.is_file():
+        return True
+    text = path.read_text(encoding="utf-8")
+    return any(marker in text for marker in GENERATED_MARKERS)
+
+
+def sync_projections(study_root: Path, *, force: bool = False, skipped: list[str] | None = None) -> list[str]:
+    """Synchronize Markdown projections from canonical JSON; return errors.
+
+    Hand-maintained projections (no generated marker) are left untouched and
+    their file names are appended to ``skipped``; ``force`` overwrites them.
+    """
 
     study_root = study_root.resolve()
     metadata = study_root / ".ai-tutor"
@@ -99,6 +120,12 @@ def sync_projections(study_root: Path) -> list[str]:
             study_root / "flashcards.md": flashcards_text,
             study_root / "session-log.md": session_log_text,
         }
+        if not force:
+            for target in list(targets):
+                if not is_generated_projection(target):
+                    del targets[target]
+                    if skipped is not None:
+                        skipped.append(target.name)
         previous: dict[Path, str] = {}
         missing: set[Path] = set()
         for target in targets:
@@ -135,12 +162,20 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("study_root", type=Path)
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite projections that were written by hand (no generated marker)",
+    )
     args = parser.parse_args()
-    errors = sync_projections(args.study_root)
+    skipped: list[str] = []
+    errors = sync_projections(args.study_root, force=args.force, skipped=skipped)
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
         return 1
+    for name in skipped:
+        print(f"SKIPPED: {name} is maintained by hand (use --force to overwrite)")
     print("PROJECTIONS: PASS")
     return 0
 

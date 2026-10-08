@@ -21,6 +21,9 @@ CONFIG = {
     "accessibility": [],
     "source_policy": {"prefer_primary": True},
 }
+OLD_CARDS = "<!-- Generated from .ai-tutor/cards.json. -->\nold cards"
+OLD_SESSIONS = "<!-- Generated from .ai-tutor/state.json. -->\nold sessions"
+HAND_LOG = "# Diario\n\nNarrativa escrita a mao.\n"
 
 
 class ProjectionTests(unittest.TestCase):
@@ -77,8 +80,8 @@ class ProjectionTests(unittest.TestCase):
             initialize_study(ROOT, study, CONFIG)
             flashcards_path = study / "flashcards.md"
             session_log_path = study / "session-log.md"
-            flashcards_path.write_text("old cards", encoding="utf-8")
-            session_log_path.write_text("old sessions", encoding="utf-8")
+            flashcards_path.write_text(OLD_CARDS, encoding="utf-8")
+            session_log_path.write_text(OLD_SESSIONS, encoding="utf-8")
             state_path = study / ".ai-tutor" / "state.json"
             state = json.loads(state_path.read_text(encoding="utf-8"))
             state["sessions"] = [None]
@@ -87,8 +90,8 @@ class ProjectionTests(unittest.TestCase):
             errors = sync_projections(study)
 
             self.assertTrue(errors)
-            self.assertEqual("old cards", flashcards_path.read_text(encoding="utf-8"))
-            self.assertEqual("old sessions", session_log_path.read_text(encoding="utf-8"))
+            self.assertEqual(OLD_CARDS, flashcards_path.read_text(encoding="utf-8"))
+            self.assertEqual(OLD_SESSIONS, session_log_path.read_text(encoding="utf-8"))
 
     def test_failed_second_write_rolls_back_first_projection(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -96,8 +99,8 @@ class ProjectionTests(unittest.TestCase):
             initialize_study(ROOT, study, CONFIG)
             flashcards_path = study / "flashcards.md"
             session_log_path = study / "session-log.md"
-            flashcards_path.write_text("old cards", encoding="utf-8")
-            session_log_path.write_text("old sessions", encoding="utf-8")
+            flashcards_path.write_text(OLD_CARDS, encoding="utf-8")
+            session_log_path.write_text(OLD_SESSIONS, encoding="utf-8")
             real_atomic_write = projections.atomic_write
             calls = 0
 
@@ -112,8 +115,33 @@ class ProjectionTests(unittest.TestCase):
                 errors = sync_projections(study)
 
             self.assertTrue(errors)
-            self.assertEqual("old cards", flashcards_path.read_text(encoding="utf-8"))
-            self.assertEqual("old sessions", session_log_path.read_text(encoding="utf-8"))
+            self.assertEqual(OLD_CARDS, flashcards_path.read_text(encoding="utf-8"))
+            self.assertEqual(OLD_SESSIONS, session_log_path.read_text(encoding="utf-8"))
+
+    def test_hand_maintained_projection_is_preserved_and_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "study"
+            initialize_study(ROOT, study, CONFIG)
+            session_log_path = study / "session-log.md"
+            session_log_path.write_text(HAND_LOG, encoding="utf-8")
+            skipped = []
+
+            self.assertEqual([], sync_projections(study, skipped=skipped))
+
+            self.assertEqual(HAND_LOG, session_log_path.read_text(encoding="utf-8"))
+            self.assertIn("Generated from .ai-tutor/cards.json", (study / "flashcards.md").read_text(encoding="utf-8"))
+            self.assertEqual(["session-log.md"], skipped)
+
+    def test_force_overwrites_hand_maintained_projection(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "study"
+            initialize_study(ROOT, study, CONFIG)
+            session_log_path = study / "session-log.md"
+            session_log_path.write_text(HAND_LOG, encoding="utf-8")
+
+            self.assertEqual([], sync_projections(study, force=True))
+
+            self.assertIn("Generated from .ai-tutor/state.json", session_log_path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

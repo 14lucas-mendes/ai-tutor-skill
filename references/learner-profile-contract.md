@@ -20,6 +20,13 @@ Inferências com escopo `topic` só podem referenciar observações daquele tóp
 
 O resumo começa com `autonomy` e `help_dependency` em `unknown`, `low`, `medium` ou `high`, e `confidence_pattern` em `unknown`, `underconfident`, `calibrated`, `overconfident` ou `mixed`. O resumo é uma síntese, não uma evidência independente.
 
+O resumo é recalculado a cada observação, e uma dimensão com menos de duas observações utilizáveis fica `unknown`:
+
+- `autonomy` usa a **taxa de acerto** das observações `autonomous_attempt` (`value.result`: `correct` ou `autonomous_success` valem 1, `partial` vale 0,5 e `incorrect` vale 0), nunca a quantidade de acertos. Taxa abaixo de 0,5 é `low`; de 0,5 em diante é `medium`; é `high` só com taxa de 0,75 ou mais **e** cinco acertos em pelo menos duas sessões.
+- `help_dependency` usa a média de `value.help_level` das observações `help_usage`, de 0 (sem ajuda) a 6 (degraus da escada de ajuda do Learning Contract): média de 4 ou mais é `high`, de 2 a 4 é `medium` e abaixo de 2 é `low`.
+
+O validador rejeita `help_usage` sem `help_level` inteiro de 0 a 6 e `autonomous_attempt` com `result` fora da lista acima, para que nenhuma observação seja ignorada em silêncio. A migração renomeia a chave antiga `support_level` para `help_level` e recalcula o resumo.
+
 ## Atualização e correção
 
 Atualize o perfil somente ao fechar ou interromper uma sessão que produziu um sinal relevante. Use escrita atômica com revisão esperada. O aluno pode consultar `/profile`, corrigir uma preferência e contestar uma inferência. A contestação muda a hipótese e registra o feedback, mas não apaga as observações factuais.

@@ -54,4 +54,4 @@ Sessions may contain an optional `practice_strategy` object with `mode` (`blocke
 
 ## Validation
 
-Run `python -m scripts.validate_study <study_root>` (or the direct script entrypoint) after changes. Run `python -m scripts.projections <study_root>` only when you intentionally want to rewrite the Markdown projections from canonical JSON. Never invent dates, evidence, IDs tied to nonexistent entities, or missing setup answers.
+Run `python -m scripts.validate_study <study_root>` (or the direct script entrypoint) after changes. Run `python -m scripts.projections <study_root>` only when you intentionally want to rewrite the Markdown projections from canonical JSON. Hand-maintained projections without a generated marker are preserved unless `--force` is passed. Never invent dates, evidence, IDs tied to nonexistent entities, or missing setup answers.
