@@ -17,6 +17,16 @@ An evidence is independent when it tests a different behavior or uses a substant
 
 Tutor-provided answers, copied solutions, generated cards, diagrams, images, audio, video, or other media are not evidence. A later autonomous attempt may be evidence.
 
+Diagnostic observations are not learning evidence. They may position the curriculum and expose prerequisite hypotheses, but they never populate `evidences`, attach to `evidence_ids`, or raise `mastery` without the normal autonomous evidence requirements below.
+
+Learner Profile observations and inferences are also not learning evidence. Profile confidence, autonomy, help dependency, and learner preferences never raise or lower `mastery` or replace the evidence matrix.
+
+## Reasoning ownership
+
+Apply `references/delegation-contract.md` when generative assistance is involved. Response autonomy is not the same as reasoning ownership: an answer written by the learner is guided for any behavior whose material criteria, analysis, conclusion, or essential implementation the tutor supplied first.
+
+That attempt may demonstrate a narrower independent behavior, but evidence for the supplied behavior requires a later reconstruction or a substantially different task in which the learner owns the cognitive core. Conventional documentation does not automatically invalidate autonomy when the assessment objective permits it and it does not provide a copied or near-complete solution.
+
 ## Resposta correta e avaliação literal
 
 Uma resposta não precisa usar palavras exatas nem mencionar toda cautela possível para ser considerada correta. O tutor deve avaliar o conteúdo observável, preservar a intenção do aluno e não transformar uma preferência de redação em requisito de domínio.
@@ -49,6 +59,8 @@ Uma melhoria opcional pode ser recomendada sem rebaixar a classificação. A ava
 
 Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requires attempts after only the prompt was supplied.
 
+After an assisted success, reduce support and present a related variation. Guided success informs the next teaching decision but does not establish independent evidence for the supplied cognitive core. A later attempt with only the prompt supplied, or a substantially different task, is required before recording the corresponding autonomous behavior.
+
 ## Retention
 
 `retention` is `unknown`, `low`, `medium`, or `high`. Review failure changes retention and schedules practice; it does not erase demonstrated mastery. Reduce mastery only after two recent autonomous evidences show consistent loss of the previously demonstrated capability.
@@ -58,6 +70,8 @@ Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requir
 Create a weak point when the same category recurs twice or blocks required evidence. Categories are `conceptual`, `procedural`, `application`, `precision`, and `execution`.
 
 Resolve it after two correct autonomous evidences in different sessions. For mastery 80+, one must be transfer. Record its ID, topic, cause, supporting evidence IDs, entry date, exit condition, and status.
+
+During a v1 migration only, an unclassified point may use `category: "unclassified"` with `migration_pending_classification: true`. It remains a pending learner-owned classification and does not count as evidence; classify it before using it in a current learning decision.
 
 ## Curriculum completion
 

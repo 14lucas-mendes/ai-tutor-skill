@@ -2,6 +2,8 @@
 
 Every artifact records `artifact_id`, `lesson_id`, pedagogical objective, topic/source IDs, audience level, format, path or URL, accessibility data, and a retrieval or transfer prompt. Every artifact has `evidence_eligible: false`.
 
+When an artifact has `representation.role: "complementary"`, it must reference one primary artifact for the same objective, provide a non-empty `rationale` and `distinct_contribution`, and add information rather than repeat the primary representation.
+
 ## Format selection
 
 | Learning need | Preferred output | Local canonical form | Fallback |
@@ -20,7 +22,7 @@ Do not use a decorative image where a chart is needed. Do not create a chart wit
 
 ## Cards and quizzes
 
-Cards contain stable ID, front, back, topic ID, source IDs, difficulty, spaced-repetition step, due date, objective correctness, confidence, and status. Keep one retrievable fact or decision per card.
+Cards in the study registry contain stable `card_id`, front, back, topic/lesson IDs, source IDs, difficulty, spaced-repetition step, due date, objective correctness, confidence, timestamps, and status. Keep one retrievable fact or decision per card. The Markdown deck is generated from `.ai-tutor/cards.json` and must not become a competing source of truth.
 
 Quiz answers and explanations remain hidden until the learner attempts the question. Each distractor targets a documented misconception.
 
