@@ -14,11 +14,11 @@ from pathlib import Path
 try:
     from scripts.init_study import atomic_write
     from scripts.validate_study import validate_state, validate_study
-    from scripts.learner_profile import empty_profile
+    from scripts.learner_profile import empty_profile, refresh_summary
 except ModuleNotFoundError:  # direct execution: ``python scripts/migrate_state.py``
     from init_study import atomic_write
     from validate_study import validate_state, validate_study
-    from learner_profile import empty_profile
+    from learner_profile import empty_profile, refresh_summary
 
 
 LEGACY_FILES = ("progress.json", "curriculum.md", "session-log.md", "flashcards.md")
@@ -150,6 +150,24 @@ def _candidate_errors(study_root: Path, payloads: dict[str, dict]) -> list[str]:
         return validate_study(candidate)
 
 
+def _repair_profile(profile: dict) -> bool:
+    """Rename the legacy help key and recompute the summary; return True if changed."""
+
+    changed = False
+    for observation in profile.get("observations") or []:
+        if not isinstance(observation, dict) or observation.get("type") != "help_usage":
+            continue
+        value = observation.get("value")
+        if isinstance(value, dict) and "help_level" not in value and "support_level" in value:
+            observation["value"] = {
+                ("help_level" if key == "support_level" else key): item for key, item in value.items()
+            }
+            changed = True
+    before = json.dumps(profile.get("summary"), sort_keys=True)
+    refresh_summary(profile)
+    return changed or before != json.dumps(profile.get("summary"), sort_keys=True)
+
+
 def _upgrade_v2_support_files(
     study_root: Path,
     study_id: str,
@@ -205,9 +223,15 @@ def _upgrade_v2_support_files(
                 or existing_profile.get("study_id") != study_id
             ):
                 warnings.append("existing learner-profile.json does not satisfy the profile contract")
-            elif "revision" not in existing_profile:
-                existing_profile["revision"] = 0
-                pending["learner-profile.json"] = existing_profile
+            else:
+                added_revision = "revision" not in existing_profile
+                if added_revision:
+                    existing_profile["revision"] = 0
+                repaired = _repair_profile(existing_profile)
+                if repaired and isinstance(existing_profile["revision"], int) and not isinstance(existing_profile["revision"], bool):
+                    existing_profile["revision"] += 1
+                if added_revision or repaired:
+                    pending["learner-profile.json"] = existing_profile
     for name, collection in (("cards.json", "cards"), ("sources.json", "sources")):
         path = metadata / name
         if not path.exists():

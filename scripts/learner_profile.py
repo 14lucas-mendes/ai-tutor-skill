@@ -28,6 +28,24 @@ CONFIDENCE_LEVELS = {"low", "medium", "high"}
 SUMMARY_LEVELS = {"unknown", "low", "medium", "high"}
 CONFIDENCE_PATTERNS = {"unknown", "underconfident", "calibrated", "overconfident", "mixed"}
 SCOPE_TYPES = {"topic", "study"}
+ATTEMPT_RESULTS = {"correct": 1.0, "autonomous_success": 1.0, "partial": 0.5, "incorrect": 0.0}
+HELP_LEVELS = range(0, 7)  # 0 = no help; 1-6 = help ladder in learning-contract.md
+
+
+def _value_errors(observation: dict, observation_id: object) -> list[str]:
+    """Validate the value keys that the summary depends on."""
+
+    value = observation.get("value")
+    if not isinstance(value, dict):
+        return []
+    kind = observation.get("type")
+    if kind == "help_usage":
+        level = value.get("help_level")
+        if isinstance(level, bool) or not isinstance(level, int) or level not in HELP_LEVELS:
+            return [f"help_usage requires help_level from 0 to 6: {observation_id}"]
+    if kind == "autonomous_attempt" and value.get("result") not in ATTEMPT_RESULTS:
+        return [f"autonomous_attempt result must be one of {sorted(ATTEMPT_RESULTS)}: {observation_id}"]
+    return []
 
 
 def _is_string(value: object) -> bool:
@@ -148,6 +166,7 @@ def validate_profile(profile: object, *, state_indexes: dict[str, set[str]] | No
                 errors.append(f"invalid observation type: {observation_id}")
             if not isinstance(observation.get("value"), dict):
                 errors.append(f"observation value must be an object: {observation_id}")
+            errors.extend(_value_errors(observation, observation_id))
             if not _is_timestamp(observation.get("recorded_at")):
                 errors.append(f"observation recorded_at must be an ISO date/time: {observation_id}")
             if state_indexes:
@@ -242,26 +261,47 @@ def record_observation(
 
 
 def refresh_summary(profile: dict) -> dict:
-    """Update conservative summaries from repeated observations only."""
+    """Recompute conservative summaries from repeated observations only.
+
+    A single observation never sets a level: fewer than two usable observations
+    keep the dimension ``unknown``. Autonomy follows the success rate of the
+    autonomous attempts (partial counts as half), not their count, so a profile
+    with few observations is not reported as low autonomy.
+    """
 
     observations = profile.get("observations", [])
     summary = profile.setdefault("summary", {})
-    attempts = [item for item in observations if item.get("type") == "autonomous_attempt"]
-    successful_attempts = [
-        item for item in attempts
-        if item.get("value", {}).get("result") in {"correct", "autonomous_success"}
+    attempts = [
+        item for item in observations
+        if item.get("type") == "autonomous_attempt"
+        and isinstance(item.get("value"), dict)
+        and item["value"].get("result") in ATTEMPT_RESULTS
     ]
-    if len(successful_attempts) >= 5 and len({item.get("session_id") for item in successful_attempts}) >= 2:
-        summary["autonomy"] = "high"
-    elif len(successful_attempts) >= 2:
-        summary["autonomy"] = "medium"
-    elif successful_attempts:
-        summary["autonomy"] = "low"
+    if len(attempts) < 2:
+        summary["autonomy"] = "unknown"
+    else:
+        rate = sum(ATTEMPT_RESULTS[item["value"]["result"]] for item in attempts) / len(attempts)
+        successes = [item for item in attempts if ATTEMPT_RESULTS[item["value"]["result"]] == 1.0]
+        enough_for_high = len(successes) >= 5 and len({item.get("session_id") for item in successes}) >= 2
+        if rate >= 0.75 and enough_for_high:
+            summary["autonomy"] = "high"
+        elif rate >= 0.5:
+            summary["autonomy"] = "medium"
+        else:
+            summary["autonomy"] = "low"
 
-    help_events = [item for item in observations if item.get("type") == "help_usage"]
-    help_levels = [item.get("value", {}).get("help_level") for item in help_events]
-    help_levels = [value for value in help_levels if isinstance(value, int) and 1 <= value <= 5]
-    if len(help_levels) >= 2:
+    help_levels = [
+        item["value"].get("help_level")
+        for item in observations
+        if item.get("type") == "help_usage" and isinstance(item.get("value"), dict)
+    ]
+    help_levels = [
+        value for value in help_levels
+        if isinstance(value, int) and not isinstance(value, bool) and value in HELP_LEVELS
+    ]
+    if len(help_levels) < 2:
+        summary["help_dependency"] = "unknown"
+    else:
         average = sum(help_levels) / len(help_levels)
         summary["help_dependency"] = "high" if average >= 4 else "medium" if average >= 2 else "low"
 
