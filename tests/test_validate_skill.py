@@ -28,6 +28,21 @@ class ValidateSkillTests(unittest.TestCase):
         for clause in required_clauses:
             self.assertIn(clause, contract)
 
+    def test_learning_strategies_contract_is_required_and_consumed(self):
+        contract_path = ROOT / "references" / "learning-strategies.md"
+        self.assertTrue(contract_path.is_file())
+        contract = contract_path.read_text(encoding="utf-8").lower()
+        for strategy in (
+            "retrieval_first",
+            "adaptive_spacing",
+            "conditional_interleaving",
+            "representational_complementarity",
+        ):
+            self.assertIn(strategy, contract)
+        for workflow in ("session.md", "review.md", "media.md"):
+            text = (ROOT / "references" / "workflows" / workflow).read_text(encoding="utf-8").lower()
+            self.assertIn("learning-strategies.md", text)
+
     def test_rejects_nested_discoverable_skills(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "package"
@@ -67,6 +82,16 @@ class ValidateSkillTests(unittest.TestCase):
             errors = validate_skill(root)
             self.assertTrue(any("domain 60" in error for error in errors), errors)
 
+    def test_rejects_non_object_json_template_without_crashing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "package"
+            shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+            (root / "assets" / "templates" / "state.json").write_text("[]", encoding="utf-8")
+
+            errors = validate_skill(root)
+
+            self.assertTrue(any("root must be an object" in error for error in errors), errors)
+
     def test_behavioral_scenario_catalog_covers_risky_flows(self):
         scenarios = json.loads(
             (ROOT / "tests" / "scenarios" / "behavioral.json").read_text(encoding="utf-8")
@@ -85,7 +110,30 @@ class ValidateSkillTests(unittest.TestCase):
             "select_output_by_learning_need",
             "literal_response_assessment",
             "response_feedback_and_omission",
+            "protect_cognitive_core",
+            "reasoning_ownership",
+            "residual_capability",
+            "generated_core_is_guided",
+            "delegation_readiness",
+            "earned_performance_mode",
         }, identifiers)
+
+    def test_adaptive_programming_scenarios_have_expected_and_forbidden_behaviors(self):
+        scenarios = json.loads(
+            (ROOT / "tests" / "scenarios" / "adaptive-programming.json").read_text(encoding="utf-8")
+        )
+        self.assertGreaterEqual(len(scenarios), 7)
+        identifiers = [scenario["id"] for scenario in scenarios]
+        self.assertEqual(len(identifiers), len(set(identifiers)))
+        for scenario in scenarios:
+            self.assertTrue(scenario["context"])
+            self.assertTrue(scenario["expected"])
+            self.assertTrue(scenario["forbidden"])
+
+        self.assertIn("fast_mastery_omits_exposition", identifiers)
+        self.assertIn("difficulty_increases_scaffolding", identifiers)
+        self.assertIn("mixed_modes_within_session", identifiers)
+        self.assertIn("time_pressure_protects_learning", identifiers)
 
 
 if __name__ == "__main__":

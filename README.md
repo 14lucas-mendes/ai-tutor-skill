@@ -335,6 +335,8 @@ O AI Tutor reconhece algumas intenções específicas:
 | `/progress` | Ver seu progresso |
 | `/sources` | Procurar boas fontes de estudo |
 | `/media` | Criar materiais visuais ou multimídia |
+| `/diagnostic` | Medir de onde você parte em um tema, sem gerar nota |
+| `/profile` | Ver ou corrigir o que o tutor observou sobre como você aprende |
 
 > Esses atalhos representam intenções do AI Tutor. Dependendo do ambiente, você pode digitá-los diretamente ou simplesmente pedir a mesma coisa em linguagem natural.
 
@@ -359,6 +361,14 @@ Por isso, durante uma sessão ele pode pedir que você:
 Receber uma explicação do tutor não significa automaticamente que você aprendeu aquele assunto.
 
 Seu progresso aumenta quando você consegue demonstrar conhecimento por conta própria.
+
+### Como o tutor se adapta a você
+
+- **Diagnóstico** (`/diagnostic`): uma sondagem curta antes de um tema novo. Ela posiciona o ponto de partida e nunca vira nota.
+- **Perfil de aprendizagem** (`/profile`): o tutor registra fatos observados nas sessões, como quanta ajuda você precisou ou qual estratégia funcionou. Você pode consultar e contestar. O perfil não altera seu domínio.
+- **Recuperar antes de reexplicar**: na revisão, você tenta lembrar primeiro e só depois recebe a explicação.
+- **Revisão espaçada**: os intervalos seguem uma escada fixa (1, 3, 7, 16, 35 e 60 dias), ou uma política adaptativa, se você escolher.
+- **Aulas de programação adaptativas**: o tutor ajusta exemplos, tamanho dos passos e apoio conforme você avança, mas a tentativa principal continua sendo sua.
 
 ---
 
@@ -570,6 +580,10 @@ Para detalhes técnicos, consulte:
 - [`references/architecture.md`](references/architecture.md)
 - [`references/state-contract.md`](references/state-contract.md)
 - [`references/learning-contract.md`](references/learning-contract.md)
+- [`references/delegation-contract.md`](references/delegation-contract.md)
+- [`references/diagnostic-contract.md`](references/diagnostic-contract.md)
+- [`references/learner-profile-contract.md`](references/learner-profile-contract.md)
+- [`references/learning-strategies.md`](references/learning-strategies.md)
 - [`references/workflows/`](references/workflows/)
 
 ---

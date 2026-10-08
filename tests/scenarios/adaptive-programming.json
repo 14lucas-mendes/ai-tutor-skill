@@ -1,0 +1,88 @@
+[
+  {
+    "id": "fast_mastery_omits_exposition",
+    "context": "O aluno implementa a variação e explica a decisão sem ajuda.",
+    "expected": [
+      "shorten or omit redundant exposition",
+      "offer a transfer variation",
+      "retain verification and learner explanation"
+    ],
+    "forbidden": [
+      "force every phase for its own sake",
+      "record phase completion as evidence"
+    ]
+  },
+  {
+    "id": "difficulty_increases_scaffolding",
+    "context": "O aluno repete a mesma causa de erro e não consegue explicar o comportamento.",
+    "expected": [
+      "split the task or retrieve the prerequisite",
+      "increase concrete examples and support",
+      "pause advancement until the prerequisite is usable"
+    ],
+    "forbidden": [
+      "mark the learner incorrect for an unintroduced concept",
+      "restart the entire curriculum"
+    ]
+  },
+  {
+    "id": "guided_success_releases_support",
+    "context": "O aluno conclui uma etapa depois de receber uma pista parcial.",
+    "expected": [
+      "reduce one level of support",
+      "change the context or task variation",
+      "require a later prompt-only attempt for autonomous evidence"
+    ],
+    "forbidden": [
+      "classify the guided attempt as independent evidence"
+    ]
+  },
+  {
+    "id": "mixed_modes_within_session",
+    "context": "O aluno domina o boilerplate, mas encontra um novo núcleo cognitivo na integração.",
+    "expected": [
+      "use performance for the demonstrated part",
+      "route the new cognitive core to learning or assessment",
+      "retain learner verification and final judgment"
+    ],
+    "forbidden": [
+      "force one mode for the whole session"
+    ]
+  },
+  {
+    "id": "time_pressure_protects_learning",
+    "context": "Restam poucos minutos e a tarefa ainda precisa de uma tentativa autônoma.",
+    "expected": [
+      "trim optional explanation or polish",
+      "protect the learner attempt and verification",
+      "record a checkpoint for the next smallest delivery"
+    ],
+    "forbidden": [
+      "skip the cognitive-core attempt merely to finish the phase list"
+    ]
+  },
+  {
+    "id": "spiral_revisit_changes_constraint",
+    "context": "Uma competência já praticada retorna no projeto com formato de dados e falha novos.",
+    "expected": [
+      "connect the revisit to the current project",
+      "increase complexity only after demonstrated readiness",
+      "collect the new transfer behavior"
+    ],
+    "forbidden": [
+      "treat the revisit as identical repetition"
+    ]
+  },
+  {
+    "id": "resume_from_adaptive_checkpoint",
+    "context": "A sessão foi interrompida durante a prática guiada após um erro de causa conhecida.",
+    "expected": [
+      "resume the checkpoint and current support level",
+      "continue with the smallest useful variation",
+      "do not restart the entire probe or lesson"
+    ],
+    "forbidden": [
+      "infer mastery from the interrupted session alone"
+    ]
+  }
+]

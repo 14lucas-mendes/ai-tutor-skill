@@ -57,6 +57,14 @@ class LearningPackTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 create_learning_pack(Path(tmp), "lesson_a", [], ["cards"], objective="Learn")
 
+    def test_rejects_malformed_formats_and_duplicate_sources(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ValueError):
+                create_learning_pack(Path(tmp), "lesson_a", SOURCES, None, objective="Learn")
+            duplicate_sources = [SOURCES[0], dict(SOURCES[0])]
+            with self.assertRaises(ValueError):
+                create_learning_pack(Path(tmp), "lesson_a", duplicate_sources, ["cards"], objective="Learn")
+
     def test_visual_artifacts_require_accessibility(self):
         errors = validate_media_item({
             "artifact_id": "media_a",
@@ -87,6 +95,16 @@ class LearningPackTests(unittest.TestCase):
         })
         self.assertTrue(any("evidence_eligible" in error for error in errors), errors)
 
+    def test_media_item_requires_canonical_metadata(self):
+        errors = validate_media_item({
+            "artifact_id": "media_a",
+            "type": "learning_pack",
+            "evidence_eligible": False,
+        })
+        self.assertTrue(any("provider" in error for error in errors), errors)
+        self.assertTrue(any("source_ids" in error for error in errors), errors)
+        self.assertTrue(any("accessibility" in error for error in errors), errors)
+
     def test_source_pack_preserves_citations(self):
         with tempfile.TemporaryDirectory() as tmp:
             pack = create_learning_pack(
@@ -109,6 +127,28 @@ class LearningPackTests(unittest.TestCase):
             self.assertEqual(1, len(index["artifacts"]))
             self.assertFalse(index["artifacts"][0]["evidence_eligible"])
             self.assertEqual("prepared", index["artifacts"][0]["status"])
+
+    def test_persists_representation_metadata_in_manifest_and_index(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "study"
+            initialize_study(ROOT, study, CONFIG)
+            pack = create_learning_pack(
+                study,
+                "lesson_a",
+                SOURCES,
+                ["image"],
+                objective="Explain loops",
+                representation={
+                    "role": "primary",
+                    "complements_artifact_id": None,
+                    "rationale": "A imagem é a representação principal.",
+                    "distinct_contribution": "Mostra o sistema concreto.",
+                },
+            )
+            manifest = json.loads((pack / "manifest.json").read_text(encoding="utf-8"))
+            index = json.loads((study / ".ai-tutor" / "media-index.json").read_text(encoding="utf-8"))
+            self.assertEqual("primary", manifest["representation"]["role"])
+            self.assertEqual("primary", index["artifacts"][0]["representation"]["role"])
 
     def test_every_format_has_a_local_fallback(self):
         expected = {

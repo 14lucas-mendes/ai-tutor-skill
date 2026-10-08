@@ -13,5 +13,9 @@
     "prefer_primary": true,
     "prefer_pt_br": true
   },
+  "spacing_policy": {
+    "mode": "fixed",
+    "target_horizon_days": null
+  },
   "external_consents": {}
 }
