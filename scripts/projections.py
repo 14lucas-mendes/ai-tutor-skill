@@ -73,8 +73,10 @@ def render_session_log(state: dict) -> str:
             f"- Fim: `{session.get('ended_at') or 'não registrado'}`",
             f"- Lições: {', '.join(f'`{value}`' for value in session.get('lesson_ids', [])) or 'nenhuma'}",
             f"- Checkpoint: {session.get('checkpoint') or 'nenhum'}",
-            "",
         ])
+        if session.get("teaching_approach"):
+            lines.append(f"- Abordagem: `{session['teaching_approach']}`")
+        lines.append("")
     return "\n".join(lines)
 
 

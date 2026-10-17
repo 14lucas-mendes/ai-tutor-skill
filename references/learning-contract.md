@@ -59,6 +59,8 @@ Uma melhoria opcional pode ser recomendada sem rebaixar a classificação. A ava
 
 Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requires attempts after only the prompt was supplied.
 
+Understanding checks inside tutor-provided theory (predict an output, explain in your own words) are not evidence, so these caps do not apply to them; a wrong answer calls for more teaching.
+
 After an assisted success, reduce support and present a related variation. Guided success informs the next teaching decision but does not establish independent evidence for the supplied cognitive core. A later attempt with only the prompt supplied, or a substantially different task, is required before recording the corresponding autonomous behavior.
 
 ## Retention

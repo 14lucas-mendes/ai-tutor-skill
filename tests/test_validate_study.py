@@ -158,6 +158,44 @@ class ValidateStudyTests(unittest.TestCase):
         state["lessons"][0]["session_ids"] = ["session_a"]
         self.assertEqual([], validate_state(state))
 
+    def test_study_config_teaching_policy_is_optional_and_restricted(self):
+        cases = (
+            (None, True),
+            ({"approach": "theory_first"}, True),
+            ({"approach": "practice_first"}, True),
+            ({"approach": "lecture_only"}, False),
+            ({}, False),
+            ("theory_first", False),
+            ({"approach": ["theory_first"]}, False),
+        )
+        for value, valid in cases:
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as tmp:
+                study = Path(tmp) / "study"
+                initialize_study(ROOT, study, CONFIG)
+                config_path = study / ".ai-tutor" / "study-config.json"
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+                if value is None:
+                    config.pop("teaching_policy", None)
+                else:
+                    config["teaching_policy"] = value
+                config_path.write_text(json.dumps(config), encoding="utf-8")
+                errors = validate_study(study)
+                if valid:
+                    self.assertEqual([], errors)
+                else:
+                    self.assertTrue(any("teaching_policy" in error for error in errors), errors)
+
+    def test_session_teaching_approach_is_optional_and_restricted(self):
+        for value, valid in (("theory_first", True), ("practice_first", True), ("lecture_only", False), ("", False), (["theory_first"], False)):
+            with self.subTest(value=value):
+                state = base_state()
+                state["sessions"][0]["teaching_approach"] = value
+                errors = validate_state(state)
+                if valid:
+                    self.assertEqual([], errors)
+                else:
+                    self.assertTrue(any("teaching_approach" in error for error in errors), errors)
+
     def test_rejects_invalid_session_transition(self):
         state = base_state()
         state["sessions"] = [{

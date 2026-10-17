@@ -160,6 +160,44 @@ class MigrationTests(unittest.TestCase):
             self.assertEqual({"mode": "fixed", "target_horizon_days": None}, migrated_config["spacing_policy"])
             self.assertEqual(state_before, json.loads((metadata / "state.json").read_text(encoding="utf-8")))
 
+    def test_v2_upgrade_adds_theory_first_teaching_policy_without_changing_other_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "v2 study"
+            initialize_study(ROOT, study, CONFIG)
+            metadata = study / ".ai-tutor"
+            config_path = metadata / "study-config.json"
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            config.pop("teaching_policy", None)
+            config_path.write_text(json.dumps(config), encoding="utf-8")
+            state_before = json.loads((metadata / "state.json").read_text(encoding="utf-8"))
+
+            report = migrate(study)
+
+            self.assertTrue(report.valid)
+            migrated_config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual({"approach": "theory_first"}, migrated_config.pop("teaching_policy"))
+            self.assertEqual(config, migrated_config)
+            self.assertEqual(state_before, json.loads((metadata / "state.json").read_text(encoding="utf-8")))
+
+    def test_v2_upgrade_keeps_explicit_teaching_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "v2 study"
+            config = dict(CONFIG)
+            config["teaching_policy"] = {"approach": "practice_first"}
+            initialize_study(ROOT, study, config)
+            config_path = study / ".ai-tutor" / "study-config.json"
+            before = config_path.read_bytes()
+
+            report = migrate(study)
+
+            self.assertTrue(report.valid)
+            self.assertEqual(before, config_path.read_bytes())
+
+    def test_v1_migration_writes_theory_first_teaching_policy(self):
+        migrate(self.study)
+        config = json.loads((self.study / ".ai-tutor" / "study-config.json").read_text(encoding="utf-8"))
+        self.assertEqual({"approach": "theory_first"}, config["teaching_policy"])
+
     def test_rejects_invalid_v2_support_files_without_writing(self):
         with tempfile.TemporaryDirectory() as tmp:
             study = Path(tmp) / "v2 study"

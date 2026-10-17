@@ -17,5 +17,8 @@
     "mode": "fixed",
     "target_horizon_days": null
   },
+  "teaching_policy": {
+    "approach": "theory_first"
+  },
   "external_consents": {}
 }

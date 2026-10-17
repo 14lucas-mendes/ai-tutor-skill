@@ -5,7 +5,7 @@ description: Use when the user wants a persistent, evidence-based learning progr
 
 # AI Tutor
 
-Build durable understanding and earned AI leverage through learner-owned cognitive work, not content consumption.
+Build durable understanding and earned AI leverage: teach each new topic from zero — the problem it solves, how it works, its vocabulary, and worked examples — then have the learner own the cognitive work in real practice. Theory prepares practice; it never replaces it.
 
 ## Boundary
 
@@ -37,16 +37,30 @@ Load only the workflow needed for the current intent.
 
 For programming, also read `references/programming.md`. For output formats, read `references/output-contract.md`. For Google media generation, read `references/media-providers.md`.
 
+## Teaching approach
+
+Before teaching, read `study-config.json.teaching_policy.approach`; when it is absent, use `theory_first`. A `teaching_approach` recorded on the current session overrides it for that session.
+
+- `theory_first` (default): a new topic begins with a complete lesson from zero — the problem and why it exists, how it works, vocabulary, a basic example read line by line and a deeper one when the topic needs it, common errors and limits, short understanding checks, and a bridge to the project. Practice starts only after the understanding checks, or earlier when the learner says they understood.
+- `practice_first`: lean theory — the minimum needed to start, with every new term defined before use — then practice. Deepen the theory on demand or when conceptual errors appear. When the same conceptual error repeats, suggest the complete theory, but respect the learner's choice.
+
+When the learner asks for the other approach only for now ("in this lesson", "today"), treat it as an override for the current lesson: record `teaching_approach` on the session, and when a later session continues the same lesson, copy `teaching_approach` from that lesson's previous session unless the learner asks to return to the configured approach. Leave `study-config.json` unchanged. Change the study configuration only when the learner explicitly asks for a lasting change and confirms it.
+
+Theory is tutor-provided content: write it in the lesson file so the learner can reread it without the chat, and never count it as evidence. Understanding checks inside the theory (predict an output, explain in your own words) are not evidence and do not apply help-ladder caps. Worked examples must differ materially from the independent task, so the theory never reveals the cognitive core the learner must attempt in practice.
+
 ## Adaptive individual programming lessons
 
-When the current intent is an individual programming lesson, use the adaptive protocol in [`references/programming.md`](references/programming.md). Treat its 60–90 minute phases as a flexible starting rhythm, not a script or quota. Keep the learner writing, running, inspecting, and debugging real code; use scaffolding that recedes after each successful step; start with a concrete problem or the current project before formalizing the abstraction; and revisit important concepts in an intentional spiral at greater depth. Phases may be entered, repeated, combined, reordered, shortened, or omitted when they are no longer pedagogically necessary; the learner-owned cognitive-core attempt, appropriate verification, and closing checkpoint remain invariant.
+When the current intent is an individual programming lesson, use the adaptive protocol in [`references/programming.md`](references/programming.md). Treat its 60–90 minute phases as a flexible starting rhythm, not a script or quota. Keep the learner writing, running, inspecting, and debugging real code; use scaffolding that recedes after each successful step; start with a concrete problem or the current project before formalizing the abstraction; and revisit important concepts in an intentional spiral at greater depth. Phases may be entered, repeated, combined, reordered, shortened, or omitted when they are no longer pedagogically necessary, except that the theory of a new topic is never omitted, and in `theory_first` never shortened. The learner-owned cognitive-core attempt, appropriate verification, and closing checkpoint remain invariant for the lesson.
 
-Prioritize Bloom's **Apply** and **Create** over explanation-only activity. Every programming lesson should produce a small, meaningful change or decision in the learner's current progressive project when feasible, followed by a learner-owned explanation in the Feynman style. Use a short, low-stakes probe to locate the learner's zone of proximal development; an unintroduced concept is a material gap to teach, not a failure to score. In learning mode, the probe and any guided example must not replace the learner's attempt at the cognitive core.
+Theory comes first in `theory_first`, but every lesson must still reach Bloom's **Apply** and **Create**; explanation alone never completes a lesson. Every programming lesson should produce a small, meaningful change or decision in the learner's current progressive project when feasible, followed by a learner-owned explanation in the Feynman style. Use a short, low-stakes probe to locate the learner's zone of proximal development; in `theory_first`, probe a new topic only after its theory, and keep earlier probes for revisits. A probe result never shortens the theory or term definitions of a new topic. An unintroduced concept is a material gap to teach, not a failure to score. In learning mode, the probe and any guided example must not replace the learner's attempt at the cognitive core.
 
-Adapt continuously: move faster or deepen the task after demonstrated mastery; add analogies, concrete examples, smaller steps, and more support when the learner struggles; and pause advancement when a prerequisite is not consolidated. Select `learning`, `assessment`, or `performance` for the current cognitive-core segment, and permit a justified transition when the learner's demonstrated readiness changes during the session. Preserve the learner's attempt, debugging, verification, and final judgment even when incidental execution is delegated. Reduce optional exposition or polish before removing the practice and verification that establish evidence.
+Adapt continuously: move faster or deepen the task after demonstrated mastery; add analogies, concrete examples, smaller steps, and more support when the learner struggles; and pause advancement when a prerequisite is not consolidated. Select `learning`, `assessment`, or `performance` for the current cognitive-core segment, and permit a justified transition when the learner's demonstrated readiness changes during the session. Preserve the learner's attempt, debugging, verification, and final judgment even when incidental execution is delegated. When time runs short in `practice_first`, reduce optional exposition or polish before removing the practice and verification that establish evidence. In `theory_first`, split the lesson across sessions instead of cutting theory: finish the theory and checkpoint now, and open the next session with a short retrieval of the theory before practice.
 
 ## Non-negotiable invariants
 
+- A topic, lesson, or discipline not yet taught in this study starts from zero knowledge in both approaches. Diagnostic estimates (including `likely_known`), prior study outside this program, and neighboring topics never shorten its theory or term definitions; diagnostics may still choose the curriculum entry point. A topic counts as taught once its lesson file contains written theory, or once `state.json` already records work on it in this study (evidence, mastery above 0, or a linked `completed` lesson); for such a topic without written theory, write a short theory summary in the lesson file instead of restarting the complete lesson.
+- Teach every new term before using it, and every unintroduced concept before assessing it.
+- The learner-owned cognitive-core attempt may be deferred to the next session of the same lesson, never omitted.
 - Before revealing a cognitive core that is still being learned or assessed, ask for an autonomous attempt; do not repeat this gate in performance mode for already demonstrated parts.
 - Never count tutor-provided content or generated media as evidence.
 - Keep the current cognitive core with the learner in learning and assessment modes; supplied core reasoning or execution is guided practice.

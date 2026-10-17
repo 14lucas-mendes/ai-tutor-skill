@@ -1,7 +1,7 @@
 [
   {
     "id": "fast_mastery_omits_exposition",
-    "context": "O aluno implementa a variação e explica a decisão sem ajuda.",
+    "context": "Em practice_first, ou numa revisita, o aluno implementa a variação e explica a decisão sem ajuda.",
     "expected": [
       "shorten or omit redundant exposition",
       "offer a transfer variation",
@@ -9,7 +9,8 @@
     ],
     "forbidden": [
       "force every phase for its own sake",
-      "record phase completion as evidence"
+      "record phase completion as evidence",
+      "shorten the theory of a new topic in theory_first"
     ]
   },
   {
@@ -51,7 +52,7 @@
   },
   {
     "id": "time_pressure_protects_learning",
-    "context": "Restam poucos minutos e a tarefa ainda precisa de uma tentativa autônoma.",
+    "context": "Em practice_first, restam poucos minutos e a tarefa ainda precisa de uma tentativa autônoma.",
     "expected": [
       "trim optional explanation or polish",
       "protect the learner attempt and verification",
@@ -83,6 +84,97 @@
     ],
     "forbidden": [
       "infer mastery from the interrupted session alone"
+    ]
+  },
+  {
+    "id": "theory_first_new_topic_gets_complete_theory",
+    "context": "Em theory_first, a lição abre um tópico ainda não ensinado neste estudo.",
+    "expected": [
+      "open the theory with the concrete problem and why it exists",
+      "teach how it works, define every term, and read a basic example line by line",
+      "cover common errors and limits, run short understanding checks, and bridge to the project",
+      "write the theory in the lesson file before the first practice task"
+    ],
+    "forbidden": [
+      "probe the new topic before its theory",
+      "start guided or independent practice before the understanding checks unless the learner says they understood",
+      "count the theory or the understanding checks as evidence"
+    ]
+  },
+  {
+    "id": "theory_first_time_pressure_splits_lesson",
+    "context": "Em theory_first, a sessão não comporta a teoria completa e a prática do tópico novo.",
+    "expected": [
+      "finish the theory and its understanding checks",
+      "record a checkpoint naming the pending practice",
+      "open the next session of the same lesson with a short retrieval before practice"
+    ],
+    "forbidden": [
+      "cut or compress the theory to fit the clock",
+      "skip the cognitive-core attempt instead of deferring it",
+      "restart the theory from scratch in the next session"
+    ]
+  },
+  {
+    "id": "likely_known_does_not_skip_theory",
+    "context": "O diagnóstico marcou o tópico como likely_known, mas ele ainda não foi ensinado neste estudo e entrou na lição atual.",
+    "expected": [
+      "treat the topic as new and start from zero knowledge",
+      "define every term before using it"
+    ],
+    "forbidden": [
+      "shorten the theory or term definitions because of the diagnostic estimate",
+      "treat prior study outside this program as taught"
+    ]
+  },
+  {
+    "id": "session_override_keeps_config",
+    "context": "O estudo usa theory_first e o aluno pede: nesta lição quero ir direto para a prática.",
+    "expected": [
+      "use practice_first for this session with lean theory and every new term defined",
+      "record teaching_approach practice_first on the session",
+      "keep study-config.json teaching_policy unchanged"
+    ],
+    "forbidden": [
+      "change study-config.json without an explicit request for a lasting change and confirmation",
+      "skip theory entirely for a new topic"
+    ]
+  },
+  {
+    "id": "theory_examples_do_not_reveal_core",
+    "context": "Em theory_first, o exemplo aprofundado da teoria seria quase idêntico à tarefa independente do projeto.",
+    "expected": [
+      "choose a worked example that differs materially from the independent task",
+      "keep the cognitive core of the project task for the learner's attempt"
+    ],
+    "forbidden": [
+      "solve the independent task inside the theory",
+      "record a retyped near-identical solution as independent evidence"
+    ]
+  },
+  {
+    "id": "split_lesson_keeps_lesson_override",
+    "context": "O estudo usa theory_first, o aluno pediu practice_first nesta lição e a lição continua numa nova sessão.",
+    "expected": [
+      "copy teaching_approach practice_first from the lesson's previous session",
+      "keep study-config.json teaching_policy unchanged"
+    ],
+    "forbidden": [
+      "silently return to theory_first in the same lesson",
+      "carry the override to a different lesson"
+    ]
+  },
+  {
+    "id": "migrated_study_resumes_without_restarting_theory",
+    "context": "Um estudo criado antes da abordagem de ensino tem uma lição in_progress com evidências, e o arquivo da lição não tem teoria escrita.",
+    "expected": [
+      "treat the topic as already taught",
+      "write a short theory summary in the lesson file",
+      "resume the practice from the checkpoint"
+    ],
+    "forbidden": [
+      "restart the complete theory from zero",
+      "change mastery or evidence because of the summary"
     ]
   }
 ]

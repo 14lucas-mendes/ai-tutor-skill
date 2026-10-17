@@ -50,6 +50,7 @@ CARD_STATUSES = {"new", "learning", "review", "suspended"}
 CARD_RESULTS = {"correct", "partial", "incorrect", "failed"}
 RETRIEVAL_OUTCOMES = {"correct", "partial", "incorrect", "not_attempted"}
 SPACING_MODES = {"fixed", "adaptive"}
+TEACHING_APPROACHES = {"theory_first", "practice_first"}
 CARD_DIFFICULTIES = {"easy", "medium", "hard"}
 WEAK_POINT_CATEGORIES = {"conceptual", "procedural", "application", "precision", "execution"}
 WEAK_POINT_STATUSES = {"active", "resolved", "archived"}
@@ -177,6 +178,10 @@ def _validate_config(config: object) -> list[str]:
         horizon = spacing_policy.get("target_horizon_days")
         if isinstance(horizon, bool) or not isinstance(horizon, int) or horizon <= 0:
             errors.append("study config target_horizon_days must be a positive integer or null")
+    teaching_policy = config.get("teaching_policy", {"approach": "theory_first"})
+    approach = teaching_policy.get("approach") if isinstance(teaching_policy, dict) else None
+    if not isinstance(approach, str) or approach not in TEACHING_APPROACHES:
+        errors.append("study config teaching_policy.approach must be theory_first or practice_first")
     return errors
 
 
@@ -500,6 +505,11 @@ def _validate_sessions(state: dict, indexes: dict[str, set[str]]) -> list[str]:
                     errors.append(f"practice strategy topic_label_visible must be boolean: {session.get('session_id')}")
                 if not _is_string(practice_strategy.get("reason")):
                     errors.append(f"practice strategy reason must be a non-empty string: {session.get('session_id')}")
+        teaching_approach = session.get("teaching_approach")
+        if "teaching_approach" in session and (
+            not isinstance(teaching_approach, str) or teaching_approach not in TEACHING_APPROACHES
+        ):
+            errors.append(f"session teaching_approach must be theory_first or practice_first: {session.get('session_id')}")
     return errors
 
 

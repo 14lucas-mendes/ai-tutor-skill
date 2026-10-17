@@ -284,6 +284,7 @@ O tutor fará algumas perguntas para entender coisas como:
 - qual é seu objetivo;
 - quanto tempo você tem disponível;
 - seu nível atual;
+- se prefere teoria primeiro ou prática primeiro;
 - onde deseja salvar seu programa de estudos.
 
 Depois disso, ele cria seu plano inicial.
@@ -369,6 +370,21 @@ Seu progresso aumenta quando você consegue demonstrar conhecimento por conta pr
 - **Recuperar antes de reexplicar**: na revisão, você tenta lembrar primeiro e só depois recebe a explicação.
 - **Revisão espaçada**: os intervalos seguem uma escada fixa (1, 3, 7, 16, 35 e 60 dias), ou uma política adaptativa, se você escolher.
 - **Aulas de programação adaptativas**: o tutor ajusta exemplos, tamanho dos passos e apoio conforme você avança, mas a tentativa principal continua sendo sua.
+
+### Teoria primeiro ou prática primeiro
+
+No `/setup`, você escolhe a abordagem de ensino do estudo:
+
+| Abordagem | Como funciona |
+| --- | --- |
+| `theory_first` (padrão) | Todo tema novo começa por uma aula completa do zero: que problema resolve e por quê, como funciona por dentro, vocabulário, exemplos, erros comuns e checagens curtas de entendimento. A prática no projeto vem depois. |
+| `practice_first` | Teoria enxuta, com todo termo novo definido, e prática logo em seguida. A teoria aprofunda quando você pedir ou quando aparecerem erros conceituais. |
+
+Nas duas abordagens, um tema que ainda não foi ensinado neste estudo começa do zero, mesmo que o diagnóstico indique que você provavelmente já o conhece. A teoria fica escrita no arquivo da lição (`lessons/`), para você reler sem o chat. Ela é material do tutor e não conta como evidência de domínio; o progresso continua vindo da sua prática.
+
+Se faltar tempo em `theory_first`, a lição é dividida: a teoria numa sessão e a prática na seguinte, que começa com uma recuperação rápida do que foi visto.
+
+Para usar a outra abordagem só na lição atual, peça ao tutor (por exemplo, "nesta lição quero ir direto para a prática"). Isso fica registrado na sessão, vale também para as próximas sessões da mesma lição e não muda a configuração. Para mudar de vez, peça a mudança e confirme.
 
 ---
 
@@ -498,6 +514,8 @@ git pull
 ```
 
 Use o caminho correspondente ao seu ambiente.
+
+> **Mudança de comportamento:** estudos criados antes da abordagem de ensino não têm o campo `teaching_policy` e passam a usar `theory_first`, ou seja, temas novos começam por uma aula completa. Temas que o estudo já trabalhou (com evidência, domínio acima de 0 ou lição concluída) não recomeçam do zero: o tutor escreve um resumo da teoria no arquivo da lição e segue a prática. Para manter o ritmo anterior também nos temas novos, peça ao tutor para mudar o estudo para `practice_first`.
 
 ### Quero começar um estudo novo
 
