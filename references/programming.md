@@ -30,19 +30,35 @@ Prefer progressive useful projects, but select them from current mastery and lea
 
 ## Adaptive individual lesson protocol
 
-Use this protocol for one-to-one programming lessons. A 60–90 minute lesson is a planning envelope; the ranges below are starting points that may be shortened, extended, or reordered when the learner's performance makes that useful. Phases may also be repeated, combined, or omitted when they are redundant for the learner. The lesson is successful when the learner owns the relevant capability, not when every minute or section is consumed. The cognitive-core attempt, appropriate verification, and closing checkpoint are invariants; phase completion is not evidence.
+Use this protocol for one-to-one programming lessons. A 60–90 minute lesson is a planning envelope; the ranges below are starting points that may be shortened, extended, or reordered when the learner's performance makes that useful. Phases may also be repeated, combined, or omitted when they are redundant for the learner, except that the theory of a new topic is never omitted. Read the teaching approach in `SKILL.md` before choosing the depth of phase 3; a new topic starts from zero knowledge in both approaches. The lesson is successful when the learner owns the relevant capability, not when every minute or section is consumed. The cognitive-core attempt, appropriate verification, and closing checkpoint are invariants of the lesson; in `theory_first`, the attempt may move to the next session of the same lesson, never disappear. Phase completion is not evidence.
 
 ### 1. Activation and clear objective (5–8 minutes)
 
-Start from a concrete operational problem or the next slice of the learner's current project. State one observable outcome in plain language: what the learner will be able to implement, diagnose, or explain by the end. Make the project's relevance explicit.
+Start from a concrete operational problem or the next slice of the learner's current project; in a new topic, this problem opens the theory. State one observable outcome in plain language: what the learner will be able to implement, diagnose, or explain by the end. Make the project's relevance explicit.
 
 ### 2. Probe (about 5 minutes)
 
-Ask one low-stakes question at a time, using at most two short probes or a tiny mini-challenge when useful, to locate the learner's current ability and zone of proximal development. Do not grade an unintroduced concept as an incorrect answer. Use the result to choose the depth and amount of support for the rest of the lesson.
+Ask one low-stakes question at a time, using at most two short probes or a tiny mini-challenge when useful, to locate the learner's current ability and zone of proximal development. Do not grade an unintroduced concept as an incorrect answer. Use the result to choose the amount of support for the practice phases.
 
-### 3. Minimal exposition and guided example (10–15 minutes)
+In `theory_first`, do not probe a new topic before its theory; move this phase after phase 3 or keep it for revisits. In both approaches, a probe result, a diagnostic estimate such as `likely_known`, or prior study outside this program never shortens the theory or term definitions of a new topic.
 
-Explain only what is needed to unblock the next action, moving from the concrete example toward the abstraction. Use runnable code, pair programming, or a visible execution when that clarifies behavior. In learning mode, do not perform the undemonstrated cognitive core: demonstrate incidental syntax or a partial example, then ask the learner to attempt the essential decision or implementation before showing it.
+### 3. Theory (`theory_first`: complete, 20–40 minutes; `practice_first`: lean, 10–15 minutes)
+
+In `theory_first`, teach the complete theory in this order before guided practice:
+
+1. **Problem and why:** what problem this solves, why it exists, and a real-world example.
+2. **How it works inside:** the mental model of what happens when the code runs, with a diagram when it helps.
+3. **Vocabulary:** define every term and write it in the lesson file.
+4. **Examples:** a basic example read line by line, then a deeper one when the topic needs it.
+5. **Common errors and limits:** typical mistakes, misleading cases, and where the concept stops applying.
+6. **Understanding checks:** short questions such as predicting an output or explaining in the learner's own words. They are not evidence and do not apply help-ladder caps; a wrong answer calls for more teaching, not a score.
+7. **Bridge to the project:** where this appears in the current project and why it is done that way there.
+
+Move to guided practice after the understanding checks, or earlier when the learner says they understood. The duration follows the topic; when the session cannot fit the theory and the practice, split the lesson as described under time pressure rather than cutting the theory.
+
+In `practice_first`, give lean theory: the concrete problem, the essential mental model, and every new term defined before use, with only what is needed to unblock the next action. Then move to guided practice, and deepen the theory on demand or when conceptual errors appear.
+
+In both approaches, write the theory in the lesson file, move from the concrete example toward the abstraction, and use runnable code or a visible execution when that clarifies behavior. Worked examples must differ materially from the independent task in phase 5. In learning mode, do not perform the undemonstrated cognitive core of the practice task: demonstrate incidental syntax or a partial example, then ask the learner to attempt the essential decision or implementation before showing it.
 
 ### 4. Guided practice with receding scaffolding (15–20 minutes)
 
@@ -62,9 +78,10 @@ Summarize what was demonstrated, what remains uncertain, and the smallest useful
 
 ## Adaptation rules
 
-- **Fast demonstrated mastery:** shorten exposition and scaffolding, deepen the project variation, add a transfer case, or move to the next justified capability.
-- **Difficulty or repeated errors:** slow down, return to a concrete example, use an analogy, split the task, retrieve the prerequisite, and increase support. Do not reset the whole curriculum or force the planned next topic.
-- **Time pressure:** protect the learner's attempt, debugging, verification, and checkpoint; trim optional explanation, polish, or breadth first.
+- **Fast demonstrated mastery:** shorten scaffolding, deepen the project variation, add a transfer case, or move to the next justified capability. Shorten exposition only in `practice_first` or on a revisit; in `theory_first`, the theory of a new topic stays complete.
+- **Difficulty or repeated errors:** slow down, return to a concrete example, use an analogy, split the task, retrieve the prerequisite, and increase support. Do not reset the whole curriculum or force the planned next topic. In `practice_first`, when the same conceptual error repeats, suggest the complete theory and respect the learner's choice.
+- **Time pressure in `practice_first`:** protect the learner's attempt, debugging, verification, and checkpoint; trim optional explanation, polish, or breadth first.
+- **Time pressure in `theory_first`:** split the lesson across sessions instead of cutting theory. Finish the theory and its understanding checks, record a checkpoint that names the pending practice, and open the next session of the same lesson with a short retrieval of the theory before guided practice. The cognitive-core attempt moves to that session; it is never skipped.
 - **Spiral revisit:** bring previously learned concepts back in the project with a new constraint, data shape, failure mode, or integration boundary. Increasing complexity should follow demonstrated readiness.
 - **Project connection:** if a lesson cannot yet produce a project change, make the connection explicit and record the smallest preparatory artifact or decision that moves the project forward.
 - **Tone:** stay direct, clear, patient, and demanding about the quality of understanding without becoming rude.
@@ -73,12 +90,12 @@ Use these observable signals to choose the next move rather than to impose a quo
 
 | Signal | Adaptive response |
 | --- | --- |
-| Implements and explains without help | Omit redundant exposition and offer a transfer variation. |
+| Implements and explains without help | Offer a transfer variation; omit redundant exposition only in `practice_first` or on a revisit. |
 | Explains but cannot implement | Return to a minimal concrete example and use short guided practice. |
 | Implements but cannot diagnose | Introduce a controlled failure and ask for inspection before explaining. |
 | Succeeds after a partial hint | Reduce one level of support and change the context. |
-| Repeats the same causal error | Split the task, revisit the prerequisite, or use a new analogy. |
+| Repeats the same causal error | Split the task, revisit the prerequisite, or use a new analogy; in `practice_first`, suggest the complete theory. |
 | Encounters an unintroduced concept | Teach it before evaluation; do not score the knowledge gap as learner failure. |
-| Time becomes limited | Preserve attempt, debugging, verification, and checkpoint; trim optional exposition or polish. |
+| Time becomes limited | In `practice_first`, preserve attempt, debugging, verification, and checkpoint and trim optional exposition or polish. In `theory_first`, split the lesson across sessions; do not cut theory. |
 
 The protocol is a flexible teaching loop, not a compliance checklist. The tutor may repeat or combine phases when doing so increases real understanding while preserving the cognitive-core and evidence gates in `references/learning-contract.md` and `references/delegation-contract.md`.

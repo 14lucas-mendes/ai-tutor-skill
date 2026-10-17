@@ -12,7 +12,7 @@ Nunca copie uma estimativa diagnóstica para `mastery`, `evidences` ou `evidence
 
 ## Estimativas
 
-`not_observed` significa que ainda não houve sondagem; `unknown` significa que a sondagem foi insuficiente ou inconclusiva; `weak` indica uma lacuna observada; `partial` indica aplicação incompleta; `likely_known` indica sinal suficiente para começar além daquele tópico. Nenhuma classificação significa `mastered`.
+`not_observed` significa que ainda não houve sondagem; `unknown` significa que a sondagem foi insuficiente ou inconclusiva; `weak` indica uma lacuna observada; `partial` indica aplicação incompleta; `likely_known` indica sinal suficiente para começar além daquele tópico. Nenhuma classificação significa `mastered`, e nenhuma encurta a teoria ou a definição de termos de um tópico quando ele for ensinado neste estudo: tópico ainda não ensinado começa do zero.
 
 Use confiança `low`, `medium` ou `high`. A confiança descreve a qualidade do sinal, não a porcentagem de domínio.
 

@@ -4,13 +4,15 @@ Every productive JSON document has `schema_version: 2`. IDs are non-empty, globa
 
 ## Canonical files
 
-`study-config.json` stores every setup answer: study ID, topic, goal, deadline, weekly hours, preferred times, initial level, language, accessibility needs, source policy, and revocable external consents.
+`study-config.json` stores every setup answer: study ID, topic, goal, deadline, weekly hours, preferred times, initial level, language, accessibility needs, source policy, spacing policy, teaching policy, and revocable external consents.
 
 `state.json` contains `revision`, `updated_at`, `topics`, `evidences`, `sessions`, `lessons`, `weak_points`, `projects`, `next_focus`, and `diagnostics`. Older valid V2 states may omit `diagnostics` until the idempotent upgrade migration runs.
 
 `cards.json` is the canonical card registry. It contains `study_id` and `cards`; each card has a stable `card_id`, optional topic/lesson links, source IDs, front/back, difficulty, spaced-repetition step, due date, objective correctness, confidence, and status. The generated `flashcards.md` file is only a readable projection.
 
 `study-config.json.spacing_policy` is optional for backward compatibility and defaults to `{ "mode": "fixed", "target_horizon_days": null }`. Existing studies keep the fixed interval ladder unless the learner explicitly selects `adaptive`. Adaptive scheduling never changes mastery or evidence requirements.
+
+`study-config.json.teaching_policy` is optional and defaults to `{ "approach": "theory_first" }` when absent. `approach` is `theory_first` (a complete lesson from zero before project practice) or `practice_first` (lean theory, then practice, deepening theory on demand). The learner chooses it at setup and may change it later only by an explicit request confirmed by the learner. The approach changes delivery only; it never changes mastery, evidence, or help-ladder requirements.
 
 `sources.json` is the canonical source registry. Every source records `source_id`, title, author or institution, direct URL or bibliographic identifier, publication date when available, access date, source type, linked lesson/topic IDs, and an authority reason. Learning packs may copy source snapshots, but the study registry remains the source of truth. A learning-pack source snapshot additionally requires non-empty `source_id`, `title`, `url`, and `content` (the pedagogical excerpt used to generate pack outputs).
 
@@ -51,6 +53,8 @@ Resume the most recent `in_progress` session; otherwise resume the most recent `
 Lesson status is `planned`, `in_progress`, `blocked`, `completed`, or `archived`. Sessions and lessons have a many-to-many relationship. Advancing depends on lesson status and evidence, never only on session status.
 
 Sessions may contain an optional `practice_strategy` object with `mode` (`blocked` or `interleaved`), selected topic IDs, `topic_label_visible`, and a rationale. This metadata describes delivery only and cannot create evidence or mastery.
+
+Sessions may contain an optional `teaching_approach` (`theory_first` or `practice_first`). Record it when the learner asks for the other approach for the current session or lesson only. This per-session override never changes `study-config.json.teaching_policy`; it is delivery metadata and cannot create evidence or mastery.
 
 ## Validation
 

@@ -74,6 +74,21 @@ class ProjectionTests(unittest.TestCase):
             self.assertIn("card_a", flashcards)
             self.assertIn("session_a", session_log)
 
+    def test_session_log_shows_recorded_teaching_approach_only_when_present(self):
+        session = {
+            "session_id": "session_a",
+            "status": "completed",
+            "transitions": ["in_progress", "completed"],
+            "lesson_ids": [],
+            "started_at": "2026-09-11T10:00:00Z",
+            "ended_at": "2026-09-11T11:00:00Z",
+            "checkpoint": None,
+            "resumable": False,
+        }
+        self.assertNotIn("Abordagem", projections.render_session_log({"sessions": [session]}))
+        session["teaching_approach"] = "practice_first"
+        self.assertIn("- Abordagem: `practice_first`", projections.render_session_log({"sessions": [session]}))
+
     def test_failed_render_does_not_partially_update_projections(self):
         with tempfile.TemporaryDirectory() as tmp:
             study = Path(tmp) / "study"

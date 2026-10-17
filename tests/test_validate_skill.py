@@ -134,6 +134,14 @@ class ValidateSkillTests(unittest.TestCase):
         self.assertIn("difficulty_increases_scaffolding", identifiers)
         self.assertIn("mixed_modes_within_session", identifiers)
         self.assertIn("time_pressure_protects_learning", identifiers)
+        for identifier in (
+            "theory_first_new_topic_gets_complete_theory",
+            "theory_first_time_pressure_splits_lesson",
+            "likely_known_does_not_skip_theory",
+            "session_override_keeps_config",
+            "theory_examples_do_not_reveal_core",
+        ):
+            self.assertIn(identifier, identifiers)
 
 
 if __name__ == "__main__":

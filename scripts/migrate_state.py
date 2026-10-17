@@ -116,6 +116,7 @@ def _convert(study_root: Path) -> tuple[dict, dict, dict, list[str]]:
         "accessibility": [],
         "source_policy": {"prefer_primary": True, "prefer_pt_br": True},
         "spacing_policy": {"mode": "fixed", "target_horizon_days": None},
+        "teaching_policy": {"approach": "theory_first"},
         "external_consents": {},
     }
     media = {"schema_version": 2, "study_id": study_id, "revision": 0, "artifacts": []}
@@ -207,6 +208,9 @@ def _upgrade_v2_support_files(
         else:
             if isinstance(config, dict) and "spacing_policy" not in config:
                 config["spacing_policy"] = {"mode": "fixed", "target_horizon_days": None}
+                pending["study-config.json"] = config
+            if isinstance(config, dict) and "teaching_policy" not in config:
+                config["teaching_policy"] = {"approach": "theory_first"}
                 pending["study-config.json"] = config
     profile_path = metadata / "learner-profile.json"
     if not profile_path.exists():

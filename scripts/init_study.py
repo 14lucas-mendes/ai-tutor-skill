@@ -79,6 +79,10 @@ def _validate_config(config: dict) -> None:
     horizon = spacing_policy.get("target_horizon_days")
     if horizon is not None and (isinstance(horizon, bool) or not isinstance(horizon, int) or horizon <= 0):
         raise ValueError("spacing_policy.target_horizon_days must be a positive integer or null")
+    teaching_policy = config.get("teaching_policy", {"approach": "theory_first"})
+    approach = teaching_policy.get("approach") if isinstance(teaching_policy, dict) else None
+    if not isinstance(approach, str) or approach not in {"theory_first", "practice_first"}:
+        raise ValueError("teaching_policy.approach must be theory_first or practice_first")
 
 
 def initialize_study(
@@ -128,6 +132,10 @@ def initialize_study(
     study_config["spacing_policy"] = deepcopy(config.get(
         "spacing_policy",
         {"mode": "fixed", "target_horizon_days": None},
+    ))
+    study_config["teaching_policy"] = deepcopy(config.get(
+        "teaching_policy",
+        {"approach": "theory_first"},
     ))
 
     for directory in (

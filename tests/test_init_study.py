@@ -62,6 +62,22 @@ class InitializeStudyTests(unittest.TestCase):
             persisted = json.loads((study / ".ai-tutor" / "study-config.json").read_text(encoding="utf-8"))
             self.assertEqual(config["spacing_policy"], persisted["spacing_policy"])
 
+    def test_defaults_teaching_policy_to_theory_first(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "study"
+            initialize_study(ROOT, study, VALID_CONFIG)
+            config = json.loads((study / ".ai-tutor" / "study-config.json").read_text(encoding="utf-8"))
+            self.assertEqual({"approach": "theory_first"}, config["teaching_policy"])
+
+    def test_persists_explicit_practice_first_teaching_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            study = Path(tmp) / "practice study"
+            config = dict(VALID_CONFIG)
+            config["teaching_policy"] = {"approach": "practice_first"}
+            initialize_study(ROOT, study, config)
+            persisted = json.loads((study / ".ai-tutor" / "study-config.json").read_text(encoding="utf-8"))
+            self.assertEqual({"approach": "practice_first"}, persisted["teaching_policy"])
+
     def test_refuses_to_overwrite_existing_study(self):
         with tempfile.TemporaryDirectory() as tmp:
             study = Path(tmp) / "study"
@@ -152,6 +168,15 @@ class InitializeStudyTests(unittest.TestCase):
             config["spacing_policy"] = {"mode": "unknown", "target_horizon_days": 0}
             with self.assertRaises(ValueError):
                 initialize_study(ROOT, Path(tmp) / "invalid spacing", config)
+
+    def test_rejects_invalid_teaching_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for value in ({"approach": "lecture_only"}, {}, "theory_first", {"approach": ["theory_first"]}):
+                with self.subTest(value=value):
+                    config = dict(VALID_CONFIG)
+                    config["teaching_policy"] = value
+                    with self.assertRaises(ValueError):
+                        initialize_study(ROOT, Path(tmp) / "invalid teaching", config)
 
 
 if __name__ == "__main__":
