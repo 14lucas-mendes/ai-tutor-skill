@@ -515,7 +515,7 @@ git pull
 
 Use o caminho correspondente ao seu ambiente.
 
-> **Mudança de comportamento:** estudos criados antes da abordagem de ensino não têm o campo `teaching_policy` e passam a usar `theory_first`, ou seja, temas novos começam por uma aula completa. Temas que o estudo já trabalhou (com evidência, domínio acima de 0 ou lição em andamento) não recomeçam do zero: o tutor escreve um resumo da teoria no arquivo da lição e segue a prática. Para manter o ritmo anterior também nos temas novos, peça ao tutor para mudar o estudo para `practice_first`.
+> **Mudança de comportamento:** estudos criados antes da abordagem de ensino não têm o campo `teaching_policy` e passam a usar `theory_first`, ou seja, temas novos começam por uma aula completa. Temas que o estudo já trabalhou (com evidência, domínio acima de 0 ou lição concluída) não recomeçam do zero: o tutor escreve um resumo da teoria no arquivo da lição e segue a prática. Para manter o ritmo anterior também nos temas novos, peça ao tutor para mudar o estudo para `practice_first`.
 
 ### Quero começar um estudo novo
 
