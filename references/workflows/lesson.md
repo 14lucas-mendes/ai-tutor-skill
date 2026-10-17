@@ -8,7 +8,7 @@ Create `lessons/<sequence>-<slug>.md` with a header (lesson ID, observable objec
 2. **Practice plan:** scaffold options, independent-task variants, expected errors, evidence criteria, and state update instructions. Worked examples in the theory must differ materially from these independent tasks.
 3. **Progress:** checkpoint, demonstrated evidence with IDs, and what remains.
 
-A topic counts as taught once its lesson file contains written theory; until then it is new and starts from zero knowledge, whatever the diagnostic estimated. When a later session continues the lesson, keep the theory, deepen it when needed, and update the progress section.
+A topic counts as taught once its lesson file contains written theory, or once `state.json` already records work on it in this study: evidence, mastery above 0, or a linked lesson `in_progress` or `completed`. Until then it is new and starts from zero knowledge, whatever the diagnostic estimated. Studies created before lesson files carried theory have taught topics without written theory; when such a lesson continues, write a short theory summary (vocabulary, mental model, common errors) in the lesson file and resume the practice, instead of restarting the complete lesson. When a later session continues the lesson, keep the theory, deepen it when needed, and update the progress section.
 
 For programming, read `references/programming.md` and treat the lesson as an adaptive set of teaching options, not a sequence that must be consumed. Add the project anchor and a possible concrete example to the header and plan. Select, combine, revisit, or omit the practice-plan components according to observed learner performance; the theory of a new topic is never omitted.
 

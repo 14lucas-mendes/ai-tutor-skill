@@ -151,5 +151,30 @@
       "solve the independent task inside the theory",
       "record a retyped near-identical solution as independent evidence"
     ]
+  },
+  {
+    "id": "split_lesson_keeps_lesson_override",
+    "context": "O estudo usa theory_first, o aluno pediu practice_first nesta lição e a lição continua numa nova sessão.",
+    "expected": [
+      "copy teaching_approach practice_first from the lesson's previous session",
+      "keep study-config.json teaching_policy unchanged"
+    ],
+    "forbidden": [
+      "silently return to theory_first in the same lesson",
+      "carry the override to a different lesson"
+    ]
+  },
+  {
+    "id": "migrated_study_resumes_without_restarting_theory",
+    "context": "Um estudo criado antes da abordagem de ensino tem uma lição in_progress com evidências, e o arquivo da lição não tem teoria escrita.",
+    "expected": [
+      "treat the topic as already taught",
+      "write a short theory summary in the lesson file",
+      "resume the practice from the checkpoint"
+    ],
+    "forbidden": [
+      "restart the complete theory from zero",
+      "change mastery or evidence because of the summary"
+    ]
   }
 ]

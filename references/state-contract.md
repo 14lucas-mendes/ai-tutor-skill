@@ -54,7 +54,7 @@ Lesson status is `planned`, `in_progress`, `blocked`, `completed`, or `archived`
 
 Sessions may contain an optional `practice_strategy` object with `mode` (`blocked` or `interleaved`), selected topic IDs, `topic_label_visible`, and a rationale. This metadata describes delivery only and cannot create evidence or mastery.
 
-Sessions may contain an optional `teaching_approach` (`theory_first` or `practice_first`). Record it when the learner asks for the other approach for the current session or lesson only. This per-session override never changes `study-config.json.teaching_policy`; it is delivery metadata and cannot create evidence or mastery.
+Sessions may contain an optional `teaching_approach` (`theory_first` or `practice_first`). Record it when the learner asks for the other approach only for now; it overrides the configured approach for the current lesson, so a later session that continues the same lesson copies it from that lesson's previous session unless the learner asks to return to the configured approach. This override never changes `study-config.json.teaching_policy`; it is delivery metadata and cannot create evidence or mastery.
 
 ## Validation
 

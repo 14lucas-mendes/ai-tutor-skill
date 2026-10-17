@@ -39,12 +39,12 @@ For programming, also read `references/programming.md`. For output formats, read
 
 ## Teaching approach
 
-Before teaching, read `study-config.json.teaching_policy.approach`; when it is absent, use `theory_first`. A `teaching_approach` recorded on the current session overrides it for that session only.
+Before teaching, read `study-config.json.teaching_policy.approach`; when it is absent, use `theory_first`. A `teaching_approach` recorded on the current session overrides it for that session.
 
 - `theory_first` (default): a new topic begins with a complete lesson from zero — the problem and why it exists, how it works, vocabulary, a basic example read line by line and a deeper one when the topic needs it, common errors and limits, short understanding checks, and a bridge to the project. Practice starts only after the understanding checks, or earlier when the learner says they understood.
 - `practice_first`: lean theory — the minimum needed to start, with every new term defined before use — then practice. Deepen the theory on demand or when conceptual errors appear. When the same conceptual error repeats, suggest the complete theory, but respect the learner's choice.
 
-When the learner asks for the other approach only for the current session or lesson, record `teaching_approach` on that session and leave `study-config.json` unchanged. Change the study configuration only when the learner explicitly asks for a lasting change and confirms it.
+When the learner asks for the other approach only for now ("in this lesson", "today"), treat it as an override for the current lesson: record `teaching_approach` on the session, and when a later session continues the same lesson, copy `teaching_approach` from that lesson's previous session unless the learner asks to return to the configured approach. Leave `study-config.json` unchanged. Change the study configuration only when the learner explicitly asks for a lasting change and confirms it.
 
 Theory is tutor-provided content: write it in the lesson file so the learner can reread it without the chat, and never count it as evidence. Understanding checks inside the theory (predict an output, explain in your own words) are not evidence and do not apply help-ladder caps. Worked examples must differ materially from the independent task, so the theory never reveals the cognitive core the learner must attempt in practice.
 
@@ -58,7 +58,7 @@ Adapt continuously: move faster or deepen the task after demonstrated mastery; a
 
 ## Non-negotiable invariants
 
-- A topic, lesson, or discipline not yet taught in this study starts from zero knowledge in both approaches. Diagnostic estimates (including `likely_known`), prior study outside this program, and neighboring topics never shorten its theory or term definitions; diagnostics may still choose the curriculum entry point. A topic counts as taught once its lesson file contains written theory.
+- A topic, lesson, or discipline not yet taught in this study starts from zero knowledge in both approaches. Diagnostic estimates (including `likely_known`), prior study outside this program, and neighboring topics never shorten its theory or term definitions; diagnostics may still choose the curriculum entry point. A topic counts as taught once its lesson file contains written theory, or once `state.json` already records work on it in this study (evidence, mastery above 0, or a linked lesson `in_progress` or `completed`); for such a topic without written theory, write a short theory summary in the lesson file instead of restarting the complete lesson.
 - Teach every new term before using it, and every unintroduced concept before assessing it.
 - The learner-owned cognitive-core attempt may be deferred to the next session of the same lesson, never omitted.
 - Before revealing a cognitive core that is still being learned or assessed, ask for an autonomous attempt; do not repeat this gate in performance mode for already demonstrated parts.

@@ -140,6 +140,8 @@ class ValidateSkillTests(unittest.TestCase):
             "likely_known_does_not_skip_theory",
             "session_override_keeps_config",
             "theory_examples_do_not_reveal_core",
+            "split_lesson_keeps_lesson_override",
+            "migrated_study_resumes_without_restarting_theory",
         ):
             self.assertIn(identifier, identifiers)
 

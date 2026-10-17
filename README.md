@@ -384,7 +384,7 @@ Nas duas abordagens, um tema que ainda não foi ensinado neste estudo começa do
 
 Se faltar tempo em `theory_first`, a lição é dividida: a teoria numa sessão e a prática na seguinte, que começa com uma recuperação rápida do que foi visto.
 
-Para usar a outra abordagem só numa sessão, peça ao tutor (por exemplo, "nesta lição quero ir direto para a prática"). Isso fica registrado na sessão e não muda a configuração. Para mudar de vez, peça a mudança e confirme.
+Para usar a outra abordagem só na lição atual, peça ao tutor (por exemplo, "nesta lição quero ir direto para a prática"). Isso fica registrado na sessão, vale também para as próximas sessões da mesma lição e não muda a configuração. Para mudar de vez, peça a mudança e confirme.
 
 ---
 
@@ -515,7 +515,7 @@ git pull
 
 Use o caminho correspondente ao seu ambiente.
 
-> **Mudança de comportamento:** estudos criados antes da abordagem de ensino não têm o campo `teaching_policy` e passam a usar `theory_first`, ou seja, temas novos começam por uma aula completa. Para manter o ritmo anterior, peça ao tutor para mudar o estudo para `practice_first`.
+> **Mudança de comportamento:** estudos criados antes da abordagem de ensino não têm o campo `teaching_policy` e passam a usar `theory_first`, ou seja, temas novos começam por uma aula completa. Temas que o estudo já trabalhou (com evidência, domínio acima de 0 ou lição em andamento) não recomeçam do zero: o tutor escreve um resumo da teoria no arquivo da lição e segue a prática. Para manter o ritmo anterior também nos temas novos, peça ao tutor para mudar o estudo para `practice_first`.
 
 ### Quero começar um estudo novo
 
