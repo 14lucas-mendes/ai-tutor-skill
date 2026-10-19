@@ -26,7 +26,7 @@ Topics may contain a `diagnostic` projection with the latest estimate, confidenc
 
 Weak points contain `weak_point_id`, optional `topic_id`, `category`, `cause`, `supporting_evidence_ids`, `entered_at`, `exit_condition`, and `status`. Categories are `conceptual`, `procedural`, `application`, `precision`, or `execution`; a v1 migration may temporarily use `category: "unclassified"` only with `migration_pending_classification: true`.
 
-Evidences contain `evidence_id`, `topic_id`, `session_id`, `kind`, `autonomous`, `transfer`, `context`, `recorded_at`, `reference`, `result`, and `error`. `reference.type` cannot be `media`.
+Evidences contain `evidence_id`, `topic_id`, `session_id`, `kind`, `autonomous`, `transfer`, `context`, `recorded_at`, `reference`, `result`, and `error`. `reference.type` cannot be `media`. Common `kind` values are `feynman`, `application`, and `supporting` (narrower behaviors defined in `references/learning-contract.md`); only `feynman` and `application` count toward mastery 60.
 
 `media-index.json` contains artifact metadata: IDs, type, provider, source IDs, pedagogical objective, local path or URL, status, dates, verification, accessibility, and `evidence_eligible: false`.
 
