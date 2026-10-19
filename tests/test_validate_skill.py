@@ -142,6 +142,8 @@ class ValidateSkillTests(unittest.TestCase):
             "theory_examples_do_not_reveal_core",
             "split_lesson_keeps_lesson_override",
             "migrated_study_resumes_without_restarting_theory",
+            "partial_autonomous_application_gets_self_verification",
+            "supporting_evidence_does_not_fill_standard_application",
         ):
             self.assertIn(identifier, identifiers)
 

@@ -8,12 +8,16 @@ This file is the sole authority for mastery, evidence, retention, weak points, h
 | --- | --- |
 | 0 | No valid evidence. |
 | 20 | Recognizes terms or attempts with intensive help. |
-| 40 | Partially applies a known procedure with directional help or a partial hint. |
+| 40 | Partially applies a known procedure: with directional help or a partial hint, or autonomously with a material element missing. |
 | 60 | One autonomous Feynman explanation and one independent autonomous standard application. |
 | 80 | Requirements for 60, with an autonomous application transferred to a new context. |
 | 100 | Performance for 80 repeated across at least two session IDs and two contexts, including limit detection or self-correction. |
 
 An evidence is independent when it tests a different behavior or uses a substantially different task. Evidence older than 45 days remains historical but must be reconfirmed before raising mastery.
+
+A **standard application** performs the essential form of the current lesson's observable objective for that topic from start to finish; in programming, that usually means implementing the target capability and showing that it behaves as the objective requires. When the objective has several parts, the standard application performs all of them. Which behavior is standard follows the objective: when the objective is to trace or predict code, a trace is the standard application.
+
+Narrower behaviors — predicting one output, tracing one loop, writing an isolated `assert`, recalling a command — are **supporting evidence**. Record them with `kind: "supporting"`, never as `application`, and use them for weak points and teaching decisions. They do not satisfy the standard application required for 60; because `scripts/validate_study.py` requires an `application` for 60, it rejects a 60 backed only by supporting evidence. Understanding checks inside tutor-provided theory are not evidence of any kind, supporting evidence included. Whether an `application` is really standard remains the tutor's judgment, since the validator checks kinds only. When an autonomous correct behavior does not count as a standard application, say so and why whenever mastery is reported, so the learner can see the criterion being applied.
 
 Tutor-provided answers, copied solutions, generated cards, diagrams, images, audio, video, or other media are not evidence. A later autonomous attempt may be evidence.
 
@@ -36,7 +40,7 @@ Antes de classificar uma resposta, verifique:
 1. **Ideia central** — o aluno identificou o conceito, ambiente ou decisão principal?
 2. **Contexto** — aplicou essa ideia ao problema e ao ambiente corretos?
 3. **Justificativa** — explicou a decisão com uma justificativa resumida e verificável? Não exija cadeia de pensamento privada.
-4. **Limites, condições e riscos** — há algum limite relevante para o objetivo? Se foi omitido, apresente-o ou ajude o aluno a identificá-lo. A omissão opcional não é erro nem resposta parcial, a menos que o objetivo tenha tornado esse ponto requisito explícito.
+4. **Limites, condições e riscos** — há algum limite relevante para o objetivo? Se foi omitido, apresente-o ou ajude o aluno a identificá-lo; quando o objetivo o exigia, faça antes a conferência genérica de *Self-verification before feedback*. A omissão opcional não é erro nem resposta parcial, a menos que o objetivo tenha tornado esse ponto requisito explícito.
 5. **Autocorreção após feedback** — o aluno corrigiu ou melhorou a resposta depois de receber feedback? Registre a melhoria; uma nova tentativa autônoma pode ser evidência conforme o nível de ajuda utilizado.
 6. **Leitura literal** — não inferir afirmações não feitas, como autorização, acesso irrestrito, ausência de revisão humana ou suporte universal a formatos. Registre somente o que o texto sustenta e sinalize inferências como hipóteses.
 
@@ -62,6 +66,12 @@ Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requir
 Understanding checks inside tutor-provided theory (predict an output, explain in your own words) are not evidence, so these caps do not apply to them; a wrong answer calls for more teaching.
 
 After an assisted success, reduce support and present a related variation. Guided success informs the next teaching decision but does not establish independent evidence for the supplied cognitive core. A later attempt with only the prompt supplied, or a substantially different task, is required before recording the corresponding autonomous behavior.
+
+## Self-verification before feedback
+
+Before giving feedback on an autonomous application that is partial or incorrect, in any mode, ask once for self-verification with this fixed prompt, translated only into the study language: "Check your solution against every rule and example of the task." Use the same prompt whatever the error is. It must not name what is missing, which rule, case, or category of case fails, or where; pointing to a category such as edge cases is already step 3. This prompt counts as part of the task prompt and does not remove autonomy or apply a cap.
+
+Ask it at most once per task. Keep the first attempt recorded with its own classification. When the learner then finds and fixes the gap without further help, record the corrected version as a new autonomous evidence. When the revised attempt is still partial or incorrect, record it with its own classification and continue with the help ladder; do not repeat the self-verification prompt.
 
 ## Retention
 

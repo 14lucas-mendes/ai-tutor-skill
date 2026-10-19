@@ -118,6 +118,13 @@ class ValidateStudyTests(unittest.TestCase):
         state["topics"][0].update(mastery=60, status="in_progress", evidence_ids=[item["evidence_id"]])
         self.assertTrue(any("mastery 60" in error for error in validate_state(state)))
 
+    def test_domain_60_rejects_supporting_evidence_as_application(self):
+        state = base_state()
+        items = [evidence("evidence_f", "feynman"), evidence("evidence_s", "supporting")]
+        state["evidences"] = items
+        state["topics"][0].update(mastery=60, status="in_progress", evidence_ids=[item["evidence_id"] for item in items])
+        self.assertTrue(any("mastery 60" in error for error in validate_state(state)))
+
     def test_domain_60_does_not_need_transfer(self):
         state = base_state()
         items = [evidence("evidence_f", "feynman"), evidence("evidence_a", "application")]

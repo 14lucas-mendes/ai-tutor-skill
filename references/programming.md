@@ -24,6 +24,8 @@ Check only relevant items:
 6. Complexity and duplication are justified.
 7. The change is scoped and deliverable.
 
+When the learner's autonomous attempt is partial or incorrect, ask for the self-verification described in `references/learning-contract.md` before this feedback; give specific feedback only if the learner does not find the gap.
+
 Feedback uses `What worked`, `What to adjust`, and `Next step`, with at most three items each. Every adjustment identifies location, impact, and a verifiable action.
 
 Prefer progressive useful projects, but select them from current mastery and learner motivation rather than a fixed technology ladder.
