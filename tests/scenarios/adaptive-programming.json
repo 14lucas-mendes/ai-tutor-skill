@@ -176,5 +176,32 @@
       "restart the complete theory from zero",
       "change mastery or evidence because of the summary"
     ]
+  },
+  {
+    "id": "partial_autonomous_application_gets_self_verification",
+    "context": "O aluno entrega sozinho uma solução que passa nos próprios exemplos, mas deixa de fora duas exclusões que o enunciado pedia.",
+    "expected": [
+      "classify the first attempt as partial and keep it recorded",
+      "ask one generic self-verification prompt against the task's rules and examples before any feedback",
+      "record a corrected version found without further help as a new autonomous evidence"
+    ],
+    "forbidden": [
+      "name the missing exclusions, the failing case, or the line before the self-verification prompt",
+      "apply a help-ladder cap to the generic self-verification prompt",
+      "treat a correction after a narrower prompt as autonomous"
+    ]
+  },
+  {
+    "id": "supporting_evidence_does_not_fill_standard_application",
+    "context": "O aluno já tem um Feynman autônomo correto e acerta sozinho a previsão de uma saída isolada, mas ainda não cumpriu de ponta a ponta o objetivo da lição sem ajuda.",
+    "expected": [
+      "record the prediction as autonomous supporting evidence",
+      "keep mastery at 40 until an autonomous correct standard application exists",
+      "tell the learner which criterion is missing and why the prediction does not count as standard"
+    ],
+    "forbidden": [
+      "raise mastery to 60 from the supporting evidence",
+      "keep the standard-application criterion implicit when reporting mastery"
+    ]
   }
 ]

@@ -8,12 +8,14 @@ This file is the sole authority for mastery, evidence, retention, weak points, h
 | --- | --- |
 | 0 | No valid evidence. |
 | 20 | Recognizes terms or attempts with intensive help. |
-| 40 | Partially applies a known procedure with directional help or a partial hint. |
+| 40 | Partially applies a known procedure: with directional help or a partial hint, or autonomously with a material element missing. |
 | 60 | One autonomous Feynman explanation and one independent autonomous standard application. |
 | 80 | Requirements for 60, with an autonomous application transferred to a new context. |
 | 100 | Performance for 80 repeated across at least two session IDs and two contexts, including limit detection or self-correction. |
 
 An evidence is independent when it tests a different behavior or uses a substantially different task. Evidence older than 45 days remains historical but must be reconfirmed before raising mastery.
+
+A **standard application** performs the essential form of the topic's or current lesson's observable objective from start to finish; in programming, that usually means implementing and verifying the target capability. Which behavior is standard follows the objective: when the objective is to trace or predict code, a trace is the standard application. Narrower behaviors — predicting one output, tracing one loop, writing an isolated `assert`, recalling a command — are supporting evidence. Record them, and use them for independence, weak points, and teaching decisions, but they do not satisfy the standard application required for 60. When an autonomous correct application does not count as standard, say so and why whenever mastery is reported, so the learner can see the criterion being applied. `scripts/validate_study.py` checks evidence kinds only; applying this definition is the tutor's responsibility.
 
 Tutor-provided answers, copied solutions, generated cards, diagrams, images, audio, video, or other media are not evidence. A later autonomous attempt may be evidence.
 
@@ -58,6 +60,10 @@ Uma melhoria opcional pode ser recomendada sem rebaixar a classificação. A ava
 6. Explain a solution.
 
 Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requires attempts after only the prompt was supplied.
+
+### Self-verification before feedback
+
+When an autonomous application is partial or incorrect, first ask for self-verification before giving any feedback: one generic prompt, such as "check your solution against every rule and example of the task". It must not name what is missing, which rule or case fails, or where. This prompt counts as part of the task prompt and does not remove autonomy or apply a cap. Keep the first attempt recorded with its own classification; when the learner then finds and fixes the gap without further help, record the corrected version as a new autonomous evidence. Any narrower prompt — naming a case, a rule, a line, or a missing element — is step 3 or higher and applies its cap.
 
 Understanding checks inside tutor-provided theory (predict an output, explain in your own words) are not evidence, so these caps do not apply to them; a wrong answer calls for more teaching.
 

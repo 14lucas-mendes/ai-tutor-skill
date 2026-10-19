@@ -368,6 +368,8 @@ Seu progresso aumenta quando você consegue demonstrar conhecimento por conta pr
 - **Diagnóstico** (`/diagnostic`): uma sondagem curta antes de um tema novo. Ela posiciona o ponto de partida e nunca vira nota.
 - **Perfil de aprendizagem** (`/profile`): o tutor registra fatos observados nas sessões, como quanta ajuda você precisou ou qual estratégia funcionou. Você pode consultar e contestar. O perfil não altera seu domínio.
 - **Recuperar antes de reexplicar**: na revisão, você tenta lembrar primeiro e só depois recebe a explicação.
+- **Conferir antes da devolutiva**: quando sua solução sai incompleta, o tutor primeiro pede que você a confira contra as regras e os exemplos da tarefa, sem dizer o que falta. Se você achar e corrigir sozinho, a correção conta como trabalho autônomo.
+- **Critério do domínio à vista**: o nível 60 exige uma aplicação **padrão**, que cumpre o objetivo da lição de ponta a ponta. Quando um acerto seu não conta para isso (por exemplo, prever uma saída isolada), o tutor diz qual é o critério e por quê.
 - **Revisão espaçada**: os intervalos seguem uma escada fixa (1, 3, 7, 16, 35 e 60 dias), ou uma política adaptativa, se você escolher.
 - **Aulas de programação adaptativas**: o tutor ajusta exemplos, tamanho dos passos e apoio conforme você avança, mas a tentativa principal continua sendo sua.
 
