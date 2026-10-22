@@ -32,7 +32,7 @@
     "expected": [
       "reduce one level of support",
       "change the context or task variation",
-      "require a later prompt-only attempt for autonomous evidence"
+      "require a later attempt without help beyond what keeps autonomy for autonomous evidence"
     ],
     "forbidden": [
       "classify the guided attempt as independent evidence"
@@ -205,6 +205,33 @@
       "record the prediction as kind application",
       "raise mastery to 60 from the supporting evidence",
       "keep the standard-application criterion implicit when reporting mastery"
+    ]
+  },
+  {
+    "id": "context_help_keeps_transfer_autonomous",
+    "context": "Na transferência para o 80, o aluno pergunta o que significa um campo das ordens de serviço e depois faz sozinho a decomposição, o código e os assert.",
+    "expected": [
+      "explain the field without supplying the decision, plan, or code",
+      "record the context help in the evidence",
+      "count a correct standard application as autonomous transfer"
+    ],
+    "forbidden": [
+      "treat the context explanation as a help-ladder cap",
+      "use a context explanation to hint at the missing rule or case"
+    ]
+  },
+  {
+    "id": "partial_transfer_allows_variation_in_same_context",
+    "context": "A transferência sai parcial, a conferência genérica não resolve e o tutor dá a devolutiva.",
+    "expected": [
+      "keep the partial transfer recorded with its classification",
+      "offer a different task in the same new context",
+      "count that variation as transfer when it is autonomous and correct"
+    ],
+    "forbidden": [
+      "count the same task redone after feedback as transfer",
+      "require a third context",
+      "count a transfer completed after step 3 or higher as autonomous"
     ]
   }
 ]

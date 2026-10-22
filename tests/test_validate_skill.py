@@ -144,6 +144,8 @@ class ValidateSkillTests(unittest.TestCase):
             "migrated_study_resumes_without_restarting_theory",
             "partial_autonomous_application_gets_self_verification",
             "supporting_evidence_does_not_fill_standard_application",
+            "context_help_keeps_transfer_autonomous",
+            "partial_transfer_allows_variation_in_same_context",
         ):
             self.assertIn(identifier, identifiers)
 

@@ -10,7 +10,7 @@ This file is the sole authority for mastery, evidence, retention, weak points, h
 | 20 | Recognizes terms or attempts with intensive help. |
 | 40 | Partially applies a known procedure: with directional help or a partial hint, or autonomously with a material element missing. |
 | 60 | One autonomous Feynman explanation and one independent autonomous standard application. |
-| 80 | Requirements for 60, with an autonomous application transferred to a new context. |
+| 80 | Requirements for 60, with an autonomous standard application transferred to a new context (see *Transfer*). |
 | 100 | Performance for 80 repeated across at least two session IDs and two contexts, including limit detection or self-correction. |
 
 An evidence is independent when it tests a different behavior or uses a substantially different task. Evidence older than 45 days remains historical but must be reconfirmed before raising mastery.
@@ -61,17 +61,36 @@ Uma melhoria opcional pode ser recomendada sem rebaixar a classificação. A ava
 5. Give an incomplete skeleton or pseudocode.
 6. Explain a solution.
 
-Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requires attempts after only the prompt was supplied.
+Steps 5–6 cap that attempt at 20; steps 3–4 cap it at 40. Mastery 60+ requires attempts that received no help beyond what *Help that keeps autonomy* allows.
+
+### Help that keeps autonomy
+
+At any mastery level, an attempt stays autonomous when the only help was:
+
+- step 1, rephrasing the task;
+- step 2, retrieving a prerequisite;
+- the self-verification prompt;
+- an explanation of the context itself: its domain, the meaning of its fields or data formats, and its local terms.
+
+None of these may supply the decision, plan, criteria, analysis, or code of the cognitive core; help that does is step 3 or higher and applies its cap. Record in the evidence which of these helps was given.
 
 Understanding checks inside tutor-provided theory (predict an output, explain in your own words) are not evidence, so these caps do not apply to them; a wrong answer calls for more teaching.
 
-After an assisted success, reduce support and present a related variation. Guided success informs the next teaching decision but does not establish independent evidence for the supplied cognitive core. A later attempt with only the prompt supplied, or a substantially different task, is required before recording the corresponding autonomous behavior.
+After an assisted success, reduce support and present a related variation. Guided success informs the next teaching decision but does not establish independent evidence for the supplied cognitive core. A later attempt with no help beyond what *Help that keeps autonomy* allows, or a substantially different task, is required before recording the corresponding autonomous behavior.
 
 ## Self-verification before feedback
 
 Before giving feedback on an autonomous application that is partial or incorrect, in any mode, ask once for self-verification with this fixed prompt, translated only into the study language: "Check your solution against every rule and example of the task." Use the same prompt whatever the error is. It must not name what is missing, which rule, case, or category of case fails, or where; pointing to a category such as edge cases is already step 3. This prompt counts as part of the task prompt and does not remove autonomy or apply a cap.
 
 Ask it at most once per task. Keep the first attempt recorded with its own classification. When the learner then finds and fixes the gap without further help, record the corrected version as a new autonomous evidence. When the revised attempt is still partial or incorrect, record it with its own classification and continue with the help ladder; do not repeat the self-verification prompt.
+
+## Transfer
+
+A transfer is an `application` evidence with `transfer: true`. It is a flag, not a `kind`: evidence recorded with `kind: "transfer"` does not count toward 80.
+
+A transfer counts toward 80 only when it is a standard application, autonomous and correct, in a new context: a domain, data set, or project in which this topic's capability has not yet been demonstrated in this study. Real use in the learner's work or in existing repositories is a valid new context.
+
+When a transfer attempt is partial or incorrect, ask for self-verification first. If a gap remains, give feedback; then a new variation in the same new context counts as transfer when it is autonomous and correct. The variation must be a different task in that context; redoing the same task after feedback is guided practice. A third context is not required.
 
 ## Retention
 
