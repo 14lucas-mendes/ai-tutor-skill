@@ -132,6 +132,17 @@ class ValidateStudyTests(unittest.TestCase):
         state["topics"][0].update(mastery=60, status="in_progress", evidence_ids=[item["evidence_id"] for item in items])
         self.assertEqual([], validate_state(state))
 
+    def test_domain_80_ignores_transfer_kind_without_application_flag(self):
+        state = base_state()
+        items = [
+            evidence("evidence_f", "feynman"),
+            evidence("evidence_a", "application"),
+            evidence("evidence_t", "transfer", transfer=True),
+        ]
+        state["evidences"] = items
+        state["topics"][0].update(mastery=80, status="mastered", evidence_ids=[item["evidence_id"] for item in items])
+        self.assertTrue(any("mastery 80" in error and "transfer" in error for error in validate_state(state)))
+
     def test_domain_80_needs_transfer(self):
         state = base_state()
         items = [evidence("evidence_f", "feynman"), evidence("evidence_a", "application")]
