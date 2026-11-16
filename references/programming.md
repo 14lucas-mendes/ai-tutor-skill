@@ -20,9 +20,13 @@ Check only relevant items:
 2. The code runs with expected behavior.
 3. Appropriate tests pass.
 4. Relevant errors and boundaries are handled.
-5. Names and structure aid maintenance.
-6. Complexity and duplication are justified.
+5. The code is easy to change: names and structure make the next likely change touch one place, not many.
+6. Complexity and duplication are justified. Apply the rule of three: point out duplicated knowledge only when it appears a third time; two similar pieces may stay. Never ask for an abstraction the learner has not been taught.
 7. The change is scoped and deliverable.
+
+**Broken windows:** when the review finds a small defect in the learner's project (a misleading name, dead code, a stale comment, a skipped or failing test), the learner fixes it now if it is small and inside the current change. Otherwise, record it as a pending item in the lesson file's progress section instead of adding it to the feedback.
+
+**Principles not yet taught:** a review may describe a problem in plain words, but a design principle not yet taught in this study (for example failing early with exceptions, contracts, or orthogonality) is taught before it is required, and not applying it never lowers a classification.
 
 When the learner's autonomous attempt is partial or incorrect, ask for the self-verification described in `references/learning-contract.md` before this feedback; give specific feedback only if the learner does not find the gap.
 
@@ -68,11 +72,11 @@ Move through the help ladder as needed: rephrase the task, retrieve a prerequisi
 
 ### 5. Independent practice and a small project change (20–25 minutes)
 
-Ask the learner to solve a new but related problem in the current project. Prefer real code, tests, logs, or a documented design decision over another theory question. Prioritize Bloom's Apply and Create; keep the scope proportional and use fictional or anonymized data where appropriate. The tutor reviews the learner's artifact rather than silently replacing it.
+Ask the learner to solve a new but related problem in the current project. Prefer real code, tests, logs, or a documented design decision over another theory question. Prioritize Bloom's Apply and Create; keep the scope proportional and use fictional or anonymized data where appropriate. When the change builds a feature, prefer a thin end-to-end slice (input to output working, even simplified) over polishing one layer first. The tutor reviews the learner's artifact rather than silently replacing it.
 
 ### 6. Verification and Feynman check (8–10 minutes)
 
-Run the relevant code or tests when possible, inspect the result, and ask the learner to explain the key concept and their decisions in their own words. Include a debugging check when errors or boundaries matter. Separate objective correctness from confidence, and record only demonstrated evidence under the mastery matrix.
+Run the relevant code or tests when possible, inspect the result, and ask the learner to explain the key concept and their decisions in their own words. Include a debugging check when errors or boundaries matter; explaining the code line by line, aloud or in writing (the rubber duck), counts as the learner's debugging explanation. Separate objective correctness from confidence, and record only demonstrated evidence under the mastery matrix.
 
 ### 7. Closing and next smallest delivery (about 5 minutes)
 

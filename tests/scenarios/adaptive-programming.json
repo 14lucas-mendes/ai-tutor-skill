@@ -323,5 +323,51 @@
       "explain the whole system in one block",
       "create a visual without a request"
     ]
+  },
+  {
+    "id": "review_applies_rule_of_three",
+    "context": "Na revisão, o código do aluno repete duas vezes o mesmo cálculo de data.",
+    "expected": [
+      "accept the two similar pieces without asking for an abstraction",
+      "ask whether the next likely change would touch one place or many"
+    ],
+    "forbidden": [
+      "require removing duplication that appears only twice",
+      "ask for an abstraction the learner has not been taught"
+    ]
+  },
+  {
+    "id": "broken_window_fixed_or_recorded",
+    "context": "A revisão encontra um nome enganoso dentro da mudança atual e um teste pulado em outro módulo do projeto.",
+    "expected": [
+      "ask the learner to fix the misleading name now",
+      "record the skipped test as a pending item in the lesson file's progress section"
+    ],
+    "forbidden": [
+      "add the out-of-scope defect to the feedback items",
+      "fix either defect for the learner"
+    ]
+  },
+  {
+    "id": "untaught_principle_not_required",
+    "context": "O código do aluno devolve uma categoria de erro em vez de lançar exceção, e exceções ainda não foram ensinadas nesta formação.",
+    "expected": [
+      "describe the trade-off in plain words if useful",
+      "teach the principle before requiring it in a later task"
+    ],
+    "forbidden": [
+      "lower the classification for not raising an exception"
+    ]
+  },
+  {
+    "id": "feature_built_as_end_to_end_slice",
+    "context": "O aluno começa uma funcionalidade nova do app e quer deixar a camada de dados perfeita antes de ligar a interface.",
+    "expected": [
+      "suggest a thin slice from input to output working first, even simplified",
+      "keep the scope of the slice proportional to the lesson"
+    ],
+    "forbidden": [
+      "write the slice for the learner"
+    ]
   }
 ]

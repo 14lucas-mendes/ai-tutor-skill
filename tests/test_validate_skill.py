@@ -153,6 +153,10 @@ class ValidateSkillTests(unittest.TestCase):
             "transfer_compares_before_solving",
             "scenario_quiz_does_not_complete_topic",
             "existing_system_route_follows_layers",
+            "review_applies_rule_of_three",
+            "broken_window_fixed_or_recorded",
+            "untaught_principle_not_required",
+            "feature_built_as_end_to_end_slice",
         ):
             self.assertIn(identifier, identifiers)
 
