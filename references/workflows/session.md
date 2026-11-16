@@ -10,7 +10,7 @@ Resume the latest `in_progress` session. If none exists, resume the latest `inte
 
 ## Conduct
 
-1. Set one observable session objective, identify its cognitive core, and anchor it to the current project or concrete problem.
+1. Set one observable session objective, identify its cognitive core, and anchor it to the current project or concrete problem. Read each topic's phase from its mastery under `phase_aware_strategy` in `references/learning-strategies.md`, and state in one line the phase and the strategy chosen for it.
 2. Apply the teaching approach from `SKILL.md`: read `study-config.json.teaching_policy.approach` (absent means `theory_first`). When the learner asks for the other approach only for now, record `teaching_approach` on the session as an override for the current lesson; when this session continues a lesson whose previous session carries `teaching_approach`, copy it unless the learner asks to return to the configured approach. Leave the study configuration unchanged. A topic not yet taught in this study starts from zero: teach its theory before practice — complete in `theory_first`, lean in `practice_first` with every new term defined before use — and write it in the lesson file.
 3. Use one low-stakes prerequisite question or probe only when the objective depends on locating prior ability. Do this after the learner knows what they are trying to accomplish; in `theory_first`, probe a new topic only after its theory. A probe or diagnostic estimate never shortens the theory of a new topic.
 4. Select the mode for the current cognitive-core segment under `references/delegation-contract.md`. A session may transition between `learning`, `assessment`, and `performance` when different behaviors have different demonstrated readiness:

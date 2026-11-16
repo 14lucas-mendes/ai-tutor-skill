@@ -376,6 +376,16 @@ Seu progresso aumenta quando você consegue demonstrar conhecimento por conta pr
 - **Revisão espaçada**: os intervalos seguem uma escada fixa (1, 3, 7, 16, 35 e 60 dias), ou uma política adaptativa, se você escolher.
 - **Aulas de programação adaptativas**: o tutor ajusta exemplos, tamanho dos passos e apoio conforme você avança, mas a tentativa principal continua sendo sua.
 
+### Superfície, profundidade e transferência
+
+O tutor escolhe a estratégia de cada tópico pela fase em que você está, lida do seu domínio:
+
+- **Superfície (0 e 20):** aula do zero, vocabulário e recuperação antes de reler.
+- **Profundidade (40 e 60):** você organiza as ideias, explica com suas palavras, confere o próprio trabalho e responde perguntas de causa e efeito.
+- **Transferência (80):** antes de aplicar em outro contexto, você compara semelhanças e diferenças com o que já resolveu.
+
+A estratégia também muda com o tipo de matéria: um conceito, um código para implementar ou um sistema que já existe. Para entender um repositório, você primeiro prevê o papel de cada parte; depois vêm a explicação em camadas, uma microtarefa e perguntas de cenário. No começo da sessão, o tutor diz em uma linha a fase e a estratégia escolhida. Quizzes e perguntas ajudam a decidir o próximo passo, mas quem conclui um tópico é a matriz de domínio.
+
 ### Teoria primeiro ou prática primeiro
 
 No `/setup`, você escolhe a abordagem de ensino do estudo:

@@ -273,5 +273,55 @@
       "register the saved visual in media-index.json",
       "export screenshots or images without a request"
     ]
+  },
+  {
+    "id": "phase_selects_strategy",
+    "context": "Na abertura da sessão, um tópico está em 40 e outro em 80.",
+    "expected": [
+      "read each topic's phase from its mastery",
+      "state the phase and the chosen strategy in one line per topic",
+      "use learner-built organization for the topic at 40 and similarity and difference comparison for the topic at 80"
+    ],
+    "forbidden": [
+      "change a mastery level to fit a phase",
+      "advance a phase because of the calendar"
+    ]
+  },
+  {
+    "id": "transfer_compares_before_solving",
+    "context": "O tópico está em 60 com aplicação padrão e vai para a transferência num contexto novo.",
+    "expected": [
+      "ask the learner to list similarities and differences with the solved problem before solving",
+      "then present the task in the new context under the transfer rules"
+    ],
+    "forbidden": [
+      "show the solution path for the new context before the learner's comparison and attempt"
+    ]
+  },
+  {
+    "id": "scenario_quiz_does_not_complete_topic",
+    "context": "O aluno acerta as três perguntas de cenário sobre o fluxo de um repositório.",
+    "expected": [
+      "treat the answers as understanding checks",
+      "keep topic and lesson completion under the mastery matrix"
+    ],
+    "forbidden": [
+      "mark the topic or lesson complete because of the quiz",
+      "record the quiz answers as evidence"
+    ]
+  },
+  {
+    "id": "existing_system_route_follows_layers",
+    "context": "O aluno quer entender como o app segundo-cerebro lê o estudo fictício.",
+    "expected": [
+      "scope the entry point, the main data flow, and three to five parts",
+      "ask for the learner's prediction before explaining",
+      "explain one part at a time from analogy to technical role to code location",
+      "propose a controlled microtask such as tracing one case or adding a log"
+    ],
+    "forbidden": [
+      "explain the whole system in one block",
+      "create a visual without a request"
+    ]
   }
 ]

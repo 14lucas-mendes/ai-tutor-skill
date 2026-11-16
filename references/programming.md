@@ -78,6 +78,17 @@ Run the relevant code or tests when possible, inspect the result, and ask the le
 
 Summarize what was demonstrated, what remains uncertain, and the smallest useful follow-up. Preserve a checkpoint and route unresolved gaps to the next session; do not advance just because the nominal time elapsed. When the lesson closes, update the canonical state and required projections according to the session workflow.
 
+## Understanding a system or an architecture concept
+
+When the lesson's objective is to understand an existing system (a repository or program) or an architecture concept rather than to implement new code, use this route inside the protocol. It follows `phase_aware_strategy` in `references/learning-strategies.md` and keeps every rule above.
+
+1. **Scope:** name the entry point, the main data flow, and the three to five parts that matter; leave the rest for later.
+2. **Learner prediction:** ask what each part does and how data moves before explaining.
+3. **Visual, only on request:** follow *Explanation visuals* in `references/output-contract.md`.
+4. **Layered explanation, one part at a time:** an everyday analogy, then the technical role, then where it lives in the code; stop for questions before the next part.
+5. **Controlled microtask:** trace one case end to end, add a log to watch the data pass, or predict the effect of a small change before running it.
+6. **Scenario questions:** two or three cause-and-effect questions ("what happens if this payload is empty?"). They are understanding checks, never evidence, and they do not complete the topic.
+
 ## Adaptation rules
 
 - **Fast demonstrated mastery:** shorten scaffolding, deepen the project variation, add a transfer case, or move to the next justified capability. Shorten exposition only in `practice_first` or on a revisit; in `theory_first`, the theory of a new topic stays complete.
