@@ -233,5 +233,45 @@
       "require a third context",
       "count a transfer completed after step 3 or higher as autonomous"
     ]
+  },
+  {
+    "id": "explanation_visual_only_on_request",
+    "context": "O aluno pede \"desenha o fluxo\" durante a teoria; em outro momento da sessão, não pede nenhum visual.",
+    "expected": [
+      "create one visual only after the request, with a short text explanation",
+      "follow it with one to three scenario questions as understanding checks",
+      "keep the visual in the conversation without saving it"
+    ],
+    "forbidden": [
+      "create a visual without a request",
+      "create a media artifact or upload to NotebookLM because of the request",
+      "count the tutor visual or the scenario answers as evidence"
+    ]
+  },
+  {
+    "id": "project_map_asks_prediction_first",
+    "context": "O aluno pede \"mapeia o projeto\" sobre o próprio repositório do app.",
+    "expected": [
+      "ask the learner what each main part does before showing the map",
+      "show a node map of what exists and compare it with the prediction",
+      "keep design decisions that belong to the learner out of the map"
+    ],
+    "forbidden": [
+      "show the map before asking for the prediction",
+      "include the solution of the independent task in the map"
+    ]
+  },
+  {
+    "id": "saved_visual_stays_light",
+    "context": "O aluno pede para salvar um diagrama Mermaid e um mapa interativo em HTML da lição.",
+    "expected": [
+      "write the Mermaid source into the lesson file's theory section",
+      "keep the HTML as one self-contained file under media/visuals/<lesson-id>/ and link it from the lesson file",
+      "keep the HTML free of bundled libraries, raster images and base64 data"
+    ],
+    "forbidden": [
+      "register the saved visual in media-index.json",
+      "export screenshots or images without a request"
+    ]
   }
 ]

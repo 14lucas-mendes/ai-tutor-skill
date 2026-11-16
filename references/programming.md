@@ -49,7 +49,7 @@ In `theory_first`, do not probe a new topic before its theory; move this phase a
 In `theory_first`, teach the complete theory in this order before guided practice:
 
 1. **Problem and why:** what problem this solves, why it exists, and a real-world example.
-2. **How it works inside:** the mental model of what happens when the code runs, with a diagram when it helps.
+2. **How it works inside:** the mental model of what happens when the code runs. When the learner asks for a visual, follow *Explanation visuals* in `references/output-contract.md`.
 3. **Vocabulary:** define every term and write it in the lesson file.
 4. **Examples:** a basic example read line by line, then a deeper one when the topic needs it.
 5. **Common errors and limits:** typical mistakes, misleading cases, and where the concept stops applying.
