@@ -2,7 +2,7 @@
 
 Leia `references/learning-strategies.md` antes de combinar representações no mesmo objetivo.
 
-Read `references/output-contract.md` and `references/media-providers.md`.
+Read `references/output-contract.md` and `references/media-providers.md`. This workflow is for artifacts made for later review; a visual requested to understand something during a lesson follows *Explanation visuals* in `references/output-contract.md` instead.
 
 Choose format from the learning need: cards for recall, quizzes for discrimination, maps for relationships, charts for quantitative comparison, images for concrete visualization, infographics for overview, slides for teaching sequence, audio for screen-free review, and video for visual process.
 

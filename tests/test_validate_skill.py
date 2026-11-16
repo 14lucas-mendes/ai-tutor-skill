@@ -146,6 +146,9 @@ class ValidateSkillTests(unittest.TestCase):
             "supporting_evidence_does_not_fill_standard_application",
             "context_help_keeps_transfer_autonomous",
             "partial_transfer_allows_variation_in_same_context",
+            "explanation_visual_only_on_request",
+            "project_map_asks_prediction_first",
+            "saved_visual_stays_light",
         ):
             self.assertIn(identifier, identifiers)
 
