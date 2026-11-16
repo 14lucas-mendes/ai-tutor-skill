@@ -149,6 +149,10 @@ class ValidateSkillTests(unittest.TestCase):
             "explanation_visual_only_on_request",
             "project_map_asks_prediction_first",
             "saved_visual_stays_light",
+            "phase_selects_strategy",
+            "transfer_compares_before_solving",
+            "scenario_quiz_does_not_complete_topic",
+            "existing_system_route_follows_layers",
         ):
             self.assertIn(identifier, identifiers)
 
