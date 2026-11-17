@@ -300,9 +300,9 @@ Configurar estudo
        ↓
 Criar seu plano
        ↓
-Fazer uma lição
+Aula (teoria do tema)
        ↓
-Praticar
+Praticar no projeto
        ↓
 Receber feedback
        ↓
@@ -368,10 +368,6 @@ Seu progresso aumenta quando você consegue demonstrar conhecimento por conta pr
 - **Diagnóstico** (`/diagnostic`): uma sondagem curta antes de um tema novo. Ela posiciona o ponto de partida e nunca vira nota.
 - **Perfil de aprendizagem** (`/profile`): o tutor registra fatos observados nas sessões, como quanta ajuda você precisou ou qual estratégia funcionou. Você pode consultar e contestar. O perfil não altera seu domínio.
 - **Recuperar antes de reexplicar**: na revisão, você tenta lembrar primeiro e só depois recebe a explicação.
-- **Conferir antes da devolutiva**: quando sua solução sai incompleta ou incorreta, o tutor pede uma vez que você a confira contra as regras e os exemplos da tarefa, sem dizer o que falta. Se você achar e corrigir sozinho, a correção conta como trabalho autônomo; se ainda faltar algo, ele segue com as pistas da escada de ajuda.
-- **Ajuda que não tira a autonomia**: reformular a tarefa, relembrar um pré-requisito, a conferência genérica e explicar o contexto (o domínio, os campos, os termos do lugar) não tiram o crédito de trabalho autônomo, desde que não entreguem a decisão, o plano ou o código.
-- **Transferência para o 80**: precisa ser uma aplicação de ponta a ponta, feita sozinho, num contexto em que o tópico ainda não foi aplicado. Se sair parcial, você recebe a devolutiva e faz uma variação nova no mesmo contexto, sem precisar achar um terceiro.
-- **Critério do domínio à vista**: o nível 60 exige uma aplicação **padrão**, que cumpre o objetivo da lição de ponta a ponta. Quando um acerto seu não conta para isso (por exemplo, prever uma saída isolada), ele fica registrado como evidência de apoio (`supporting`), e o tutor diz qual é o critério e por quê.
 - **Revisão de código pragmática**: a revisão pergunta se o código fica fácil de mudar, só cobra a eliminação de duplicação na terceira repetição, pede que você corrija pequenos defeitos do projeto quando estão no escopo (os outros viram pendência) e prefere fatias de ponta a ponta a polir uma camada só. Princípio de design ainda não ensinado é ensinado antes de ser cobrado.
 - **Visuais sob pedido**: durante a aula, peça "mostra visualmente", "desenha o fluxo" ou "mapeia o projeto" e o tutor monta um diagrama, uma tabela de rastreio ou um mapa interativo, seguido de perguntas curtas para conferir se você entendeu. Nada é salvo nem enviado ao NotebookLM, a menos que você peça. Ao salvar, o diagrama vai para a teoria da lição e o mapa interativo fica em `media/visuals/`, sempre em formato leve.
 - **Revisão espaçada**: os intervalos seguem uma escada fixa (1, 3, 7, 16, 35 e 60 dias), ou uma política adaptativa, se você escolher.
@@ -406,21 +402,50 @@ Para usar a outra abordagem só na lição atual, peça ao tutor (por exemplo, "
 
 ## 📈 Como o progresso funciona?
 
-O AI Tutor mantém um histórico do seu programa de estudos. Ele acompanha coisas como:
+O AI Tutor mantém um histórico do seu programa de estudos: tentativas, evidências, revisões e o domínio de cada tópico.
 
-```text
-Conteúdos estudados
-        ↓
-Tentativas
-        ↓
-Evidências
-        ↓
-Revisões
-        ↓
-Domínio
-```
+### Matriz de domínio
 
-Isso permite continuar seus estudos em sessões futuras. Por exemplo:
+Cada tópico tem um nível de domínio. O nível só sobe com evidência do que você fez, não com o que o tutor explicou.
+
+| Nível | O que você precisa demonstrar |
+| --- | --- |
+| 0 | Nada ainda: sem evidência válida. |
+| 20 | Reconhece os termos ou tenta com muita ajuda. |
+| 40 | Aplica parcialmente: com pistas, ou sozinho mas faltando uma parte importante. |
+| 60 | Uma explicação com suas palavras (Feynman) e uma aplicação padrão, as duas sozinho. |
+| 80 | O que pede o 60, mais uma aplicação padrão feita sozinho num contexto novo (transferência). |
+| 100 | O desempenho do 80 repetido em pelo menos duas sessões e dois contextos, percebendo limites ou corrigindo o próprio erro. |
+
+### O que conta como evidência
+
+- **Não contam:** explicações e respostas do tutor, a teoria da lição, código copiado, cards, diagramas e outras mídias geradas, nem o diagnóstico.
+- **Aplicação padrão:** cumpre o objetivo da lição de ponta a ponta. Um acerto mais estreito (prever uma saída, rastrear um laço, um `assert` isolado) fica registrado como evidência de apoio (`supporting`). Ele ajuda o tutor a decidir o próximo passo, mas não vale para o 60. Quando isso acontece, o tutor diz qual é o critério e por quê.
+- **Transferência para o 80:** uma aplicação de ponta a ponta, feita sozinho, num contexto em que o tópico ainda não foi aplicado. Se sair parcial, você recebe a devolutiva e faz uma variação nova no mesmo contexto.
+- **Validade:** evidências com mais de 45 dias continuam no histórico, mas precisam ser reconfirmadas antes de o nível subir.
+
+### Ajuda e autonomia
+
+Quando você trava, o tutor sobe uma escada de ajuda, um degrau por vez:
+
+1. reformula a tarefa;
+2. relembra um pré-requisito;
+3. faz uma pergunta que aponta a direção;
+4. dá uma pista parcial;
+5. mostra um esqueleto ou pseudocódigo;
+6. explica uma solução.
+
+Os degraus 3 e 4 limitam aquela tentativa a 40; os degraus 5 e 6, a 20.
+
+Alguns tipos de ajuda não tiram o crédito de trabalho autônomo, desde que não entreguem a decisão, o plano ou o código:
+
+- os degraus 1 e 2;
+- explicar o contexto (o domínio, os campos, os termos do lugar);
+- a **conferência antes da devolutiva**: quando sua solução sai incompleta ou incorreta, o tutor pede uma vez que você a confira contra as regras e os exemplos da tarefa, sem dizer o que falta. Se você achar o erro e corrigir sozinho, a correção conta como trabalho autônomo.
+
+### Continuar de onde parou
+
+O histórico permite continuar seus estudos em sessões futuras. Por exemplo:
 
 ```text
 Continue de onde paramos.
@@ -453,7 +478,8 @@ Essa pasta passa a ser seu diretório de estudos. Ela pode conter:
 - lições;
 - projetos;
 - flashcards;
-- histórico de progresso.
+- histórico de progresso;
+- visuais de explicação que você pediu para salvar (`media/visuals/`).
 
 Você normalmente não precisa editar esses arquivos manualmente.
 
@@ -617,7 +643,9 @@ Para detalhes técnicos, consulte:
 - [`references/delegation-contract.md`](references/delegation-contract.md)
 - [`references/diagnostic-contract.md`](references/diagnostic-contract.md)
 - [`references/learner-profile-contract.md`](references/learner-profile-contract.md)
-- [`references/learning-strategies.md`](references/learning-strategies.md)
+- [`references/learning-strategies.md`](references/learning-strategies.md): estratégias por fase e por tipo de matéria
+- [`references/programming.md`](references/programming.md): aulas de programação, revisão de código e roteiro para entender sistemas
+- [`references/output-contract.md`](references/output-contract.md): formato das respostas e dos visuais de explicação
 - [`references/workflows/`](references/workflows/)
 
 ---
@@ -632,16 +660,30 @@ ai-tutor-skill/
 ├── agents/
 ├── references/
 ├── assets/
+├── locales/
 ├── scripts/
 ├── tests/
 └── docs/
 ```
 
-O arquivo `SKILL.md` é o ponto de entrada utilizado pelos agentes.
+- `SKILL.md`: ponto de entrada usado pelos agentes.
+- `references/`: workflows e contratos técnicos.
+- `scripts/`: inicialização, migração e validação do estado.
+- `locales/`: textos traduzidos.
+- `docs/superpowers/`: specs e planos de design das mudanças.
 
-Os workflows e contratos técnicos ficam em `references/`.
+Para validar localmente, rode os mesmos comandos do CI na raiz do repositório:
 
-Os scripts responsáveis por inicialização e validação ficam em `scripts/`.
+```bash
+python -m unittest discover -s tests -p 'test_*.py'
+python scripts/validate_skill.py .
+```
+
+Para conferir um programa de estudos:
+
+```bash
+python -m scripts.validate_study <pasta-do-estudo>
+```
 
 Se você pretende modificar a skill, criar novos workflows ou alterar a forma como o progresso é calculado, consulte primeiro a documentação técnica em `references/` e `docs/`.
 
