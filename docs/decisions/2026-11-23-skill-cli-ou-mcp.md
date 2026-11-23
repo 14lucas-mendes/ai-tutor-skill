@@ -14,7 +14,7 @@ Mudar de formato só se justifica quando uma das duas dores abaixo pesar. Cada d
 
 **Status em 23/11/2026:** ainda não aconteceu. Nenhum caso de estado corrompido até agora.
 
-O protocolo de gravação segura (validar, preparar a revisão, gravar de forma atômica, rodar `validate_study`) só roda se o agente lembrar de executá-lo. Hoje quem garante a consistência é o modelo, não o código.
+O protocolo de gravação segura (validar, preparar a revisão, gravar de forma atômica, rodar `validate_study`) só roda se o agente lembrar de executá-lo. O código de gravação segura existe, mas quem garante que ele seja chamado é o modelo.
 
 Sinais de que essa dor ficou real:
 
@@ -26,20 +26,20 @@ Sinais de que essa dor ficou real:
 
 ## Dor 2 — usar fora do computador
 
-**Status em 23/11/2026:** já acontece. A skill só roda onde há sistema de arquivos e Python (Codex, Claude Code, Cursor). No celular ou no chat do claude.ai não existe `study_root` persistente.
+**Status em 23/11/2026:** já acontece. A skill só roda onde há sistema de arquivos e Python (Codex, Claude Code, Cursor, OpenCode). No celular ou no chat do claude.ai não existe `study_root` persistente.
 
 Contornos usados hoje:
 
 - abrir um ambiente em nuvem do Claude para continuar a formação fora de casa;
 - deixar o repositório no Google Drive para sincronizar as mudanças entre ambientes.
 
-**Risco do segundo contorno:** o Drive sincroniza arquivo a arquivo e não entende Git. A pasta `.git` pode corromper, e edições em dois lugares viram cópias como `state (1).json` em vez de serem mescladas. O lock e o controle de revisão da skill só protegem dentro de uma mesma máquina.
+**Risco do segundo contorno:** o Drive sincroniza arquivo a arquivo e não entende Git. A pasta `.git` pode corromper, e edições em dois lugares viram cópias como `state (1).json`, em vez de aparecerem como um conflito que o Git mostra e permite resolver. O lock e o controle de revisão da skill só protegem dentro de uma mesma máquina.
 
 **Ajuste imediato, sem ferramenta nova:** o estado versionado fica só no GitHub, com `git pull` no início da sessão e commit + push no fim. O Drive continua útil para material solto (PDFs, mídia, exports do NotebookLM).
 
 ## Opção CLI
 
-A CLI é o primeiro passo se a Dor 1 aparecer, ou se você quiser revisar sem abrir um agente. É um `pyproject.toml` com entry points sobre os scripts que já existem, como `ai-tutor due`, `ai-tutor review`, `ai-tutor progress` e `ai-tutor record-evidence`.
+A CLI é o primeiro passo se a Dor 1 aparecer, ou se você quiser revisar sem abrir um agente. É um `pyproject.toml` com entry points sobre os módulos que já existem, como `ai-tutor due`, `ai-tutor review`, `ai-tutor progress` e `ai-tutor record-evidence`. Alguns desses comandos são novos: hoje não existe script de progresso nem de registro de evidência. Os nomes são provisórios.
 
 - **O que resolve:** a gravação passa a ser um comando que valida e grava sozinho, e o agente só chama o comando. Também dá para revisar cartões e ver progresso sem gastar tokens.
 - **O que não resolve:** o celular. A CLI continua precisando de terminal e Python.
@@ -48,9 +48,9 @@ A CLI é o primeiro passo se a Dor 1 aparecer, ou se você quiser revisar sem ab
 
 ## Opção MCP
 
-O MCP é o passo seguinte, e o único que resolve as duas dores juntas. Um servidor MCP expõe as operações do tutor como ferramentas (`cartoes_vencidos`, `registrar_evidencia`, `proxima_licao`, `progresso`) para qualquer cliente compatível, incluindo o Claude Desktop e o web.
+O MCP é o passo seguinte, e o único que resolve as duas dores juntas. Um servidor MCP expõe as operações do tutor como ferramentas (nomes provisórios: `cartoes_vencidos`, `registrar_evidencia`, `proxima_licao`, `progresso`) para qualquer cliente compatível, incluindo o Claude Desktop e o web.
 
-- **O que resolve:** o estado é gravado por código (Dor 1). Com servidor remoto e armazenamento no GitHub ou no Drive, funciona fora do computador (Dor 2).
+- **O que resolve:** o estado é gravado por código (Dor 1). Com servidor remoto e armazenamento no GitHub ou no Drive, com o servidor como único escritor, funciona fora do computador (Dor 2).
 - **O que não resolve:** o ensino em si. Teoria, prática e escada de ajuda continuam nas instruções da skill.
 - **Custo:** médio. Local é simples; remoto exige hospedagem, autenticação e acesso ao repositório ou ao Drive.
 - **Faz sentido quando:** você quiser estudar 10 a 15 minutos pelo celular (revisar cartões, ver o que vence hoje) com frequência, e abrir um ambiente em nuvem só para isso virar atrito.
