@@ -483,6 +483,8 @@ Essa pasta passa a ser seu diretório de estudos. Ela pode conter:
 
 Você normalmente não precisa editar esses arquivos manualmente.
 
+Se for estudar em mais de um computador ou na nuvem, veja [Estudo em mais de um computador ou na nuvem](#estudo-em-mais-de-um-computador-ou-na-nuvem).
+
 ---
 
 ## 🧭 Posso ter mais de um programa de estudos?
@@ -558,6 +560,25 @@ git pull
 Use o caminho correspondente ao seu ambiente.
 
 > **Mudança de comportamento:** estudos criados antes da abordagem de ensino não têm o campo `teaching_policy` e passam a usar `theory_first`, ou seja, temas novos começam por uma aula completa. Temas que o estudo já trabalhou (com evidência, domínio acima de 0 ou lição concluída) não recomeçam do zero: o tutor escreve um resumo da teoria no arquivo da lição e segue a prática. Para manter o ritmo anterior também nos temas novos, peça ao tutor para mudar o estudo para `practice_first`.
+
+### Estudo em mais de um computador ou na nuvem
+
+Guarde o programa de estudos num repositório Git **privado** (por exemplo, no GitHub), porque a pasta guarda dados pessoais, como o seu perfil de aprendizagem. Rode `git pull` antes de cada sessão e faça commit e push no fim. O AI Tutor não faz pull, commit nem push por você.
+
+Não estude em dois lugares sem fazer push num e pull no outro. Cada gravação muda a revisão dos arquivos de estado, então duas sessões em paralelo sempre dão conflito em `.ai-tutor/*.json`: o Git não junta esses arquivos sozinho. Se o `git pull` der conflito, resolva o conflito e rode o `validate_study` antes de continuar.
+
+Inclua no `.gitignore` do estudo os arquivos temporários da skill:
+
+```text
+*.lock
+.*.tmp
+```
+
+Um `.lock` que sobrou de uma sessão interrompida e foi para o repositório trava as gravações na outra máquina.
+
+Não sincronize a pasta do estudo pelo Google Drive, Dropbox ou OneDrive. Eles copiam arquivo por arquivo e não entendem Git. A pasta `.git` pode corromper, e edições em dois lugares viram cópias como `state (1).json`, sem que o Git mostre o conflito. A proteção da skill contra gravações simultâneas só vale dentro de uma mesma máquina.
+
+O Drive continua útil para material solto, como PDFs, mídia e exports do NotebookLM.
 
 ### Quero começar um estudo novo
 
@@ -671,6 +692,7 @@ ai-tutor-skill/
 - `scripts/`: inicialização, migração e validação do estado.
 - `locales/`: textos traduzidos.
 - `docs/superpowers/`: specs e planos de design das mudanças.
+- `docs/decisions/`: decisões de rumo do projeto. Por exemplo, [por que o AI Tutor continua como skill e quando pode virar CLI ou MCP](docs/decisions/2026-11-23-skill-cli-ou-mcp.md).
 
 Para validar localmente, rode os mesmos comandos do CI na raiz do repositório:
 
