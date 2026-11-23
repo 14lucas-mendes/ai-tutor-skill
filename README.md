@@ -559,6 +559,14 @@ Use o caminho correspondente ao seu ambiente.
 
 > **Mudança de comportamento:** estudos criados antes da abordagem de ensino não têm o campo `teaching_policy` e passam a usar `theory_first`, ou seja, temas novos começam por uma aula completa. Temas que o estudo já trabalhou (com evidência, domínio acima de 0 ou lição concluída) não recomeçam do zero: o tutor escreve um resumo da teoria no arquivo da lição e segue a prática. Para manter o ritmo anterior também nos temas novos, peça ao tutor para mudar o estudo para `practice_first`.
 
+### Estudo em mais de um computador ou na nuvem
+
+Guarde o programa de estudos num repositório Git (por exemplo, no GitHub). Rode `git pull` antes de cada sessão e faça commit e push no fim.
+
+Não sincronize a pasta do estudo pelo Google Drive, Dropbox ou OneDrive. Eles copiam arquivo por arquivo e não entendem Git. A pasta `.git` pode corromper, e edições em dois lugares viram cópias como `state (1).json` em vez de serem mescladas. A proteção da skill contra gravações simultâneas só vale dentro de uma mesma máquina.
+
+O Drive continua útil para material solto, como PDFs, mídia e exports do NotebookLM.
+
 ### Quero começar um estudo novo
 
 Peça:
@@ -671,6 +679,7 @@ ai-tutor-skill/
 - `scripts/`: inicialização, migração e validação do estado.
 - `locales/`: textos traduzidos.
 - `docs/superpowers/`: specs e planos de design das mudanças.
+- `docs/decisions/`: decisões de rumo do projeto. Por exemplo, [por que o AI Tutor continua como skill e quando pode virar CLI ou MCP](docs/decisions/2026-11-23-skill-cli-ou-mcp.md).
 
 Para validar localmente, rode os mesmos comandos do CI na raiz do repositório:
 
