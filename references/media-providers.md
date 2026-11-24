@@ -38,6 +38,37 @@ Optional dependencies, imported only when used:
 
 Without them, the workflow stops at a validated script, which is still a usable storyboard.
 
+## Local audio reviews
+
+An audio review is for screen-free review, made with `scripts/audio_review.py` and the same studio. It is retrieval first, not a replayed lesson.
+
+**Its own script, written for the ear.** Never reuse the video narration: a video narration points at the screen ("this line", "this block"), which the listener does not have. Describe code in words; do not read code symbol by symbol.
+
+**Script format** (`schema_version: 1`, `kind: "audio"`):
+- top level: `title`, `lesson_id`, `source_ids`, an optional `pronunciation` map, optional `labels`, and `segments`;
+- `labels` localizes the transcript markers: `question`, `answer`, `pause`, `final` and `think`;
+- each segment is one of three types:
+  - `say`, with `text`;
+  - `recall`, with `question`, `pause_seconds` (1 to 30) and `answer`;
+  - `questions`, the last segment, with an optional `intro`, `items` (asked without answers) and an optional `outro`;
+- at least one `recall` is required.
+
+**Shape:**
+- a short opening that tells the learner to answer during the pause;
+- 5 to 8 recall blocks: question, a short tone, a pause of about 6 seconds, then a short answer;
+- one or two application questions without answers.
+
+Aim for 4 to 6 minutes per part of a lesson. Each answer must come from the written theory or a registered source.
+
+**Commands:**
+1. Run `validate`. It fails on a structural error, and it prints a warning when a line points at a screen.
+2. Run `render --out <review.mp3> --voice piper --model <voice.onnx>`. It writes the MP3 and a `.txt` transcript with times, tones and pauses.
+3. Run `check <script.json> <review.mp3>` to compare the speech with the script.
+
+**Registering:** register the item in `media-index.json` with `type: "audio"`, `provider: "local"`, the `.txt` as `transcript`, and `evidence_eligible: false`. Keep the MP3 out of version control.
+
+**What it is not:** an audio review does not record retrieval attempts. Recall that must count still happens in cards or in a session.
+
 ### Studio environment
 
 Install the optional dependencies in one virtual environment of their own (the "studio"), outside the study and outside any synced folder (Google Drive, Dropbox, OneDrive), so the study stays free of binaries. The versions are pinned in `requirements-video.txt` at the skill root.
