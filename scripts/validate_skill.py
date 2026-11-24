@@ -39,6 +39,7 @@ REQUIRED_FILES = (
     "scripts/representation.py",
     "scripts/state_io.py",
     "scripts/projections.py",
+    "scripts/video_lesson.py",
 )
 
 WORKFLOWS = (
