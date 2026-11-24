@@ -2,6 +2,42 @@
 
 Always create a local learning pack first. External generation is optional and cannot block study.
 
+## Local video lessons
+
+When the study chooses tutor-made media, a video lesson is rendered on the learner's machine with `scripts/video_lesson.py`; nothing leaves the computer, so no upload consent is needed.
+
+1. **Script.** Write a scene script (`schema_version: 1`) from the lesson's written theory and registered sources only, using the theory's own examples:
+   - top level: `title`, `lesson_id`, `source_ids`, an optional `pronunciation` map, and `scenes`;
+   - each scene has a `type`, a `title` and `steps`, and each step has a `say` (the narration, in correct spelling);
+   - `title` takes a `subtitle`;
+   - `list` takes `items`, and each step takes `show`;
+   - `flow` takes 1 to 3 `boxes` with `label` and `detail`, and an optional `note`; each step takes `active` and `note`;
+   - `code` takes `file`, `language`, `code` and an optional `command`; each step takes `visible`, `highlight`, `output` and `error`;
+   - `compare` takes `left`, `right` and `footer`; each step's `show` is `left`, `right` or `footer`;
+   - the last scene is `questions`: retrieval questions without answers;
+   - in on-screen text (titles, items, boxes, compare lines, notes and footers), wrap inline code in backticks, as in `` `print(__name__)` ``. It is drawn in the monospaced font, because proportional fonts merge `__` into one stroke. Unbalanced backticks fail validation.
+2. **Verify before rendering.**
+   - Run every code sample and output in the script.
+   - Run `python scripts/video_lesson.py validate <script.json>`.
+3. **Speech.** Run `speak --voice piper --model <voice.onnx>` (any OS) or `--voice sapi` (Windows). The `pronunciation` map turns terms into their spoken form for the voice only; the subtitles keep the script text.
+4. **Render.**
+   - `render --audio <dir> --out <lesson.mp4> --frames <dir>` draws dark-theme frames (code highlighted line by line, unhighlighted lines dimmed) and joins them with the speech.
+   - The subtitle file (`.srt`) is written next to the video and added as a separate track. It also serves as the transcript.
+   - Subtitles are not burned into the image: on-screen text identical to the narration hurts learning (redundancy principle).
+5. **Check before delivering.**
+   - Inspect key frames for clipped or overlapping text.
+   - Run `check <script.json> <lesson.mp4>` to transcribe the speech locally and list words that differ from the script. Recognizer noise (accents, digits) is expected; fix real mispronunciations in the `pronunciation` map.
+   - Voice naturalness is judged by the learner.
+6. **Register** the item in `media-index.json` with `type: "video"`, `provider: "local"`, the `.srt` as `transcript`, and `evidence_eligible: false`. Keep the MP4 out of version control; the script and subtitles are enough to render it again.
+
+Optional dependencies, imported only when used:
+- `piper-tts` and a voice model, for speech;
+- `pillow` and `pygments`, for frames;
+- `ffmpeg` on `PATH`, for assembly;
+- `faster-whisper`, for the speech check.
+
+Without them, the workflow stops at a validated script, which is still a usable storyboard.
+
 ## Capability order
 
 1. Produce local sources, prompts, manifests, and fallbacks.

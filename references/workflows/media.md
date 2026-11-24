@@ -8,7 +8,9 @@ Choose format from the learning need: cards for recall, quizzes for discriminati
 
 Apply `representational_complementarity` when combining formats. Mark the primary artifact and at most one complementary artifact with a distinct contribution and rationale; do not generate redundant media.
 
-Create the local learning pack first with `scripts/create_learning_pack.py`. Validate source IDs, prompts, accessibility fields, and `evidence_eligible: false`.
+When the study chose tutor-made media, render a video lesson locally with `scripts/video_lesson.py`, following *Local video lessons* in `references/media-providers.md`. The video is offered when parts of a lesson close, not generated unasked. It never reveals the solution of an open task, and it ends with retrieval questions without answers.
+
+Otherwise, create the local learning pack first with `scripts/create_learning_pack.py`. Validate source IDs, prompts, accessibility fields, and `evidence_eligible: false`.
 
 For NotebookLM/Gemini, detect an already authenticated browser and feature availability. Immediately before upload, list exact files and obtain specific consent. Without capability or consent, provide the local pack and manual steps. Never claim an external artifact exists until its URL or downloaded file is observed.
 
