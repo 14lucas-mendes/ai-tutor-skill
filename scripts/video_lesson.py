@@ -294,18 +294,26 @@ def synthesize(script: dict, out_dir: Path, voice: str = "piper", model: Path | 
                sapi_voice: str = "Microsoft Maria Desktop", sapi_rate: int = 2) -> list[Path]:
     """Write one WAV per step. Piper needs ``model``; SAPI runs only on Windows."""
 
-    if voice not in VOICES:
-        raise ValueError(f"voice must be one of {sorted(VOICES)}")
     out_dir.mkdir(parents=True, exist_ok=True)
     lines = spoken_lines(script)
-    paths = [out_dir / f"{step_id}.wav" for step_id, _ in lines]
+    jobs = [(out_dir / f"{step_id}.wav", text) for step_id, text in lines]
+    return speak_texts(jobs, voice=voice, model=model, sapi_voice=sapi_voice, sapi_rate=sapi_rate)
+
+
+def speak_texts(jobs: list[tuple[Path, str]], voice: str = "piper", model: Path | None = None,
+                sapi_voice: str = "Microsoft Maria Desktop", sapi_rate: int = 2) -> list[Path]:
+    """Write each ``(path, text)`` as a WAV with the chosen voice; the text is already pronounced."""
+
+    if voice not in VOICES:
+        raise ValueError(f"voice must be one of {sorted(VOICES)}")
+    paths = [path for path, _ in jobs]
     if voice == "piper":
         if model is None:
             raise ValueError("piper needs --model, the path to a .onnx voice")
         from piper import PiperVoice  # optional dependency: piper-tts
 
         speaker = PiperVoice.load(str(model))
-        for path, (_, text) in zip(paths, lines):
+        for path, text in jobs:
             with wave.open(str(path), "wb") as handle:
                 speaker.synthesize_wav(text, handle)
         return paths
@@ -313,7 +321,7 @@ def synthesize(script: dict, out_dir: Path, voice: str = "piper", model: Path | 
         raise RuntimeError("the sapi voice is only available on Windows")
     with tempfile.TemporaryDirectory() as tmp:
         items = Path(tmp) / "lines.json"
-        items.write_text(json.dumps([[str(p), t] for p, (_, t) in zip(paths, lines)], ensure_ascii=False), encoding="utf-8")
+        items.write_text(json.dumps([[str(p), t] for p, t in jobs], ensure_ascii=False), encoding="utf-8")
         script_ps = Path(tmp) / "speak.ps1"
         script_ps.write_text(
             "param($list)\n"
