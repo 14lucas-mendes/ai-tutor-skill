@@ -1,0 +1,7 @@
+# Optional dependencies of scripts/video_lesson.py (local video lessons).
+# The rest of the skill uses only the Python standard library.
+# ffmpeg is not a Python package: install it separately and keep it on PATH.
+pillow==13.0.0
+pygments==2.21.0
+piper-tts==1.8.0
+faster-whisper==1.2.1

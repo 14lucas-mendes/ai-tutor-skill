@@ -38,6 +38,22 @@ Optional dependencies, imported only when used:
 
 Without them, the workflow stops at a validated script, which is still a usable storyboard.
 
+### Studio environment
+
+Install the optional dependencies in one virtual environment of their own (the "studio"), outside the study and outside any synced folder (Google Drive, Dropbox, OneDrive), so the study stays free of binaries. The versions are pinned in `requirements-video.txt` at the skill root.
+
+```text
+python -m venv <studio>/.venv
+<studio>/.venv/Scripts/python -m pip install -r <skill_root>/requirements-video.txt   (bin/python on Linux and macOS)
+<studio>/.venv/Scripts/python -m piper.download_voices --download-dir <studio>/voices <voice>
+```
+
+Then run `<studio>/.venv/Scripts/python -I <skill_root>/scripts/video_lesson.py ...`, passing `--model <studio>/voices/<voice>.onnx` to `speak`. A small launcher script in the studio folder may fill in the interpreter and the voice. The speech check downloads its recognition model (`small`, about 460 MB) to the user's cache on first use.
+
+Before rendering in a new session, confirm the studio is ready:
+- `validate` passes on the script;
+- `ffmpeg -version` runs.
+
 ## Capability order
 
 1. Produce local sources, prompts, manifests, and fallbacks.
