@@ -203,6 +203,33 @@ class ValidateStudyTests(unittest.TestCase):
                 else:
                     self.assertTrue(any("teaching_policy" in error for error in errors), errors)
 
+    def test_study_config_course_policy_is_optional_and_restricted(self):
+        cases = (
+            (None, True),
+            ({"path": "curso"}, True),
+            ({"path": "docs/curso"}, True),
+            ({}, False),
+            ("curso", False),
+            ({"path": "../curso"}, False),
+            ({"path": "/tmp/curso"}, False),
+            ({"path": "C:\\curso"}, False),
+            ({"path": ".ai-tutor/curso"}, False),
+        )
+        for value, valid in cases:
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as tmp:
+                study = Path(tmp) / "study"
+                initialize_study(ROOT, study, CONFIG)
+                config_path = study / ".ai-tutor" / "study-config.json"
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+                if value is not None:
+                    config["course_policy"] = value
+                config_path.write_text(json.dumps(config), encoding="utf-8")
+                errors = validate_study(study)
+                if valid:
+                    self.assertEqual([], errors)
+                else:
+                    self.assertTrue(any("course_policy" in error for error in errors), errors)
+
     def test_session_teaching_approach_is_optional_and_restricted(self):
         for value, valid in (("theory_first", True), ("practice_first", True), ("lecture_only", False), ("", False), (["theory_first"], False)):
             with self.subTest(value=value):

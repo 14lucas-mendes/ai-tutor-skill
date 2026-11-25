@@ -14,6 +14,8 @@ Every productive JSON document has `schema_version: 2`. IDs are non-empty, globa
 
 `study-config.json.teaching_policy` is optional and defaults to `{ "approach": "theory_first" }` when absent. `approach` is `theory_first` (a complete lesson from zero before project practice) or `practice_first` (lean theory, then practice, deepening theory on demand). The learner chooses it at setup and may change it later only by an explicit request confirmed by the learner. The approach changes delivery only; it never changes mastery, evidence, or help-ladder requirements.
 
+`study-config.json.course_policy` is optional; when present it is `{ "path": "<folder>" }`, a folder relative to the study root and outside `.ai-tutor`, where the tutor writes the study's course: a readable projection of completed lessons for any reader (`references/workflows/course.md`). Without it, the study has no course. The course is tutor-provided material: it is never evidence, never changes mastery, and must not contain personal state; `scripts/course_check.py` checks it.
+
 `sources.json` is the canonical source registry. Every source records `source_id`, title, author or institution, direct URL or bibliographic identifier, publication date when available, access date, source type, linked lesson/topic IDs, and an authority reason. Learning packs may copy source snapshots, but the study registry remains the source of truth. A learning-pack source snapshot additionally requires non-empty `source_id`, `title`, `url`, and `content` (the pedagogical excerpt used to generate pack outputs).
 
 Topics contain `topic_id`, `name`, `mastery`, `retention`, `status`, `last_practice`, and `evidence_ids`. Status is `not_started` for 0, `in_progress` for 20–60, and `mastered` for 80–100.

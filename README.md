@@ -338,6 +338,7 @@ O AI Tutor reconhece algumas intenções específicas:
 | `/media` | Criar materiais visuais ou multimídia |
 | `/diagnostic` | Medir de onde você parte em um tema, sem gerar nota |
 | `/profile` | Ver ou corrigir o que o tutor observou sobre como você aprende |
+| `/course` | Escrever ou conferir o curso opcional do estudo |
 
 > Esses atalhos representam intenções do AI Tutor. Dependendo do ambiente, você pode digitá-los diretamente ou simplesmente pedir a mesma coisa em linguagem natural.
 
@@ -384,6 +385,10 @@ O tutor escolhe a estratégia de cada tópico pela fase em que você está, lida
 - **Transferência (80):** antes de aplicar em outro contexto, você compara semelhanças e diferenças com o que já resolveu.
 
 A estratégia também muda com o tipo de matéria: um conceito, um código para implementar ou um sistema que já existe. Para entender um repositório, você primeiro prevê o papel de cada parte; depois vêm a explicação em camadas, uma microtarefa e perguntas de cenário. No começo da sessão, o tutor diz em uma linha a fase e a estratégia escolhida. Quizzes e perguntas ajudam a decidir o próximo passo, mas quem conclui um tópico é a matriz de domínio.
+
+### Curso do estudo (opcional)
+
+Se você pedir, o estudo ganha um curso: uma pasta com uma aula para cada lição concluída, escrita para qualquer leitor, com objetivos, teoria, exercícios com gabarito escondido, resumo de uma página e material de apoio. O tutor escreve a aula no fechamento da lição. Depois, o `scripts/course_check.py` confere que a aula vem de uma lição concluída, que os gabaritos estão escondidos, que os links funcionam e que nenhum dado pessoal do estudo foi parar no curso. O curso é material de estudo: não é evidência e não muda o domínio.
 
 ### Teoria primeiro ou prática primeiro
 

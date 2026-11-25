@@ -182,6 +182,18 @@ def _validate_config(config: object) -> list[str]:
     approach = teaching_policy.get("approach") if isinstance(teaching_policy, dict) else None
     if not isinstance(approach, str) or approach not in TEACHING_APPROACHES:
         errors.append("study config teaching_policy.approach must be theory_first or practice_first")
+    if "course_policy" in config:
+        course_policy = config["course_policy"]
+        course_path = course_policy.get("path") if isinstance(course_policy, dict) else None
+        parts = course_path.replace("\\", "/").split("/") if _is_string(course_path) else []
+        if (
+            not parts
+            or course_path.startswith(("/", "\\"))
+            or (len(course_path) > 1 and course_path[1] == ":")
+            or ".." in parts
+            or parts[0] == ".ai-tutor"
+        ):
+            errors.append("study config course_policy.path must be a relative folder inside the study root, outside .ai-tutor")
     return errors
 
 
