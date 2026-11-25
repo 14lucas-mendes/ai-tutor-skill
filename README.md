@@ -391,7 +391,7 @@ No `/setup`, você escolhe a abordagem de ensino do estudo:
 
 | Abordagem | Como funciona |
 | --- | --- |
-| `theory_first` (padrão) | Todo tema novo começa por uma aula completa do zero, no formato "ver primeiro": a ideia toda numa frase, depois passos curtos que mostram o código rodando antes de explicar, com cada nome técnico só depois de você ver a coisa acontecer. Vêm ainda uma analogia em destaque, um glossário no fim para consulta, os erros comuns e checagens curtas de entendimento. A prática no projeto vem depois. |
+| `theory_first` (padrão) | Todo tema novo começa por uma aula completa do zero, no formato "ver primeiro": a ideia toda numa frase, o problema num caso concreto e passos curtos que mostram a coisa funcionando (em programação, o código rodando) antes de explicar, com cada nome técnico só depois de você ver a coisa acontecer. Vêm ainda analogias em destaque, um glossário no fim para consulta, os erros comuns, checagens curtas de entendimento e a ponte para o projeto. A prática no projeto vem depois. |
 | `practice_first` | Teoria enxuta, com todo termo novo definido, e prática logo em seguida. A teoria aprofunda quando você pedir ou quando aparecerem erros conceituais. |
 
 Nas duas abordagens, um tema que ainda não foi ensinado neste estudo começa do zero, mesmo que o diagnóstico indique que você provavelmente já o conhece. A teoria fica escrita no arquivo da lição (`lessons/`), para você reler sem o chat. Ela é material do tutor e não conta como evidência de domínio; o progresso continua vindo da sua prática.
