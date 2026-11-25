@@ -31,14 +31,17 @@ import subprocess
 import sys
 import tempfile
 import wave
+from dataclasses import replace
 from pathlib import Path
 from typing import Callable, Iterator
 
 try:
-    from scripts.ide_scene import code_lines, first_visible_line, terminal_tail, validate_ide_scene
+    from scripts.ide_scene import (code_lines, first_visible_line, initial_screen, quantize, step_events,
+                                   terminal_tail, validate_ide_scene)
 except ModuleNotFoundError:  # direct execution, also under ``python -I``
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from ide_scene import code_lines, first_visible_line, terminal_tail, validate_ide_scene
+    from ide_scene import (code_lines, first_visible_line, initial_screen, quantize, step_events,
+                           terminal_tail, validate_ide_scene)
 
 SCHEMA_VERSION = 1
 SCENE_TYPES = {"title", "list", "questions", "flow", "code", "compare", "ide"}
@@ -716,11 +719,54 @@ class _Painter:
         return image
 
 
-def render_frames(script: dict) -> Iterator[tuple[str, str, object]]:
-    """Yield ``(step_id, say, image)``; scenes keep what earlier steps revealed."""
+Frame = tuple[object, Callable[[], object], float]  # (key, draw, seconds): equal keys draw the same image
+
+
+def render_steps(script: dict, step_seconds: dict[str, tuple[float, float]]
+                 ) -> Iterator[tuple[str, str, list[Frame], bool, bool]]:
+    """Yield ``(step_id, say, frames, fade_in, squeezed)`` for each step.
+
+    ``step_seconds`` maps a step id to ``(speech, step_total)``. A still scene
+    gives one frame per step; an ``ide`` scene gives one frame per change on
+    screen, and fades in only on its first step.
+    """
 
     painter = _Painter(script)
     for scene_number, scene in enumerate(script["scenes"], 1):
+        if scene["type"] != "ide":
+            for step_id, say, image in _still_steps(painter, scene_number, scene):
+                yield step_id, say, [(step_id, lambda image=image: image, step_seconds[step_id][1])], True, False
+            continue
+        screen = initial_screen(scene)
+        for step_number, step in enumerate(scene["steps"], 1):
+            step_id = f"s{scene_number:02d}_p{step_number:02d}"
+            speech, total = step_seconds[step_id]
+            events, squeezed = step_events(scene, screen, step, speech, total)
+            screen = replace(events[-1][1], cursor_on=True)
+            frames = [(shot, lambda shot=shot: painter.ide(scene, shot), seconds)
+                      for shot, seconds in quantize(events, total, FPS)]
+            yield step_id, step["say"], frames, step_number == 1, squeezed
+
+
+def render_frames(script: dict) -> Iterator[tuple[str, str, object]]:
+    """Yield ``(step_id, say, image)`` with the final screen of each step (a storyboard)."""
+
+    painter = _Painter(script)
+    for scene_number, scene in enumerate(script["scenes"], 1):
+        if scene["type"] != "ide":
+            yield from _still_steps(painter, scene_number, scene)
+            continue
+        screen = initial_screen(scene)
+        for step_number, step in enumerate(scene["steps"], 1):
+            events, _ = step_events(scene, screen, step, 0.0, 0.0)
+            screen = replace(events[-1][1], cursor_on=True)
+            yield f"s{scene_number:02d}_p{step_number:02d}", step["say"], painter.ide(scene, screen)
+
+
+def _still_steps(painter, scene_number: int, scene: dict) -> Iterator[tuple[str, str, object]]:
+    """Steps of a still scene; it keeps what earlier steps revealed."""
+
+    if True:
         note_seen, shown = False, []
         for step_number, step in enumerate(scene["steps"], 1):
             kind = scene["type"]
@@ -756,26 +802,42 @@ def render_video(script: dict, audio_dir: Path, out: Path, frames_dir: Path) -> 
     chunks: list[bytes] = []
     texts: list[str] = []
     seconds: list[float] = []
+    step_seconds: dict[str, tuple[float, float]] = {}
     params = None
-    previous = Image.new("RGB", (WIDTH, HEIGHT), COLORS["background"])
-    for step_id, say, image in render_frames(script):
+    for step_id, _, _, _ in iter_steps(script):
         with wave.open(str(audio_dir / f"{step_id}.wav")) as handle:
             params = params or handle.getparams()
             frames = handle.readframes(handle.getnframes())
             speech = handle.getnframes() / handle.getframerate()
         pause_frames = int(PAUSE_SECONDS * params.framerate)
         chunks.append(frames + b"\x00" * (pause_frames * params.sampwidth * params.nchannels))
-        texts.append(say)
         seconds.append(speech)
-        still = frames_dir / f"{step_id}.png"
-        image.save(still)
-        for k in range(1, TRANSITION_FRAMES + 1):
-            blend = frames_dir / f"{step_id}_t{k:02d}.png"
-            Image.blend(previous, image, k / TRANSITION_FRAMES).save(blend)
-            entries.append((blend, 1 / FPS))
-        step_total = speech + pause_frames / params.framerate
-        entries.append((still, step_total - TRANSITION_FRAMES / FPS))
-        previous = image
+        step_seconds[step_id] = (speech, speech + pause_frames / params.framerate)
+
+    previous = Image.new("RGB", (WIDTH, HEIGHT), COLORS["background"])
+    for step_id, say, frames, fade_in, squeezed in render_steps(script, step_seconds):
+        texts.append(say)
+        if squeezed:
+            print(f"WARNING: {step_id} has more than its narration can show; split the step", file=sys.stderr)
+        saved: dict[object, tuple[Path, object]] = {}
+        for k, (key, draw, duration) in enumerate(frames):
+            if key not in saved:
+                image = draw()
+                path = frames_dir / f"{step_id}_f{len(saved):04d}.png"
+                image.save(path)
+                saved[key] = (path, image if k == 0 else None)
+            path, image = saved[key]
+            if k == 0 and fade_in:
+                fades = min(TRANSITION_FRAMES, int(duration * FPS))
+                for n in range(1, fades + 1):
+                    blend = frames_dir / f"{step_id}_t{n:02d}.png"
+                    Image.blend(previous, image, n / fades).save(blend)
+                    entries.append((blend, 1 / FPS))
+                duration -= fades / FPS
+            entries.append((path, duration))
+        last_path = saved[frames[-1][0]][0]
+        with Image.open(last_path) as last:
+            previous = last.convert("RGB")
     timeline = build_timeline(seconds, pause=PAUSE_SECONDS)
     total = timeline[-1][2]
     with tempfile.TemporaryDirectory() as tmp:

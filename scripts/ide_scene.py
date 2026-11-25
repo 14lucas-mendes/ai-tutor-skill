@@ -291,3 +291,28 @@ def terminal_tail(lines: tuple, capacity: int) -> tuple:
     """The last ``capacity`` terminal lines, as a real terminal scrolls."""
 
     return tuple(lines[-capacity:]) if capacity > 0 else ()
+
+
+# ---------------------------------------------------------------------------
+# Frame grid
+# ---------------------------------------------------------------------------
+
+def quantize(events: list[tuple[float, object]], total: float, fps: int) -> list[tuple[object, float]]:
+    """Snap events to the nearest video frame, keep the last one of each frame, return ``(item, seconds)``.
+
+    The durations add up to ``total``.
+    """
+
+    slots: list[tuple[int, object]] = []
+    last_slot = max(0, round(total * fps) - 1) if total * fps >= 1 else 0
+    for t, item in events:
+        slot = min(round(t * fps), last_slot)
+        if slots and slots[-1][0] == slot:
+            slots[-1] = (slot, item)
+        else:
+            slots.append((slot, item))
+    frames = []
+    for k, (slot, item) in enumerate(slots):
+        end = slots[k + 1][0] / fps if k + 1 < len(slots) else total
+        frames.append((item, end - slot / fps))
+    return frames

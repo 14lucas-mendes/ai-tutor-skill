@@ -2,7 +2,7 @@ import copy
 import unittest
 from dataclasses import replace
 
-from scripts.ide_scene import (IdeScreen, TermLine, first_visible_line, initial_screen, step_events, terminal_tail,
+from scripts.ide_scene import (IdeScreen, TermLine, first_visible_line, initial_screen, quantize, step_events, terminal_tail,
                                validate_ide_scene)
 
 
@@ -192,6 +192,17 @@ class PacingTests(unittest.TestCase):
             self.assertEqual(sorted(times), times)
             self.assertEqual(0.0, times[0])
             self.assertTrue(all(t < speech + 0.6 for t in times))
+
+
+class QuantizeTests(unittest.TestCase):
+    def test_quantize_keeps_last_event_per_frame(self):
+        self.assertEqual([("b", 0.5), ("c", 0.5)], quantize([(0.0, "a"), (0.01, "b"), (0.5, "c")], 1.0, 30))
+
+    def test_quantize_durations_sum_to_total(self):
+        events, _ = play("x" * 100, {"type": 1, "say": "s"}, 10.0, 10.6)
+        frames = quantize(events, 10.6, 30)
+        self.assertAlmostEqual(10.6, sum(seconds for _, seconds in frames))
+        self.assertTrue(all(seconds > 0 for _, seconds in frames))
 
 
 class ScrollTests(unittest.TestCase):

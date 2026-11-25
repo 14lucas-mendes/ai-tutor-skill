@@ -216,6 +216,25 @@ class RenderTests(unittest.TestCase):
             self.assertAlmostEqual(len(spoken_lines(SCRIPT)) * 1.1, total, places=3)
             self.assertIn("It prints 212.0.", out.with_suffix(".srt").read_text(encoding="utf-8"))
 
+    def test_renders_ide_scene(self):
+        script = with_ide(SCRIPT)
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            audio = work / "audio"
+            audio.mkdir()
+            for step_id, _ in spoken_lines(script):
+                with wave.open(str(audio / f"{step_id}.wav"), "wb") as handle:
+                    handle.setnchannels(1)
+                    handle.setsampwidth(2)
+                    handle.setframerate(16000)
+                    handle.writeframes(b"\x00\x00" * 8000)
+            out = work / "lesson.mp4"
+            total = render_video(script, audio, out, work / "frames")
+            video = probe_video(out)
+            self.assertEqual((1920, 1080), (video["width"], video["height"]))
+            self.assertAlmostEqual(len(spoken_lines(script)) * 1.1, total, places=3)
+            self.assertGreater(len(list((work / "frames").glob("s06_p02_f*.png"))), 1)
+
 
 @unittest.skipUnless(HAS_RENDER_TOOLS, "pillow, pygments and ffmpeg are optional")
 class IdePaintTests(unittest.TestCase):
