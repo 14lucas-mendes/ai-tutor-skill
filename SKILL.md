@@ -35,6 +35,7 @@ Load only the workflow needed for the current intent.
 | Find and register trustworthy sources, `/sources` | `references/workflows/sources.md` |
 | Show something visually during a lesson ("show it visually", "draw the flow", "map the project") | `references/output-contract.md` (*Explanation visuals*) |
 | Create cards, images, diagrams, charts, audio, video, or NotebookLM material for later review, `/media` or `/notebooklm` | `references/workflows/media.md` |
+| Write or check the study's optional course, `/course` | `references/workflows/course.md` |
 
 For programming, also read `references/programming.md`. For output formats, read `references/output-contract.md`. For Google media generation, read `references/media-providers.md`.
 

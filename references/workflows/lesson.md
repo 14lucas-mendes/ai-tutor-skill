@@ -12,4 +12,4 @@ A topic counts as taught once its lesson file contains written theory, or once `
 
 For programming, read `references/programming.md` and treat the lesson as an adaptive set of teaching options, not a sequence that must be consumed. Add the project anchor and a possible concrete example to the header and plan. Select, combine, revisit, or omit the practice-plan components according to observed learner performance; the theory of a new topic is never omitted.
 
-Transfer is required only when the targeted mastery level requires it under the learning contract. A solution supplied by the tutor remains study material. Complete the lesson only when its own criteria and evidence are present.
+Transfer is required only when the targeted mastery level requires it under the learning contract. A solution supplied by the tutor remains study material. Complete the lesson only when its own criteria and evidence are present. When the study has `study-config.json.course_policy`, write the lesson's course page in the same closing turn, following `references/workflows/course.md`.

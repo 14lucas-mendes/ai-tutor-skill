@@ -56,6 +56,7 @@ WORKFLOWS = (
     "progress",
     "sources",
     "media",
+    "course",
 )
 
 LOCAL_REFERENCE = re.compile(
