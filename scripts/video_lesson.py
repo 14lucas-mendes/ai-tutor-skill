@@ -34,8 +34,14 @@ import wave
 from pathlib import Path
 from typing import Callable, Iterator
 
+try:
+    from scripts.ide_scene import validate_ide_scene
+except ModuleNotFoundError:  # direct execution, also under ``python -I``
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from ide_scene import validate_ide_scene
+
 SCHEMA_VERSION = 1
-SCENE_TYPES = {"title", "list", "questions", "flow", "code", "compare"}
+SCENE_TYPES = {"title", "list", "questions", "flow", "code", "compare", "ide"}
 COMPARE_PARTS = ("left", "right", "footer")
 VOICES = {"piper", "sapi"}
 
@@ -132,6 +138,9 @@ def _validate_scene(scene: object, number: int, errors: list[str]) -> None:
             output = step.get("output")
             if output is not None and (not isinstance(output, list) or not all(isinstance(x, str) for x in output)):
                 errors.append(f"{where} step {index}: output must be a list of text lines")
+
+    if kind == "ide":
+        validate_ide_scene(scene, where, steps, errors)
 
     if kind == "compare":
         for side in ("left", "right"):

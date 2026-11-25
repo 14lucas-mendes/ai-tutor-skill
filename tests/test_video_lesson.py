@@ -54,6 +54,16 @@ SCRIPT = {
 }
 
 
+def with_ide(script: dict) -> dict:
+    """A copy of ``script`` with the reference ide scene before the closing questions."""
+
+    from tests.test_ide_scene import IDE_SCENE
+
+    result = copy.deepcopy(script)
+    result["scenes"].insert(len(result["scenes"]) - 1, copy.deepcopy(IDE_SCENE))
+    return result
+
+
 class ValidationTests(unittest.TestCase):
     def test_valid_script_passes(self):
         self.assertEqual([], validate_video_script(SCRIPT))
@@ -90,6 +100,15 @@ class ValidationTests(unittest.TestCase):
         script["scenes"][5]["items"][0] = "What does `print(__name__) show?"
         self.assertIn("scene 6: unbalanced backtick in 'What does `print(__name__) show?'",
                       validate_video_script(script))
+
+    def test_script_with_ide_scene_passes(self):
+        self.assertEqual([], validate_video_script(with_ide(SCRIPT)))
+
+    def test_ide_code_is_not_checked_for_backticks(self):
+        script = with_ide(SCRIPT)
+        script["scenes"][5]["files"][0]["code"] = "s = '`'"
+        script["scenes"][5]["steps"][0]["show"] = 1
+        self.assertEqual([], validate_video_script(script))
 
     def test_footer_and_note_need_text(self):
         script = copy.deepcopy(SCRIPT)
