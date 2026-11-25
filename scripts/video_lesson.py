@@ -39,9 +39,16 @@ SCENE_TYPES = {"title", "list", "questions", "flow", "code", "compare"}
 COMPARE_PARTS = ("left", "right", "footer")
 VOICES = {"piper", "sapi"}
 
-WIDTH, HEIGHT, FPS = 1280, 720, 24
-TRANSITION_FRAMES = 10
+WIDTH, HEIGHT, FPS = 1920, 1080, 30
+SCALE = 1.5  # the layout was drawn for 1280x720; every measure is scaled to Full HD
+TRANSITION_FRAMES = 12
 PAUSE_SECONDS = 0.6
+
+
+def _px(value: float) -> int:
+    """A measure of the 1280x720 layout, in Full HD pixels."""
+
+    return round(value * SCALE)
 
 
 # ---------------------------------------------------------------------------
@@ -386,15 +393,17 @@ class _Painter:
         image = self.Image.new("RGB", (WIDTH, HEIGHT), COLORS["background"])
         draw = self.ImageDraw.Draw(image)
         if title:
-            for line in self.rich_lines(draw, title, 34, WIDTH - 120, kind="semibold")[:1]:
-                self.draw_rich_line(draw, 60, 38, line, 34, COLORS["text"], code_color=COLORS["text"], kind="semibold")
-            draw.rectangle((60, 92, 140, 96), fill=COLORS["accent"])
-        draw.text((WIDTH - 60, HEIGHT - 34), self.footer, font=self.font("sans", 16), fill=COLORS["faint"], anchor="rs")
+            size = _px(34)
+            for line in self.rich_lines(draw, title, size, WIDTH - _px(120), kind="semibold")[:1]:
+                self.draw_rich_line(draw, _px(60), _px(38), line, size, COLORS["text"], code_color=COLORS["text"], kind="semibold")
+            draw.rectangle((_px(60), _px(92), _px(140), _px(96)), fill=COLORS["accent"])
+        draw.text((WIDTH - _px(60), HEIGHT - _px(34)), self.footer, font=self.font("sans", _px(16)),
+                  fill=COLORS["faint"], anchor="rs")
         return image, draw
 
     @staticmethod
     def panel(draw, box, border=None):
-        draw.rounded_rectangle(box, radius=14, fill=COLORS["panel"], outline=border or COLORS["border"], width=2)
+        draw.rounded_rectangle(box, radius=_px(14), fill=COLORS["panel"], outline=border or COLORS["border"], width=_px(2))
 
     def rich_lines(self, draw, text, size, width, kind="sans"):
         """Wrap text where `backticked` parts use the monospaced font.
@@ -431,7 +440,7 @@ class _Painter:
     def code_font(self, size):
         """Inline code: monospaced and a little smaller, to match the text's visual size."""
 
-        return self.font("mono", max(size - 3, 10))
+        return self.font("mono", max(size - _px(3), _px(10)))
 
     def rich_width(self, draw, line, size, kind="sans"):
         return sum(extra + draw.textlength(w, font=self.code_font(size) if c else self.font(kind, size))
@@ -462,52 +471,60 @@ class _Painter:
 
     def title(self, scene, step):
         image, draw = self.canvas(None)
-        draw.text((WIDTH // 2, HEIGHT // 2 - 40), scene["title"], font=self.font("bold", 60), fill=COLORS["text"], anchor="mm")
-        draw.rectangle((WIDTH // 2 - 60, HEIGHT // 2 + 10, WIDTH // 2 + 60, HEIGHT // 2 + 15), fill=COLORS["accent"])
-        draw.text((WIDTH // 2, HEIGHT // 2 + 55), scene["subtitle"], font=self.font("sans", 28), fill=COLORS["muted"], anchor="mm")
+        draw.text((WIDTH // 2, HEIGHT // 2 - _px(40)), scene["title"], font=self.font("bold", _px(60)),
+                  fill=COLORS["text"], anchor="mm")
+        draw.rectangle((WIDTH // 2 - _px(60), HEIGHT // 2 + _px(10), WIDTH // 2 + _px(60), HEIGHT // 2 + _px(15)),
+                       fill=COLORS["accent"])
+        draw.text((WIDTH // 2, HEIGHT // 2 + _px(55)), scene["subtitle"], font=self.font("sans", _px(28)),
+                  fill=COLORS["muted"], anchor="mm")
         return image
 
     def listing(self, scene, step, numbered=False):
         image, draw = self.canvas(scene["title"])
         items = scene["items"]
         shown = step.get("show", len(items))
-        size = 30 if len(items) <= 4 else 26
-        gap = 82 if len(items) <= 4 else 72
-        y = 140
+        size = _px(30) if len(items) <= 4 else _px(26)
+        gap = _px(82) if len(items) <= 4 else _px(72)
+        y = _px(140)
         for number, item in enumerate(items[:shown], 1):
             current = numbered or number == shown
             marker = f"{number}." if numbered else "●"
-            draw.text((80, y), marker, font=self.font("bold", 26), fill=COLORS["accent"] if current else COLORS["faint"])
-            lines = self.rich_lines(draw, item, size, WIDTH - 220)
+            draw.text((_px(80), y), marker, font=self.font("bold", _px(26)),
+                      fill=COLORS["accent"] if current else COLORS["faint"])
+            lines = self.rich_lines(draw, item, size, WIDTH - _px(220))
             for k, line in enumerate(lines):
-                self.draw_rich_line(draw, 125, y - 4 + k * 38, line, size,
+                self.draw_rich_line(draw, _px(125), y - _px(4) + k * _px(38), line, size,
                                     COLORS["text"] if current else COLORS["muted"],
                                     code_color=COLORS["amber"] if current else COLORS["muted"])
-            y += gap + (len(lines) - 1) * 38
+            y += gap + (len(lines) - 1) * _px(38)
         return image
 
     def flow(self, scene, step, note_seen):
         image, draw = self.canvas(scene["title"])
         active = step.get("active", 0)
         boxes = scene["boxes"]
-        width, height, top = 330, 230, 190
-        lefts = [70, 475, 880][: len(boxes)]
+        width, height, top = _px(330), _px(230), _px(190)
+        lefts = [_px(70), _px(475), _px(880)][: len(boxes)]
         for number, (left, box) in enumerate(zip(lefts, boxes), 1):
             on = number == active
             lit = on or active == 0
             self.panel(draw, (left, top, left + width, top + height), COLORS["accent"] if on else None)
-            draw.text((left + 24, top + 24), box["label"], font=self.font("bold", 30), fill=COLORS["text"] if lit else COLORS["muted"])
+            draw.text((left + _px(24), top + _px(24)), box["label"], font=self.font("bold", _px(30)),
+                      fill=COLORS["text"] if lit else COLORS["muted"])
             for k, line in enumerate(box.get("detail", "").split("\n")):
                 code_like = "." in line and " " not in line
                 color = (COLORS["amber"] if code_like else COLORS["text"]) if lit else COLORS["faint"]
-                draw.text((left + 24, top + 84 + k * 36), line, font=self.font("mono" if code_like else "sans", 24), fill=color)
+                draw.text((left + _px(24), top + _px(84) + k * _px(36)), line,
+                          font=self.font("mono" if code_like else "sans", _px(24)), fill=color)
             if number < len(boxes):
-                x, mid = left + width + 12, top + height // 2
-                draw.line((x, mid, x + 50, mid), fill=COLORS["accent"], width=4)
-                draw.polygon([(x + 50, mid - 10), (x + 64, mid), (x + 50, mid + 10)], fill=COLORS["accent"])
+                x, mid = left + width + _px(12), top + height // 2
+                draw.line((x, mid, x + _px(50), mid), fill=COLORS["accent"], width=_px(4))
+                draw.polygon([(x + _px(50), mid - _px(10)), (x + _px(64), mid), (x + _px(50), mid + _px(10))],
+                             fill=COLORS["accent"])
         if note_seen:
-            self.panel(draw, (70, 480, 1210, 550), COLORS["error"])
-            draw.text((WIDTH // 2, 515), scene["note"], font=self.font("semibold", 26), fill=COLORS["error"], anchor="mm")
+            self.panel(draw, (_px(70), _px(480), _px(1210), _px(550)), COLORS["error"])
+            draw.text((WIDTH // 2, _px(515)), scene["note"], font=self.font("semibold", _px(26)),
+                      fill=COLORS["error"], anchor="mm")
         return image
 
     def code(self, scene, step):
@@ -533,14 +550,14 @@ class _Painter:
         lines = scene["code"].split("\n")
         visible = step.get("visible", len(lines))
         marked = set(step.get("highlight", []))
-        mono, line_h = self.font("mono", 22), 31
-        left, top, right = 60, 125, WIDTH - 60
-        bottom = min(top + 70 + line_h * len(lines), 640)
+        mono, line_h = self.font("mono", _px(22)), _px(31)
+        left, top, right = _px(60), _px(125), WIDTH - _px(60)
+        bottom = min(top + _px(70) + line_h * len(lines), _px(640))
         self.panel(draw, (left, top, right, bottom))
-        tab_font = self.font("mono", 18)
-        draw.rounded_rectangle((left, top, left + 48 + draw.textlength(scene["file"], font=tab_font), top + 38),
-                               radius=10, fill=COLORS["border"])
-        draw.text((left + 24, top + 8), scene["file"], font=tab_font, fill=COLORS["text"])
+        tab_font = self.font("mono", _px(18))
+        draw.rounded_rectangle((left, top, left + _px(48) + draw.textlength(scene["file"], font=tab_font), top + _px(38)),
+                               radius=_px(10), fill=COLORS["border"])
+        draw.text((left + _px(24), top + _px(8)), scene["file"], font=tab_font, fill=COLORS["text"])
         rows: list[list[tuple[object, str]]] = [[]]
         for kind, value in lex(scene["code"], get_lexer_by_name(scene["language"])):
             for k, piece in enumerate(value.split("\n")):
@@ -549,12 +566,12 @@ class _Painter:
                 if piece:
                     rows[-1].append((kind, piece))
         for index in range(min(visible, len(lines))):
-            y, number = top + 54 + index * line_h, index + 1
+            y, number = top + _px(54) + index * line_h, index + 1
             if number in marked:
-                draw.rectangle((left + 2, y - 3, right - 2, y + line_h - 5), fill=COLORS["highlight"])
-                draw.rectangle((left + 2, y - 3, left + 7, y + line_h - 5), fill=COLORS["amber"])
-            draw.text((left + 22, y), f"{number:>2}", font=mono, fill=COLORS["faint"])
-            x, dim = left + 72, bool(marked) and number not in marked
+                draw.rectangle((left + _px(2), y - _px(3), right - _px(2), y + line_h - _px(5)), fill=COLORS["highlight"])
+                draw.rectangle((left + _px(2), y - _px(3), left + _px(7), y + line_h - _px(5)), fill=COLORS["amber"])
+            draw.text((left + _px(22), y), f"{number:>2}", font=mono, fill=COLORS["faint"])
+            x, dim = left + _px(72), bool(marked) and number not in marked
             for kind, text in rows[index] if index < len(rows) else []:
                 color = token_color(kind)
                 if dim:
@@ -564,35 +581,36 @@ class _Painter:
         output = step.get("output")
         if output:
             term = list(output) if output[0].startswith("$") else ["$ " + scene.get("command", "")] + list(output)
-            t_top = bottom + 24
-            self.panel(draw, (left, t_top, right, min(t_top + 50 + 32 * len(term), HEIGHT - 50)))
-            draw.text((left + 22, t_top + 12), "terminal", font=self.font("semibold", 18), fill=COLORS["muted"])
+            t_top = bottom + _px(24)
+            self.panel(draw, (left, t_top, right, min(t_top + _px(50) + _px(32) * len(term), HEIGHT - _px(50))))
+            draw.text((left + _px(22), t_top + _px(12)), "terminal", font=self.font("semibold", _px(18)), fill=COLORS["muted"])
             for k, line in enumerate(term):
                 color = COLORS["accent"] if line.startswith("$") else (COLORS["error"] if step.get("error") else COLORS["text"])
-                draw.text((left + 22, t_top + 44 + k * 32), line, font=self.font("mono", 21), fill=color)
+                draw.text((left + _px(22), t_top + _px(44) + k * _px(32)), line, font=self.font("mono", _px(21)), fill=color)
         return image
 
     def compare(self, scene, step, shown):
         image, draw = self.canvas(scene["title"])
-        for side, left in (("left", 60), ("right", 660)):
+        for side, left in (("left", _px(60)), ("right", _px(660))):
             if side not in shown:
                 continue
             part, current = scene[side], shown[-1] == side
             color = COLORS["ok"] if part.get("tone") == "ok" else COLORS["accent"]
-            self.panel(draw, (left, 130, left + 560, 470), color if current else None)
-            draw.text((left + 28, 155), part["head"], font=self.font("mono", 26), fill=color)
+            self.panel(draw, (left, _px(130), left + _px(560), _px(470)), color if current else None)
+            draw.text((left + _px(28), _px(155)), part["head"], font=self.font("mono", _px(26)), fill=color)
             for k, text in enumerate(part["lines"]):
                 tone = COLORS["text"] if current else COLORS["muted"]
-                for line in self.rich_lines(draw, text, 27, 510)[:1]:
-                    self.draw_rich_line(draw, left + 28, 220 + k * 50, line, 27, tone,
+                for line in self.rich_lines(draw, text, _px(27), _px(510))[:1]:
+                    self.draw_rich_line(draw, left + _px(28), _px(220) + k * _px(50), line, _px(27), tone,
                                         code_color=COLORS["amber"] if current else COLORS["muted"])
         if "footer" in shown:
-            self.panel(draw, (60, 500, 1220, 580), COLORS["amber"])
-            lines = self.rich_lines(draw, scene["footer"], 24, 1100, kind="semibold")
+            self.panel(draw, (_px(60), _px(500), _px(1220), _px(580)), COLORS["amber"])
+            size = _px(24)
+            lines = self.rich_lines(draw, scene["footer"], size, _px(1100), kind="semibold")
             for k, line in enumerate(lines):
-                x = (WIDTH - self.rich_width(draw, line, 24, kind="semibold")) / 2
-                y = 540 - (len(lines) - 1) * 16 + k * 32 - 16
-                self.draw_rich_line(draw, x, y, line, 24, COLORS["amber"], code_color=COLORS["amber"], kind="semibold")
+                x = (WIDTH - self.rich_width(draw, line, size, kind="semibold")) / 2
+                y = _px(540) - (len(lines) - 1) * _px(16) + k * _px(32) - _px(16)
+                self.draw_rich_line(draw, x, y, line, size, COLORS["amber"], code_color=COLORS["amber"], kind="semibold")
         return image
 
 
@@ -671,7 +689,7 @@ def render_video(script: dict, audio_dir: Path, out: Path, frames_dir: Path) -> 
         plain = work / "plain.mp4"
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(listing),
                         "-i", str(audio), "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "veryfast",
-                        "-tune", "stillimage", "-pix_fmt", "yuv420p", "-r", str(FPS), "-crf", "23",
+                        "-tune", "stillimage", "-pix_fmt", "yuv420p", "-r", str(FPS), "-crf", "18",
                         "-c:a", "aac", "-b:a", "128k", "-t", f"{total:.3f}", str(plain)], check=True)
         # Subtitles go in a separate pass: muxing them with the concat input stalled ffmpeg.
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(plain), "-i", str(subtitles),

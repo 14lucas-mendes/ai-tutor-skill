@@ -168,6 +168,14 @@ HAS_RENDER_TOOLS = (
 )
 
 
+def probe_video(path: Path) -> dict:
+    """Return the first video stream that ffprobe reports for ``path``."""
+
+    result = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_streams", "-of", "json", str(path)],
+                            capture_output=True, text=True, check=True)
+    return json.loads(result.stdout)["streams"][0]
+
+
 @unittest.skipUnless(HAS_RENDER_TOOLS, "pillow, pygments and ffmpeg are optional")
 class RenderTests(unittest.TestCase):
     def test_renders_video_with_subtitles(self):
@@ -184,6 +192,8 @@ class RenderTests(unittest.TestCase):
             out = work / "lesson.mp4"
             total = render_video(SCRIPT, audio, out, work / "frames")
             self.assertTrue(out.is_file())
+            video = probe_video(out)
+            self.assertEqual((1920, 1080, "30/1"), (video["width"], video["height"], video["r_frame_rate"]))
             self.assertAlmostEqual(len(spoken_lines(SCRIPT)) * 1.1, total, places=3)
             self.assertIn("It prints 212.0.", out.with_suffix(".srt").read_text(encoding="utf-8"))
 
