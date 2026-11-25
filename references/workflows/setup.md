@@ -6,7 +6,7 @@ Collect only persisted fields: topic, concrete goal, initial level, weekly hours
 
 Ask for the teaching approach with one line per option, and persist it as `teaching_policy.approach`:
 
-- `theory_first` (default): each new topic starts with a complete lesson from zero — why, how it works, vocabulary, and examples — and practice in the project comes after.
+- `theory_first` (default): each new topic starts with a complete lesson from zero, seen first and named later — the idea in one sentence, short steps that show it working before naming it, a glossary at the end — and practice in the project comes after.
 - `practice_first`: lean theory with every term defined, then practice soon; the theory deepens on demand or when conceptual errors appear.
 
 When the learner does not choose, use `theory_first`.

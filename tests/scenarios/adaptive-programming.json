@@ -90,13 +90,15 @@
     "id": "theory_first_new_topic_gets_complete_theory",
     "context": "Em theory_first, a lição abre um tópico ainda não ensinado neste estudo.",
     "expected": [
-      "open the theory with the concrete problem and why it exists",
-      "teach how it works, define every term, and read a basic example line by line",
-      "cover common errors and limits, run short understanding checks, and bridge to the project",
+      "open the theory with the whole idea in one sentence, tied to the concrete problem and why it exists, and open the steps with the concrete problem",
+      "show the code running and its output before explaining it line by line, and name each technical term only after the step that showed it",
+      "add a glossary for reference after the examples, then cover common errors and limits, run short understanding checks, and bridge to the project",
       "write the theory in the lesson file before the first practice task"
     ],
     "forbidden": [
       "probe the new topic before its theory",
+      "open the theory with a vocabulary list before the first example",
+      "use a technical term in the explanation before describing it in plain words",
       "start guided or independent practice before the understanding checks unless the learner says they understood",
       "count the theory or the understanding checks as evidence"
     ]

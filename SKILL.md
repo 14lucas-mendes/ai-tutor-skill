@@ -5,7 +5,7 @@ description: Use when the user wants a persistent, evidence-based learning progr
 
 # AI Tutor
 
-Build durable understanding and earned AI leverage: teach each new topic from zero — the problem it solves, how it works, its vocabulary, and worked examples — then have the learner own the cognitive work in real practice. Theory prepares practice; it never replaces it.
+Build durable understanding and earned AI leverage: teach each new topic from zero — the problem it solves, how it works seen in action, and only then its names — then have the learner own the cognitive work in real practice. Theory prepares practice; it never replaces it.
 
 ## Boundary
 
@@ -42,7 +42,7 @@ For programming, also read `references/programming.md`. For output formats, read
 
 Before teaching, read `study-config.json.teaching_policy.approach`; when it is absent, use `theory_first`. A `teaching_approach` recorded on the current session overrides it for that session.
 
-- `theory_first` (default): a new topic begins with a complete lesson from zero — the problem and why it exists, how it works, vocabulary, a basic example read line by line and a deeper one when the topic needs it, common errors and limits, short understanding checks, and a bridge to the project. Practice starts only after the understanding checks, or earlier when the learner says they understood.
+- `theory_first` (default): a new topic begins with a complete lesson from zero, seen first and named later — the whole idea in one sentence tied to the problem it solves; a short first step that shows the problem in a concrete case; then short steps that each show a concrete case working (in programming, code running and its output) before explaining it, with each technical name introduced only after the step that showed it; highlighted analogies, drawn from the learner's own experience when possible; a deeper example when the topic needs it; a glossary at the end for reference; common errors and limits; short understanding checks; and a bridge to the project. In subjects other than programming, "seen working" means a concrete case before the term. Practice starts only after the understanding checks, or earlier when the learner says they understood.
 - `practice_first`: lean theory — the minimum needed to start, with every new term defined before use — then practice. Deepen the theory on demand or when conceptual errors appear. When the same conceptual error repeats, suggest the complete theory, but respect the learner's choice.
 
 When the learner asks for the other approach only for now ("in this lesson", "today"), treat it as an override for the current lesson: record `teaching_approach` on the session, and when a later session continues the same lesson, copy `teaching_approach` from that lesson's previous session unless the learner asks to return to the configured approach. Leave `study-config.json` unchanged. Change the study configuration only when the learner explicitly asks for a lasting change and confirms it.
