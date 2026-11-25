@@ -273,3 +273,21 @@ def _apply_terminal_partial(terminal: tuple[TermLine, ...], kind: str, text: str
     if kind == "cmd":
         return terminal[:-1] + (replace(last, text=text),)
     return terminal[:-1] + (replace(last, entry=text),)
+
+
+# ---------------------------------------------------------------------------
+# Scrolling
+# ---------------------------------------------------------------------------
+
+def first_visible_line(total_lines: int, cursor_line: int, capacity: int) -> int:
+    """First editor line on screen (1-based), scrolled so the cursor line stays visible."""
+
+    if total_lines <= capacity:
+        return 1
+    return max(1, cursor_line - capacity + 1)
+
+
+def terminal_tail(lines: tuple, capacity: int) -> tuple:
+    """The last ``capacity`` terminal lines, as a real terminal scrolls."""
+
+    return tuple(lines[-capacity:]) if capacity > 0 else ()

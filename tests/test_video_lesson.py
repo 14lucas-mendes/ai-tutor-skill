@@ -217,5 +217,28 @@ class RenderTests(unittest.TestCase):
             self.assertIn("It prints 212.0.", out.with_suffix(".srt").read_text(encoding="utf-8"))
 
 
+@unittest.skipUnless(HAS_RENDER_TOOLS, "pillow, pygments and ffmpeg are optional")
+class IdePaintTests(unittest.TestCase):
+    def paint(self, code: str):
+        from scripts.ide_scene import IdeScreen, TermLine
+        from scripts.video_lesson import _Painter
+
+        scene = {"type": "ide", "title": "T", "files": [{"name": "a.py", "language": "python", "code": code}],
+                 "steps": [{"show": 1, "say": "s"}]}
+        screen = IdeScreen("a.py", (("a.py", len(code)),), (1,), (TermLine("cmd", "python a.py"), TermLine("out", "W" * 300)),
+                           "terminal", True)
+        return _Painter(SCRIPT).ide(scene, screen)
+
+    def test_ide_frame_is_full_hd(self):
+        self.assertEqual((1920, 1080), self.paint("x = 1").size)
+
+    def test_long_line_is_clipped_at_panel_edge(self):
+        from scripts.video_lesson import COLORS, HEIGHT, WIDTH, _px
+
+        image = self.paint("W" * 300)
+        column = [image.getpixel((WIDTH - _px(30), y)) for y in range(HEIGHT - _px(60))]
+        self.assertTrue(all(pixel == COLORS["background"] for pixel in column))
+
+
 if __name__ == "__main__":
     unittest.main()

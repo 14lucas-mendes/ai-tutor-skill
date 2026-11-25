@@ -35,10 +35,10 @@ from pathlib import Path
 from typing import Callable, Iterator
 
 try:
-    from scripts.ide_scene import validate_ide_scene
+    from scripts.ide_scene import code_lines, first_visible_line, terminal_tail, validate_ide_scene
 except ModuleNotFoundError:  # direct execution, also under ``python -I``
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from ide_scene import validate_ide_scene
+    from ide_scene import code_lines, first_visible_line, terminal_tail, validate_ide_scene
 
 SCHEMA_VERSION = 1
 SCENE_TYPES = {"title", "list", "questions", "flow", "code", "compare", "ide"}
@@ -379,6 +379,28 @@ FONT_DIRS = (
 )
 
 
+def _token_color(kind) -> tuple[int, int, int]:
+    """Editor color of a pygments token kind (the most specific match wins)."""
+
+    from pygments.token import Token  # optional dependency: pygments
+
+    palette = [
+        (Token.Comment, (110, 118, 140)), (Token.Literal.String, (158, 206, 106)),
+        (Token.Literal.Number, (255, 158, 100)), (Token.Keyword, (187, 154, 247)),
+        (Token.Name.Function, (122, 162, 247)), (Token.Name.Builtin, (125, 207, 255)),
+        (Token.Operator, (137, 221, 255)), (Token.Name.Class, (224, 175, 104)),
+    ]
+    best = None
+    for parent, color in palette:
+        if kind in parent and (best is None or len(parent) > len(best[0])):
+            best = (parent, color)
+    return best[1] if best else COLORS["text"]
+
+
+def _dimmed(color: tuple[int, int, int]) -> tuple[int, int, int]:
+    return tuple(int(v * 0.55 + COLORS["panel"][i] * 0.45) for i, v in enumerate(color))
+
+
 class _Painter:
     def __init__(self, script: dict):
         from PIL import Image, ImageDraw, ImageFont  # optional dependency: pillow
@@ -536,25 +558,24 @@ class _Painter:
                       fill=COLORS["error"], anchor="mm")
         return image
 
-    def code(self, scene, step):
+    @staticmethod
+    def code_rows(code: str, language: str) -> list[list[tuple[object, str]]]:
+        """Syntax tokens of ``code``, one list per line."""
+
         from pygments import lex  # optional dependency: pygments
         from pygments.lexers import get_lexer_by_name
-        from pygments.token import Token
 
-        palette = [
-            (Token.Comment, (110, 118, 140)), (Token.Literal.String, (158, 206, 106)),
-            (Token.Literal.Number, (255, 158, 100)), (Token.Keyword, (187, 154, 247)),
-            (Token.Name.Function, (122, 162, 247)), (Token.Name.Builtin, (125, 207, 255)),
-            (Token.Operator, (137, 221, 255)), (Token.Name.Class, (224, 175, 104)),
-        ]
+        rows: list[list[tuple[object, str]]] = [[]]
+        for kind, value in lex(code, get_lexer_by_name(language)):
+            for k, piece in enumerate(value.split("\n")):
+                if k:
+                    rows.append([])
+                if piece:
+                    rows[-1].append((kind, piece))
+        return rows
 
-        def token_color(kind):
-            best = None
-            for parent, color in palette:
-                if kind in parent and (best is None or len(parent) > len(best[0])):
-                    best = (parent, color)
-            return best[1] if best else COLORS["text"]
-
+    def code(self, scene, step):
+        token_color = _token_color
         image, draw = self.canvas(scene["title"])
         lines = scene["code"].split("\n")
         visible = step.get("visible", len(lines))
@@ -567,13 +588,7 @@ class _Painter:
         draw.rounded_rectangle((left, top, left + _px(48) + draw.textlength(scene["file"], font=tab_font), top + _px(38)),
                                radius=_px(10), fill=COLORS["border"])
         draw.text((left + _px(24), top + _px(8)), scene["file"], font=tab_font, fill=COLORS["text"])
-        rows: list[list[tuple[object, str]]] = [[]]
-        for kind, value in lex(scene["code"], get_lexer_by_name(scene["language"])):
-            for k, piece in enumerate(value.split("\n")):
-                if k:
-                    rows.append([])
-                if piece:
-                    rows[-1].append((kind, piece))
+        rows = self.code_rows(scene["code"], scene["language"])
         for index in range(min(visible, len(lines))):
             y, number = top + _px(54) + index * line_h, index + 1
             if number in marked:
@@ -584,7 +599,7 @@ class _Painter:
             for kind, text in rows[index] if index < len(rows) else []:
                 color = token_color(kind)
                 if dim:
-                    color = tuple(int(v * 0.55 + COLORS["panel"][i] * 0.45) for i, v in enumerate(color))
+                    color = _dimmed(color)
                 draw.text((x, y), text, font=mono, fill=color)
                 x += draw.textlength(text, font=mono)
         output = step.get("output")
@@ -596,6 +611,84 @@ class _Painter:
             for k, line in enumerate(term):
                 color = COLORS["accent"] if line.startswith("$") else (COLORS["error"] if step.get("error") else COLORS["text"])
                 draw.text((left + _px(22), t_top + _px(44) + k * _px(32)), line, font=self.font("mono", _px(21)), fill=color)
+        return image
+
+    def ide(self, scene, screen):
+        """An editor with one tab per file and a terminal below, as ``screen`` describes them."""
+
+        image, draw = self.canvas(None)
+        for line in self.rich_lines(draw, scene["title"], _px(24), WIDTH - _px(120), kind="semibold")[:1]:
+            self.draw_rich_line(draw, _px(60), _px(16), line, _px(24), COLORS["muted"], kind="semibold")
+        left, right = _px(60), WIDTH - _px(60)
+        editor_top, editor_bottom, term_top, term_bottom = _px(56), _px(458), _px(470), _px(664)
+        files = {f["name"]: f for f in scene["files"]}
+
+        self.panel(draw, (left, editor_top, right, editor_bottom))
+        tab_font, x = self.font("mono", _px(18)), left
+        for name in files:
+            width, on = _px(48) + draw.textlength(name, font=tab_font), name == screen.active
+            if on:
+                draw.rounded_rectangle((x, editor_top, x + width, editor_top + _px(38)), radius=_px(10),
+                                       fill=COLORS["border"])
+            draw.text((x + _px(24), editor_top + _px(8)), name, font=tab_font,
+                      fill=COLORS["text"] if on else COLORS["faint"])
+            x += width + _px(4)
+
+        box = (left + _px(4), editor_top + _px(46), right - _px(4), editor_bottom - _px(8))
+        area = self.Image.new("RGB", (box[2] - box[0], box[3] - box[1]), COLORS["panel"])
+        pen = self.ImageDraw.Draw(area)
+        mono, line_h = self.font("mono", _px(22)), _px(29)
+        code = files[screen.active]["code"]
+        count = dict(screen.chars)[screen.active]
+        lines = code_lines(code[:count]) if count else []
+        rows = self.code_rows(code, files[screen.active]["language"])
+        capacity = max(1, (area.height - _px(8)) // line_h)
+        first = first_visible_line(len(lines), len(lines), capacity)
+        marked = set(screen.highlight)
+        cursor_at = (_px(68), _px(6))
+        for index in range(first - 1, min(len(lines), first - 1 + capacity)):
+            y, number = _px(6) + (index - first + 1) * line_h, index + 1
+            if number in marked:
+                pen.rectangle((0, y - _px(3), area.width, y + line_h - _px(5)), fill=COLORS["highlight"])
+                pen.rectangle((0, y - _px(3), _px(5), y + line_h - _px(5)), fill=COLORS["amber"])
+            pen.text((_px(18), y), f"{number:>2}", font=mono, fill=COLORS["faint"])
+            x, remaining = _px(68), len(lines[index])
+            dim = bool(marked) and number not in marked
+            for kind, text in rows[index] if index < len(rows) else []:
+                if remaining <= 0:
+                    break
+                piece = text[:remaining]
+                remaining -= len(piece)
+                color = _token_color(kind)
+                pen.text((x, y), piece, font=mono, fill=_dimmed(color) if dim else color)
+                x += pen.textlength(piece, font=mono)
+            cursor_at = (x, y)
+        if screen.cursor == "editor" and screen.cursor_on:
+            pen.rectangle((cursor_at[0] + _px(2), cursor_at[1], cursor_at[0] + _px(4), cursor_at[1] + line_h - _px(6)),
+                          fill=COLORS["text"])
+        image.paste(area, box[:2])
+
+        self.panel(draw, (left, term_top, right, term_bottom))
+        draw.text((left + _px(22), term_top + _px(10)), "TERMINAL", font=self.font("semibold", _px(16)),
+                  fill=COLORS["muted"])
+        box = (left + _px(4), term_top + _px(36), right - _px(4), term_bottom - _px(6))
+        area = self.Image.new("RGB", (box[2] - box[0], box[3] - box[1]), COLORS["panel"])
+        pen = self.ImageDraw.Draw(area)
+        mono, line_h = self.font("mono", _px(21)), _px(30)
+        shown = terminal_tail(screen.terminal, max(1, (area.height - _px(4)) // line_h))
+        x, y = _px(18), _px(2)
+        for k, line in enumerate(shown):
+            x, y = _px(18), _px(2) + k * line_h
+            text = f"$ {line.text}" if line.kind == "cmd" else line.text
+            color = {"cmd": COLORS["accent"], "err": COLORS["error"]}.get(line.kind, COLORS["text"])
+            pen.text((x, y), text, font=mono, fill=color)
+            x += pen.textlength(text, font=mono)
+            if line.entry:
+                pen.text((x, y), line.entry, font=mono, fill=COLORS["accent"])
+                x += pen.textlength(line.entry, font=mono)
+        if screen.cursor == "terminal" and screen.cursor_on:
+            pen.rectangle((x + _px(2), y, x + _px(4), y + line_h - _px(6)), fill=COLORS["text"])
+        image.paste(area, box[:2])
         return image
 
     def compare(self, scene, step, shown):

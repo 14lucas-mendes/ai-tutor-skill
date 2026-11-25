@@ -2,7 +2,8 @@ import copy
 import unittest
 from dataclasses import replace
 
-from scripts.ide_scene import IdeScreen, TermLine, initial_screen, step_events, validate_ide_scene
+from scripts.ide_scene import (IdeScreen, TermLine, first_visible_line, initial_screen, step_events, terminal_tail,
+                               validate_ide_scene)
 
 
 IDE_SCENE = {
@@ -191,6 +192,17 @@ class PacingTests(unittest.TestCase):
             self.assertEqual(sorted(times), times)
             self.assertEqual(0.0, times[0])
             self.assertTrue(all(t < speech + 0.6 for t in times))
+
+
+class ScrollTests(unittest.TestCase):
+    def test_editor_scrolls_to_keep_the_cursor_visible(self):
+        self.assertEqual(29, first_visible_line(40, 40, 12))
+        self.assertEqual(1, first_visible_line(5, 5, 12))
+        self.assertEqual(1, first_visible_line(40, 3, 12))
+
+    def test_terminal_keeps_its_last_lines(self):
+        self.assertEqual(("c", "d", "e"), terminal_tail(tuple("abcde"), 3))
+        self.assertEqual(("a",), terminal_tail(("a",), 3))
 
 
 if __name__ == "__main__":
