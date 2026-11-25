@@ -25,10 +25,13 @@ Initialize with `python <skill_root>/scripts/init_study.py --study-root <study_r
 ├── flashcards.md
 ├── lessons/
 ├── media/
-└── projects/
+│   ├── visuals/                 (explanation visuals the learner asked to save)
+│   └── <lesson-id>/notebooklm/  (learning packs)
+├── projects/
+└── <course_policy.path>/        (optional course, only when configured)
 ```
 
-Structured files are canonical. Markdown is a readable projection and carries stable IDs from structured state.
+Structured files are canonical. Markdown is a readable projection and carries stable IDs from structured state. The optional course (`references/workflows/course.md`) is also a readable projection, for any reader, and never holds personal state.
 
 `learner-profile.json` is a per-study canonical file for declared preferences, factual observations, and provenance-backed inferences. It is not a mastery store.
 
@@ -49,4 +52,4 @@ Do not leave a partially updated state. If validation fails, report the exact in
 
 ## Portability
 
-Scripts require Python 3.11+ and the standard library. Describe operations independently of shell; command examples may be adapted to PowerShell or POSIX shells.
+Scripts require Python 3.11+ and the standard library. The only exception is the optional rendering in `scripts/video_lesson.py` and `scripts/audio_review.py`: frames, speech, and the speech check use the studio dependencies pinned in `requirements-video.txt` (plus `ffmpeg` on `PATH`), imported only when used; their validation commands still run on the standard library alone (`references/media-providers.md`). Describe operations independently of shell; command examples may be adapted to PowerShell or POSIX shells.
