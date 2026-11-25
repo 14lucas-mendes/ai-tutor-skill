@@ -38,6 +38,18 @@ SCRIPT = {
         {"type": "questions", "intro": "To finish:", "items": ["Where should the model live?"], "outro": "The end."},
     ],
 }
+SUMMARY = {
+    "schema_version": 1,
+    "kind": "audio",
+    "style": "summary",
+    "title": "Summary: modules",
+    "lesson_id": "lesson_01-modules",
+    "source_ids": ["source_python-modules"],
+    "segments": [
+        {"type": "say", "text": "A module is a Python file."},
+        {"type": "say", "text": "It runs once per name."},
+    ],
+}
 
 
 class ValidationTests(unittest.TestCase):
@@ -77,6 +89,39 @@ class ValidationTests(unittest.TestCase):
         script["segments"][1]["answer"] = "Esta linha roda uma vez."
         self.assertEqual([], validate_audio_script(script))
         self.assertEqual(["points at a screen: 'Esta linha roda uma vez.'"], screen_warnings(script))
+
+
+class SummaryStyleTests(unittest.TestCase):
+    def test_summary_needs_no_recall_or_questions(self):
+        self.assertEqual([], validate_audio_script(SUMMARY))
+
+    def test_summary_may_close_with_questions(self):
+        script = copy.deepcopy(SUMMARY)
+        script["segments"].append({"type": "questions", "items": ["Where should the model live?"]})
+        self.assertEqual([], validate_audio_script(script))
+
+    def test_summary_rejects_recall_blocks(self):
+        script = copy.deepcopy(SUMMARY)
+        script["segments"].insert(1, copy.deepcopy(SCRIPT["segments"][1]))
+        self.assertIn("a summary has no recall segments; use the recall style for question and answer blocks",
+                      validate_audio_script(script))
+
+    def test_summary_needs_a_say_and_questions_stay_last(self):
+        script = copy.deepcopy(SUMMARY)
+        script["segments"] = [{"type": "questions", "items": ["Why?"]}, {"type": "questions", "items": ["How?"]}]
+        errors = validate_audio_script(script)
+        self.assertIn("a summary needs at least one say segment", errors)
+        self.assertIn("segment 1: questions must be the last segment", errors)
+
+    def test_unknown_style_fails(self):
+        script = copy.deepcopy(SCRIPT)
+        script["style"] = "podcast"
+        self.assertIn("style must be one of ['recall', 'summary']", validate_audio_script(script))
+
+    def test_summary_plan_is_speech_and_gaps_only(self):
+        self.assertEqual([("speech", "A module is a Python file.", ""), ("silence", GAP_AFTER_SAY, None),
+                          ("speech", "It runs once per name.", ""), ("silence", GAP_AFTER_SAY, None)],
+                         plan_audio(SUMMARY))
 
 
 class PlanTests(unittest.TestCase):
@@ -123,6 +168,11 @@ class CliTests(unittest.TestCase):
 
     def test_validate_runs_directly_and_isolated(self):
         result = self.run_cli(SCRIPT)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("AUDIO SCRIPT: PASS", result.stdout)
+
+    def test_validate_accepts_a_summary(self):
+        result = self.run_cli(SUMMARY)
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertIn("AUDIO SCRIPT: PASS", result.stdout)
 

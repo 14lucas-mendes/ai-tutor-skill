@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Render a local audio review: question, tone, pause, answer (retrieval first).
 
+Two styles share one script format:
+
+- ``recall`` (the default): retrieval first, with question, tone, pause and
+  answer blocks, closed by questions without answers;
+- ``summary``: a narrated summary of the lesson, only ``say`` segments and an
+  optional closing ``questions`` segment, for a learner who already does
+  retrieval in cards and asked for a screen-free retelling.
+
 The audio is written for the ear: it has its own script, never the video
 narration, because a video narration points at the screen ("this line").
 
@@ -39,6 +47,7 @@ except ModuleNotFoundError:  # direct execution, also under ``python -I``
 
 SCHEMA_VERSION = 1
 SEGMENT_TYPES = {"say", "recall", "questions"}
+STYLES = ("recall", "summary")
 SCREEN_WORDS = (
     "esta linha", "este bloco", "na tela", "veja aqui", "dá uma olhada", "aqui em cima",
     "this line", "this block", "on screen", "look here",
@@ -89,19 +98,25 @@ def validate_audio_script(script: object) -> list[str]:
     labels = script.get("labels", {})
     if not isinstance(labels, dict) or not all(k in DEFAULT_LABELS and isinstance(v, str) for k, v in labels.items()):
         errors.append(f"labels may only override {sorted(DEFAULT_LABELS)} with text")
+    style = script.get("style", "recall")
+    if style not in STYLES:
+        errors.append(f"style must be one of {list(STYLES)}")
     segments = script.get("segments")
     if not isinstance(segments, list) or not segments:
         errors.append("segments must be a non-empty list")
         return errors
     recalls = 0
+    says = 0
     for number, segment in enumerate(segments, 1):
         where = f"segment {number}"
         if not isinstance(segment, dict) or segment.get("type") not in SEGMENT_TYPES:
             errors.append(f"{where}: type must be one of {sorted(SEGMENT_TYPES)}")
             continue
         kind = segment["type"]
-        if kind == "say" and not _is_text(segment.get("text")):
-            errors.append(f"{where}: text must be non-empty text")
+        if kind == "say":
+            says += 1
+            if not _is_text(segment.get("text")):
+                errors.append(f"{where}: text must be non-empty text")
         if kind == "recall":
             recalls += 1
             for field in ("question", "answer"):
@@ -119,6 +134,12 @@ def validate_audio_script(script: object) -> list[str]:
                     errors.append(f"{where}: {field} must be non-empty text when present")
             if number != len(segments):
                 errors.append(f"{where}: questions must be the last segment")
+    if style == "summary":
+        if recalls:
+            errors.append("a summary has no recall segments; use the recall style for question and answer blocks")
+        if says == 0:
+            errors.append("a summary needs at least one say segment")
+        return errors
     if recalls == 0:
         errors.append("an audio review needs at least one recall segment")
     last = segments[-1]
