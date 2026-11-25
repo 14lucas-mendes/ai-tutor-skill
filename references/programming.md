@@ -50,15 +50,19 @@ In `theory_first`, do not probe a new topic before its theory; move this phase a
 
 ### 3. Theory (`theory_first`: complete, 20–40 minutes; `practice_first`: lean, 10–15 minutes)
 
-In `theory_first`, teach the complete theory in this order before guided practice:
+In `theory_first`, teach the complete theory "seen first, named later", in this order before guided practice:
 
-1. **Problem and why:** what problem this solves, why it exists, and a real-world example.
-2. **How it works inside:** the mental model of what happens when the code runs. When the learner asks for a visual, follow *Explanation visuals* in `references/output-contract.md`.
-3. **Vocabulary:** define every term and write it in the lesson file.
-4. **Examples:** a basic example read line by line, then a deeper one when the topic needs it.
-5. **Common errors and limits:** typical mistakes, misleading cases, and where the concept stops applying.
-6. **Understanding checks:** short questions such as predicting an output or explaining in the learner's own words. They are not evidence and do not apply help-ladder caps; a wrong answer calls for more teaching, not a score.
-7. **Bridge to the project:** where this appears in the current project and why it is done that way there.
+1. **In one sentence:** the whole idea in one plain sentence, tied to the real problem the topic solves and why it exists.
+2. **Seen working, in short steps:** each step starts with code running and its output on screen, then explains what happened, line by line, in plain sentences. Build the mental model of what happens inside here, one step at a time. When the learner asks for a visual, follow *Explanation visuals* in `references/output-contract.md`.
+3. **The technical name after seeing it, one at a time:** introduce each term right after the step that showed it ("Now, the technical name: ..."). Never open with a vocabulary list; before a term is named, describe the behavior in plain words, so no term is ever used unexplained.
+4. **Analogy in its own paragraph:** highlighted, not buried in a sentence. When the learner has already lived the situation, such as an error of theirs in a session, use it as the example.
+5. **Deeper example:** when the topic needs it.
+6. **Glossary at the end, for reference only:** each term, its plain-words meaning, and the step where it appeared. Write the theory, glossary included, in the lesson file.
+7. **Common errors and limits:** typical mistakes, misleading cases, and where the concept stops applying.
+8. **Understanding checks:** short questions such as predicting an output or explaining in the learner's own words. They are not evidence and do not apply help-ladder caps; a wrong answer calls for more teaching, not a score.
+9. **Bridge to the project:** where this appears in the current project and why it is done that way there.
+
+This order changes the sequence and the language, not the content or the rigor: the theory stays complete, and every example is checked by running it.
 
 Move to guided practice after the understanding checks, or earlier when the learner says they understood. The duration follows the topic; when the session cannot fit the theory and the practice, split the lesson as described under time pressure rather than cutting the theory.
 
