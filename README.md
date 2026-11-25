@@ -35,7 +35,9 @@ Antes de começar, tenha:
 - Python 3.11 ou superior;
 - Git, caso queira instalar pelo terminal.
 
-O Python é usado internamente pelo AI Tutor para salvar e validar seu progresso.
+O Python é usado internamente pelo AI Tutor para salvar e validar seu progresso. Para isso basta o Python instalado, sem nenhum pacote extra.
+
+A videoaula e o áudio de revisão locais são opcionais e precisam de algumas ferramentas a mais, instaladas à parte num "estúdio". Veja [Videoaula local](#como-o-tutor-se-adapta-a-você) mais abaixo. Quem não usa esses recursos não precisa instalar nada além do Python.
 
 Você pode verificar sua versão executando:
 
@@ -429,6 +431,7 @@ Cada tópico tem um nível de domínio. O nível só sobe com evidência do que 
 - **Não contam:** explicações e respostas do tutor, a teoria da lição, código copiado, cards, diagramas e outras mídias geradas, nem o diagnóstico.
 - **Aplicação padrão:** cumpre o objetivo da lição de ponta a ponta. Um acerto mais estreito (prever uma saída, rastrear um laço, um `assert` isolado) fica registrado como evidência de apoio (`supporting`). Ele ajuda o tutor a decidir o próximo passo, mas não vale para o 60. Quando isso acontece, o tutor diz qual é o critério e por quê.
 - **Transferência para o 80:** uma aplicação de ponta a ponta, feita sozinho, num contexto em que o tópico ainda não foi aplicado. Se sair parcial, você recebe a devolutiva e faz uma variação nova no mesmo contexto.
+- **Deslize de precisão:** quando a entrega inteira mostra o raciocínio certo e só um detalhe de forma o contradiz (uma seta invertida, um rótulo trocado, um nome digitado errado), o tutor avalia pela intenção que você demonstrou. O deslize não rebaixa a resposta: ele é mostrado como ajuste e, se voltar a acontecer, vira ponto fraco de precisão. Continua sendo erro quando nada na entrega mostra a intenção certa, quando o detalhe muda a lógica (um laço que não para, uma saída que falta) ou quando o detalhe é justamente o que a tarefa pedia.
 - **Validade:** evidências com mais de 45 dias continuam no histórico, mas precisam ser reconfirmadas antes de o nível subir.
 
 ### Ajuda e autonomia
@@ -486,7 +489,9 @@ Essa pasta passa a ser seu diretório de estudos. Ela pode conter:
 - projetos;
 - flashcards;
 - histórico de progresso;
-- visuais de explicação que você pediu para salvar (`media/visuals/`).
+- visuais de explicação que você pediu para salvar (`media/visuals/`);
+- roteiros e legendas de videoaulas e áudios de revisão locais, se você usar esses recursos (os arquivos MP4 e MP3 ficam fora do controle de versão, porque podem ser gerados de novo a partir do roteiro);
+- o curso do estudo, numa pasta escolhida por você, se você pedir um.
 
 Você normalmente não precisa editar esses arquivos manualmente.
 
@@ -674,7 +679,8 @@ Para detalhes técnicos, consulte:
 - [`references/learning-strategies.md`](references/learning-strategies.md): estratégias por fase e por tipo de matéria
 - [`references/programming.md`](references/programming.md): aulas de programação, revisão de código e roteiro para entender sistemas
 - [`references/output-contract.md`](references/output-contract.md): formato das respostas e dos visuais de explicação
-- [`references/workflows/`](references/workflows/)
+- [`references/media-providers.md`](references/media-providers.md): videoaula e áudio de revisão locais, o estúdio e o NotebookLM
+- [`references/workflows/`](references/workflows/): um arquivo por intenção, incluindo o curso do estudo ([`course.md`](references/workflows/course.md))
 
 ---
 
@@ -691,12 +697,14 @@ ai-tutor-skill/
 ├── locales/
 ├── scripts/
 ├── tests/
-└── docs/
+├── docs/
+└── requirements-video.txt
 ```
 
 - `SKILL.md`: ponto de entrada usado pelos agentes.
 - `references/`: workflows e contratos técnicos.
-- `scripts/`: inicialização, migração e validação do estado.
+- `scripts/`: inicialização, migração e validação do estado; a videoaula (`video_lesson.py`) e o áudio de revisão (`audio_review.py`) locais; e o conferidor do curso (`course_check.py`).
+- `requirements-video.txt`: as versões fixas das dependências opcionais do estúdio (Pillow, Pygments, Piper e faster-whisper). O resto da skill usa só a biblioteca padrão do Python.
 - `locales/`: textos traduzidos.
 - `docs/superpowers/`: specs e planos de design das mudanças.
 - `docs/decisions/`: decisões de rumo do projeto. Por exemplo, [por que o AI Tutor continua como skill e quando pode virar CLI ou MCP](docs/decisions/2026-11-23-skill-cli-ou-mcp.md).
@@ -707,6 +715,8 @@ Para validar localmente, rode os mesmos comandos do CI na raiz do repositório:
 python -m unittest discover -s tests -p 'test_*.py'
 python scripts/validate_skill.py .
 ```
+
+Os testes que renderizam o vídeo e gravam o MP3 do áudio são pulados quando o estúdio ou o `ffmpeg` não estão instalados. O restante (validação dos roteiros, pronúncia, legendas e comparação da fala) roda só com a biblioteca padrão, como no CI.
 
 Para conferir um programa de estudos:
 

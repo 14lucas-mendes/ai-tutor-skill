@@ -37,7 +37,7 @@ Load only the workflow needed for the current intent.
 | Create cards, images, diagrams, charts, audio, video, or NotebookLM material for later review, `/media` or `/notebooklm` | `references/workflows/media.md` |
 | Write or check the study's optional course, `/course` | `references/workflows/course.md` |
 
-For programming, also read `references/programming.md`. For output formats, read `references/output-contract.md`. For Google media generation, read `references/media-providers.md`.
+For programming, also read `references/programming.md`. For output formats, read `references/output-contract.md`. For local video lessons, local audio reviews, or NotebookLM/Gemini generation, read `references/media-providers.md`.
 
 ## Teaching approach
 

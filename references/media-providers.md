@@ -1,10 +1,10 @@
 # Media Providers: Local, NotebookLM, and Gemini
 
-Always create a local learning pack first. External generation is optional and cannot block study.
+Media is made either locally by the tutor (a video lesson or an audio review, below) or by an external provider (NotebookLM or Gemini). For an external provider, always create a local learning pack first (*Learning pack*). External generation is optional and cannot block study.
 
 ## Local video lessons
 
-When the study chooses tutor-made media, a video lesson is rendered on the learner's machine with `scripts/video_lesson.py`; nothing leaves the computer, so no upload consent is needed.
+When the learner chooses tutor-made media (made locally instead of by NotebookLM), a video lesson is rendered on the learner's machine with `scripts/video_lesson.py`; nothing leaves the computer, so no upload consent is needed.
 
 1. **Script.** Write a scene script (`schema_version: 1`) from the lesson's written theory and registered sources only, using the theory's own examples:
    - top level: `title`, `lesson_id`, `source_ids`, an optional `pronunciation` map, and `scenes`;

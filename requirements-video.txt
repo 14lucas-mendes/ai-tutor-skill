@@ -1,4 +1,5 @@
-# Optional dependencies of scripts/video_lesson.py (local video lessons).
+# Optional dependencies of scripts/video_lesson.py (local video lessons)
+# and scripts/audio_review.py (local audio reviews): the "studio".
 # The rest of the skill uses only the Python standard library.
 # ffmpeg is not a Python package: install it separately and keep it on PATH.
 pillow==13.0.0
