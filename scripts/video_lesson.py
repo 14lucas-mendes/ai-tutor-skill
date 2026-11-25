@@ -766,23 +766,22 @@ def render_frames(script: dict) -> Iterator[tuple[str, str, object]]:
 def _still_steps(painter, scene_number: int, scene: dict) -> Iterator[tuple[str, str, object]]:
     """Steps of a still scene; it keeps what earlier steps revealed."""
 
-    if True:
-        note_seen, shown = False, []
-        for step_number, step in enumerate(scene["steps"], 1):
-            kind = scene["type"]
-            if kind == "title":
-                image = painter.title(scene, step)
-            elif kind in {"list", "questions"}:
-                image = painter.listing(scene, step, numbered=kind == "questions")
-            elif kind == "flow":
-                note_seen = note_seen or bool(step.get("note"))
-                image = painter.flow(scene, step, note_seen)
-            elif kind == "code":
-                image = painter.code(scene, step)
-            else:
-                shown.append(step["show"])
-                image = painter.compare(scene, step, shown)
-            yield f"s{scene_number:02d}_p{step_number:02d}", step["say"], image
+    note_seen, shown = False, []
+    for step_number, step in enumerate(scene["steps"], 1):
+        kind = scene["type"]
+        if kind == "title":
+            image = painter.title(scene, step)
+        elif kind in {"list", "questions"}:
+            image = painter.listing(scene, step, numbered=kind == "questions")
+        elif kind == "flow":
+            note_seen = note_seen or bool(step.get("note"))
+            image = painter.flow(scene, step, note_seen)
+        elif kind == "code":
+            image = painter.code(scene, step)
+        else:
+            shown.append(step["show"])
+            image = painter.compare(scene, step, shown)
+        yield f"s{scene_number:02d}_p{step_number:02d}", step["say"], image
 
 
 # ---------------------------------------------------------------------------
