@@ -17,6 +17,9 @@ Usage::
     python scripts/video_lesson.py render script.json --audio audio --out lesson.mp4 --frames frames
     python scripts/video_lesson.py check script.json lesson.mp4
 
+Videos are 1920x1080 at 30 frames per second. The ``ide`` scene (code typed in
+an editor, then run in a terminal) has its pure part in ``ide_scene.py``.
+
 Generated videos are review material: never learning evidence.
 """
 

@@ -14,6 +14,7 @@ When the learner chooses tutor-made media (made locally instead of by NotebookLM
    - `flow` takes 1 to 3 `boxes` with `label` and `detail`, and an optional `note`; each step takes `active` and `note`;
    - `code` takes `file`, `language`, `code` and an optional `command`; each step takes `visible`, `highlight`, `output` and `error`;
    - `compare` takes `left`, `right` and `footer`; each step's `show` is `left`, `right` or `footer`;
+   - `ide` shows code being typed in an editor and run in a terminal (see *The `ide` scene* below);
    - the last scene is `questions`: retrieval questions without answers;
    - in on-screen text (titles, items, boxes, compare lines, notes and footers), wrap inline code in backticks, as in `` `print(__name__)` ``. It is drawn in the monospaced font, because proportional fonts merge `__` into one stroke. Unbalanced backticks fail validation.
 2. **Verify before rendering.**
@@ -22,6 +23,8 @@ When the learner chooses tutor-made media (made locally instead of by NotebookLM
 3. **Speech.** Run `speak --voice piper --model <voice.onnx>` (any OS) or `--voice sapi` (Windows). The `pronunciation` map turns terms into their spoken form for the voice only; the subtitles keep the script text.
 4. **Render.**
    - `render --audio <dir> --out <lesson.mp4> --frames <dir>` draws dark-theme frames (code highlighted line by line, unhighlighted lines dimmed) and joins them with the speech.
+   - The video is 1920×1080 at 30 frames per second.
+   - A `WARNING: <step> has more than its narration can show` line means an `ide` step had to show its code line by line, or its terminal at once. Split that step and render again.
    - The subtitle file (`.srt`) is written next to the video and added as a separate track. It also serves as the transcript.
    - Subtitles are not burned into the image: on-screen text identical to the narration hurts learning (redundancy principle).
 5. **Check before delivering.**
@@ -29,6 +32,39 @@ When the learner chooses tutor-made media (made locally instead of by NotebookLM
    - Run `check <script.json> <lesson.mp4>` to transcribe the speech locally and list words that differ from the script. Recognizer noise (accents, digits) is expected; fix real mispronunciations in the `pronunciation` map.
    - Voice naturalness is judged by the learner.
 6. **Register** the item in `media-index.json` with `type: "video"`, `provider: "local"`, the `.srt` as `transcript`, and `evidence_eligible: false`. Keep the MP4 out of version control; the script and subtitles are enough to render it again.
+
+### The `ide` scene
+
+Use it when the lesson shows code running: the code is typed in an editor, letter by letter, in time with the narration, and then it runs in a terminal below. Use `code` to show a file without typing.
+
+**Scene fields:**
+- `title`, drawn small so the editor has room;
+- `files`: 1 to 4 files, each with `name`, `language` and `code`. Each file is a tab.
+
+**Step fields** (all optional except `say`):
+- `file`: the active tab. Without it, the tab stays the same; the first step starts on the first file.
+- `type`: how many lines of the active file are visible at the end of the step. The missing lines are typed during the narration.
+- `show`: like `type`, but the lines appear at once. A step uses `type` or `show`, never both. Lines never disappear: the count never goes down within a file.
+- `highlight`: lines highlighted at the end of the step; the others are dimmed.
+- `terminal`: lines added to the terminal, in order. Each line has exactly one key:
+  - `cmd`: a command, typed after `$`;
+  - `out`: program output, shown at once;
+  - `err`: error output, shown at once in red;
+  - `in`: what the user types after the last `out` (the prompt of an `input()`), on the same line.
+- `clear_terminal`: `true` clears the terminal before this step's lines. The terminal starts empty in each scene.
+
+**Pacing:** everything that moves in a step ends by 75% of its narration. Typing runs at one speed for the whole step, between about 8 and 60 characters per second. Each `out` and `err` appears 0.3 s after the line before it. Afterwards the cursor blinks.
+
+**Writing rule: one idea per step.** The narration talks about what appears in that step, not what comes next. When the narration announces the output ("it prints 212.0"), type the code in one step and run it in the next, so the output never appears after the narration has said it.
+
+```json
+{"type": "ide", "title": "Who imports",
+ "files": [{"name": "conv.py", "language": "python", "code": "def f(c):\n    return c * 9 / 5 + 32"},
+           {"name": "use.py", "language": "python", "code": "import conv\nprint(conv.f(100))"}],
+ "steps": [{"file": "conv.py", "show": 2, "say": "The module we already wrote."},
+           {"file": "use.py", "type": 2, "highlight": [1], "say": "A second file imports it."},
+           {"terminal": [{"cmd": "python use.py"}, {"out": "212.0"}], "say": "Running it prints 212.0."}]}
+```
 
 Optional dependencies, imported only when used:
 - `piper-tts` and a voice model, for speech;
