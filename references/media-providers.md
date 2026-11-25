@@ -40,12 +40,12 @@ Without them, the workflow stops at a validated script, which is still a usable 
 
 ## Local audio reviews
 
-An audio review is for screen-free review, made with `scripts/audio_review.py` and the same studio. It is retrieval first, not a replayed lesson.
+An audio review is for screen-free review, made with `scripts/audio_review.py` and the same studio. By default it is retrieval first, not a replayed lesson; a narrated summary is the exception the learner may choose (below).
 
 **Its own script, written for the ear.** Never reuse the video narration: a video narration points at the screen ("this line", "this block"), which the listener does not have. Describe code in words; do not read code symbol by symbol.
 
 **Script format** (`schema_version: 1`, `kind: "audio"`):
-- top level: `title`, `lesson_id`, `source_ids`, an optional `pronunciation` map, optional `labels`, and `segments`;
+- top level: `title`, `lesson_id`, `source_ids`, an optional `style` (`recall`, the default, or `summary`), an optional `pronunciation` map, optional `labels`, and `segments`;
 - `labels` localizes the transcript markers: `question`, `answer`, `pause`, `final` and `think`;
 - each segment is one of three types:
   - `say`, with `text`;
@@ -68,6 +68,14 @@ Aim for 4 to 6 minutes per part of a lesson. Each answer must come from the writ
 **Registering:** register the item in `media-index.json` with `type: "audio"`, `provider: "local"`, the `.txt` as `transcript`, and `evidence_eligible: false`. Keep the MP3 out of version control.
 
 **What it is not:** an audio review does not record retrieval attempts. Recall that must count still happens in cards or in a session.
+
+**Narrated summary (`"style": "summary"`).** When the learner asks for a retelling instead of recall, because retrieval already happens in cards, set `style` to `summary` (the default is `recall`):
+- the script has only `say` segments, plus an optional closing `questions` segment;
+- `recall` segments are rejected, and no tone or pause is played;
+- it is still written for the ear, from the written theory or a registered source, with the same commands, check and registration;
+- aim for 4 to 6 minutes per part of a lesson.
+
+Offer the recall style first; use the summary only when the learner chooses it. Neither style is evidence.
 
 ### Studio environment
 
