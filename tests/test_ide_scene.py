@@ -2,7 +2,7 @@ import copy
 import unittest
 from dataclasses import replace
 
-from scripts.ide_scene import (IdeScreen, TermLine, first_visible_line, initial_screen, quantize, step_events, terminal_tail,
+from scripts.ide_scene import (IdeScreen, TermLine, editor_first_line, first_visible_line, initial_screen, quantize, step_events, terminal_tail,
                                validate_ide_scene)
 
 
@@ -68,6 +68,12 @@ class IdeValidationTests(unittest.TestCase):
             scene["steps"][2]["terminal"] = [bad]
             self.assertIn("scene 1 step 3: terminal must be a list of lines with one of cmd, out, err, in",
                           errors_of(scene), bad)
+
+    def test_terminal_text_must_be_one_line(self):
+        for bad in ({"out": "1\n2"}, {"cmd": "a\r\nb"}):
+            scene = copy.deepcopy(IDE_SCENE)
+            scene["steps"][2]["terminal"] = [bad]
+            self.assertIn("scene 1 step 3: terminal text must be one line; use one out per line", errors_of(scene), bad)
 
     def test_in_must_follow_out(self):
         scene = copy.deepcopy(IDE_SCENE)
@@ -210,6 +216,12 @@ class ScrollTests(unittest.TestCase):
         self.assertEqual(29, first_visible_line(40, 40, 12))
         self.assertEqual(1, first_visible_line(5, 5, 12))
         self.assertEqual(1, first_visible_line(40, 3, 12))
+
+    def test_editor_keeps_highlighted_lines_in_view(self):
+        self.assertEqual(1, editor_first_line(15, (2,), 11))
+        self.assertEqual(5, editor_first_line(15, (), 11))
+        self.assertEqual(5, editor_first_line(15, (14, 15), 11))
+        self.assertEqual(3, editor_first_line(13, (12, 13), 11))
 
     def test_terminal_keeps_its_last_lines(self):
         self.assertEqual(("c", "d", "e"), terminal_tail(tuple("abcde"), 3))

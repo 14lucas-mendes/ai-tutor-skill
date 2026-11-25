@@ -39,11 +39,11 @@ from pathlib import Path
 from typing import Callable, Iterator
 
 try:
-    from scripts.ide_scene import (code_lines, first_visible_line, initial_screen, quantize, step_events,
+    from scripts.ide_scene import (code_lines, editor_first_line, first_visible_line, initial_screen, quantize, step_events,
                                    terminal_tail, validate_ide_scene)
 except ModuleNotFoundError:  # direct execution, also under ``python -I``
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from ide_scene import (code_lines, first_visible_line, initial_screen, quantize, step_events,
+    from ide_scene import (code_lines, editor_first_line, first_visible_line, initial_screen, quantize, step_events,
                            terminal_tail, validate_ide_scene)
 
 SCHEMA_VERSION = 1
@@ -572,7 +572,7 @@ class _Painter:
         from pygments.lexers import get_lexer_by_name
 
         rows: list[list[tuple[object, str]]] = [[]]
-        for kind, value in lex(code, get_lexer_by_name(language)):
+        for kind, value in lex(code, get_lexer_by_name(language, stripnl=False)):
             for k, piece in enumerate(value.split("\n")):
                 if k:
                     rows.append([])
@@ -649,7 +649,7 @@ class _Painter:
         lines = code_lines(code[:count]) if count else []
         rows = self.code_rows(code, files[screen.active]["language"])
         capacity = max(1, (area.height - _px(8)) // line_h)
-        first = first_visible_line(len(lines), len(lines), capacity)
+        first = editor_first_line(len(lines), screen.highlight, capacity)
         marked = set(screen.highlight)
         cursor_at = (_px(68), _px(6))
         for index in range(first - 1, min(len(lines), first - 1 + capacity)):

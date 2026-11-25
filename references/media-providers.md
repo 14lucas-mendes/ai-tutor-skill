@@ -53,6 +53,10 @@ Use it when the lesson shows code running: the code is typed in an editor, lette
   - `in`: what the user types after the last `out` (the prompt of an `input()`), on the same line.
 - `clear_terminal`: `true` clears the terminal before this step's lines. The terminal starts empty in each scene.
 
+Each terminal text is one line: write one `out` per line of output.
+
+**Room on screen:** the editor shows 11 lines and the terminal 4. A longer file scrolls to keep the highlighted lines in view, or the last line when nothing is highlighted; the terminal keeps its last lines.
+
 **Pacing:** everything that moves in a step ends by 75% of its narration. Typing runs at one speed for the whole step, between about 8 and 60 characters per second. Each `out` and `err` appears 0.3 s after the line before it. Afterwards the cursor blinks.
 
 **Writing rule: one idea per step.** The narration talks about what appears in that step, not what comes next. When the narration announces the output ("it prints 212.0"), type the code in one step and run it in the next, so the output never appears after the narration has said it.

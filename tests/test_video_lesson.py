@@ -236,6 +236,15 @@ class RenderTests(unittest.TestCase):
             self.assertGreater(len(list((work / "frames").glob("s06_p02_f*.png"))), 1)
 
 
+@unittest.skipUnless(importlib.util.find_spec("pygments") is not None, "pygments is optional")
+class CodeRowsTests(unittest.TestCase):
+    def test_code_rows_keep_a_leading_blank_line(self):
+        from scripts.video_lesson import _Painter
+
+        rows = _Painter.code_rows("\nx = 1\ny = 2", "python")
+        self.assertEqual([[], "x = 1", "y = 2"], [rows[0]] + ["".join(t for _, t in row) for row in rows[1:3]])
+
+
 @unittest.skipUnless(HAS_RENDER_TOOLS, "pillow, pygments and ffmpeg are optional")
 class IdePaintTests(unittest.TestCase):
     def paint(self, code: str):

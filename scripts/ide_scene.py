@@ -104,6 +104,8 @@ def validate_ide_scene(scene: dict, where: str, steps: list[dict], errors: list[
         ):
             errors.append(f"{at}: terminal must be a list of lines with one of cmd, out, err, in")
             continue
+        if any("\n" in text or "\r" in text for line in terminal for text in line.values()):
+            errors.append(f"{at}: terminal text must be one line; use one out per line")
         for line in terminal:
             kind = next(iter(line))
             if kind == "in" and last_terminal != "out":
@@ -316,3 +318,11 @@ def quantize(events: list[tuple[float, object]], total: float, fps: int) -> list
         end = slots[k + 1][0] / fps if k + 1 < len(slots) else total
         frames.append((item, end - slot / fps))
     return frames
+
+
+def editor_first_line(total_lines: int, highlight: tuple[int, ...], capacity: int) -> int:
+    """First editor line on screen: the highlighted lines stay in view, else the last line does."""
+
+    if not highlight:
+        return first_visible_line(total_lines, total_lines, capacity)
+    return min(min(highlight), first_visible_line(total_lines, max(highlight), capacity))
