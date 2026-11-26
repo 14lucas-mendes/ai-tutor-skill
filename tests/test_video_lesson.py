@@ -54,6 +54,16 @@ SCRIPT = {
 }
 
 
+def with_ide(script: dict) -> dict:
+    """A copy of ``script`` with the reference ide scene before the closing questions."""
+
+    from tests.test_ide_scene import IDE_SCENE
+
+    result = copy.deepcopy(script)
+    result["scenes"].insert(len(result["scenes"]) - 1, copy.deepcopy(IDE_SCENE))
+    return result
+
+
 class ValidationTests(unittest.TestCase):
     def test_valid_script_passes(self):
         self.assertEqual([], validate_video_script(SCRIPT))
@@ -90,6 +100,15 @@ class ValidationTests(unittest.TestCase):
         script["scenes"][5]["items"][0] = "What does `print(__name__) show?"
         self.assertIn("scene 6: unbalanced backtick in 'What does `print(__name__) show?'",
                       validate_video_script(script))
+
+    def test_script_with_ide_scene_passes(self):
+        self.assertEqual([], validate_video_script(with_ide(SCRIPT)))
+
+    def test_ide_code_is_not_checked_for_backticks(self):
+        script = with_ide(SCRIPT)
+        script["scenes"][5]["files"][0]["code"] = "s = '`'"
+        script["scenes"][5]["steps"][0]["show"] = 1
+        self.assertEqual([], validate_video_script(script))
 
     def test_footer_and_note_need_text(self):
         script = copy.deepcopy(SCRIPT)
@@ -168,6 +187,14 @@ HAS_RENDER_TOOLS = (
 )
 
 
+def probe_video(path: Path) -> dict:
+    """Return the first video stream that ffprobe reports for ``path``."""
+
+    result = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_streams", "-of", "json", str(path)],
+                            capture_output=True, text=True, check=True)
+    return json.loads(result.stdout)["streams"][0]
+
+
 @unittest.skipUnless(HAS_RENDER_TOOLS, "pillow, pygments and ffmpeg are optional")
 class RenderTests(unittest.TestCase):
     def test_renders_video_with_subtitles(self):
@@ -184,8 +211,61 @@ class RenderTests(unittest.TestCase):
             out = work / "lesson.mp4"
             total = render_video(SCRIPT, audio, out, work / "frames")
             self.assertTrue(out.is_file())
+            video = probe_video(out)
+            self.assertEqual((1920, 1080, "30/1"), (video["width"], video["height"], video["r_frame_rate"]))
             self.assertAlmostEqual(len(spoken_lines(SCRIPT)) * 1.1, total, places=3)
             self.assertIn("It prints 212.0.", out.with_suffix(".srt").read_text(encoding="utf-8"))
+
+    def test_renders_ide_scene(self):
+        script = with_ide(SCRIPT)
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            audio = work / "audio"
+            audio.mkdir()
+            for step_id, _ in spoken_lines(script):
+                with wave.open(str(audio / f"{step_id}.wav"), "wb") as handle:
+                    handle.setnchannels(1)
+                    handle.setsampwidth(2)
+                    handle.setframerate(16000)
+                    handle.writeframes(b"\x00\x00" * 8000)
+            out = work / "lesson.mp4"
+            total = render_video(script, audio, out, work / "frames")
+            video = probe_video(out)
+            self.assertEqual((1920, 1080), (video["width"], video["height"]))
+            self.assertAlmostEqual(len(spoken_lines(script)) * 1.1, total, places=3)
+            self.assertGreater(len(list((work / "frames").glob("s06_p02_f*.png"))), 1)
+
+
+@unittest.skipUnless(importlib.util.find_spec("pygments") is not None, "pygments is optional")
+class CodeRowsTests(unittest.TestCase):
+    def test_code_rows_keep_a_leading_blank_line(self):
+        from scripts.video_lesson import _Painter
+
+        rows = _Painter.code_rows("\nx = 1\ny = 2", "python")
+        self.assertEqual([[], "x = 1", "y = 2"], [rows[0]] + ["".join(t for _, t in row) for row in rows[1:3]])
+
+
+@unittest.skipUnless(HAS_RENDER_TOOLS, "pillow, pygments and ffmpeg are optional")
+class IdePaintTests(unittest.TestCase):
+    def paint(self, code: str):
+        from scripts.ide_scene import IdeScreen, TermLine
+        from scripts.video_lesson import _Painter
+
+        scene = {"type": "ide", "title": "T", "files": [{"name": "a.py", "language": "python", "code": code}],
+                 "steps": [{"show": 1, "say": "s"}]}
+        screen = IdeScreen("a.py", (("a.py", len(code)),), (1,), (TermLine("cmd", "python a.py"), TermLine("out", "W" * 300)),
+                           "terminal", True)
+        return _Painter(SCRIPT).ide(scene, screen)
+
+    def test_ide_frame_is_full_hd(self):
+        self.assertEqual((1920, 1080), self.paint("x = 1").size)
+
+    def test_long_line_is_clipped_at_panel_edge(self):
+        from scripts.video_lesson import COLORS, HEIGHT, WIDTH, _px
+
+        image = self.paint("W" * 300)
+        column = [image.getpixel((WIDTH - _px(30), y)) for y in range(HEIGHT - _px(60))]
+        self.assertTrue(all(pixel == COLORS["background"] for pixel in column))
 
 
 if __name__ == "__main__":

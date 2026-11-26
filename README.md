@@ -703,7 +703,7 @@ ai-tutor-skill/
 
 - `SKILL.md`: ponto de entrada usado pelos agentes.
 - `references/`: workflows e contratos técnicos.
-- `scripts/`: inicialização, migração e validação do estado; a videoaula (`video_lesson.py`) e o áudio de revisão (`audio_review.py`) locais; e o conferidor do curso (`course_check.py`).
+- `scripts/`: inicialização, migração e validação do estado; a videoaula (`video_lesson.py`, com a cena de editor e terminal em `ide_scene.py`) e o áudio de revisão (`audio_review.py`) locais; e o conferidor do curso (`course_check.py`).
 - `requirements-video.txt`: as versões fixas das dependências opcionais do estúdio (Pillow, Pygments, Piper e faster-whisper). O resto da skill usa só a biblioteca padrão do Python.
 - `locales/`: textos traduzidos.
 - `docs/superpowers/`: specs e planos de design das mudanças.

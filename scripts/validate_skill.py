@@ -40,6 +40,7 @@ REQUIRED_FILES = (
     "scripts/state_io.py",
     "scripts/projections.py",
     "scripts/video_lesson.py",
+    "scripts/ide_scene.py",
     "scripts/audio_review.py",
 )
 
