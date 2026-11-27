@@ -41,6 +41,7 @@ REQUIRED_FILES = (
     "scripts/projections.py",
     "scripts/video_lesson.py",
     "scripts/ide_scene.py",
+    "scripts/cloud_voice.py",
     "scripts/audio_review.py",
 )
 
