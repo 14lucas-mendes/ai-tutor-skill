@@ -40,10 +40,12 @@ import wave
 from pathlib import Path
 
 try:
-    from scripts.video_lesson import VOICES, build_pronouncer, speak_texts, speech_match
+    from scripts.video_lesson import (add_speech_arguments, cloud_options, speak_script_texts, speech_match,
+                                      validate_pronunciation)
 except ModuleNotFoundError:  # direct execution, also under ``python -I``
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from video_lesson import VOICES, build_pronouncer, speak_texts, speech_match
+    from video_lesson import (add_speech_arguments, cloud_options, speak_script_texts, speech_match,
+                              validate_pronunciation)
 
 SCHEMA_VERSION = 1
 SEGMENT_TYPES = {"say", "recall", "questions"}
@@ -92,9 +94,7 @@ def validate_audio_script(script: object) -> list[str]:
     sources = script.get("source_ids")
     if not isinstance(sources, list) or not sources or not all(_is_text(s) for s in sources):
         errors.append("source_ids must list at least one source")
-    pronunciation = script.get("pronunciation", {})
-    if not isinstance(pronunciation, dict) or not all(_is_text(k) and isinstance(v, str) for k, v in pronunciation.items()):
-        errors.append("pronunciation must map text to spoken text")
+    errors.extend(validate_pronunciation(script))
     labels = script.get("labels", {})
     if not isinstance(labels, dict) or not all(k in DEFAULT_LABELS and isinstance(v, str) for k, v in labels.items()):
         errors.append(f"labels may only override {sorted(DEFAULT_LABELS)} with text")
@@ -285,15 +285,17 @@ def assemble_audio(pieces: list[tuple], speech_wavs: list[Path], out: Path, titl
     return seconds
 
 
-def render_audio(script: dict, out: Path, voice: str = "piper", model: Path | None = None) -> float:
+def render_audio(script: dict, out: Path, voice: str = "piper", model: Path | None = None,
+                 cloud=None, fallback_model: Path | None = None) -> float:
     """Speak every text, join with tones and pauses, and write the MP3 and its ``.txt`` transcript."""
 
-    pronounce = build_pronouncer(script.get("pronunciation", {}))
     pieces = plan_audio(script)
     texts = [piece[1] for piece in pieces if piece[0] == "speech"]
     with tempfile.TemporaryDirectory() as tmp:
-        jobs = [(Path(tmp) / f"t{n:03d}.wav", pronounce(text)) for n, text in enumerate(texts)]
-        wavs = speak_texts(jobs, voice=voice, model=model)
+        wavs = [Path(tmp) / f"t{n:03d}.wav" for n in range(len(texts))]
+        used = speak_script_texts(wavs, texts, script, voice=voice, model=model, cloud=cloud,
+                                  fallback_model=fallback_model)
+        print(f"VOICE: {used}")
         durations = []
         for path in wavs:
             with wave.open(str(path)) as handle:
@@ -336,8 +338,7 @@ def main(argv: list[str] | None = None) -> int:
     render = commands.add_parser("render")
     render.add_argument("script", type=Path)
     render.add_argument("--out", type=Path, required=True)
-    render.add_argument("--voice", choices=sorted(VOICES), default="piper")
-    render.add_argument("--model", type=Path)
+    add_speech_arguments(render)
     check = commands.add_parser("check")
     check.add_argument("script", type=Path)
     check.add_argument("audio", type=Path)
@@ -348,7 +349,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate":
         print("AUDIO SCRIPT: PASS")
     elif args.command == "render":
-        total = render_audio(script, args.out, voice=args.voice, model=args.model)
+        total = render_audio(script, args.out, voice=args.voice, model=args.model, cloud=cloud_options(args),
+                             fallback_model=args.fallback_model)
         print(f"AUDIO: {args.out} ({total:.1f} s)")
     else:
         ratio, differences = check_audio(script, args.audio, model=args.model)
