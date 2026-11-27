@@ -5,7 +5,8 @@ The pure part (script validation, pronunciation, timeline, subtitles and the
 speech check) uses only the standard library. Speech, drawing and assembly
 import their optional dependencies lazily:
 
-- speech: ``piper-tts`` (any OS) or the Windows SAPI voices (Windows only);
+- speech: ``piper-tts`` (any OS), the Windows SAPI voices (Windows only), or a cloud voice through
+  OpenRouter (``cloud_voice.py``, standard library only; sends the text out, so it needs consent);
 - frames: ``pillow`` and ``pygments``;
 - assembly: the ``ffmpeg`` executable;
 - speech check: ``faster-whisper``.
@@ -28,6 +29,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -36,20 +38,22 @@ import tempfile
 import wave
 from dataclasses import replace
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import Callable, Iterator, Mapping
 
 try:
+    from scripts.cloud_voice import DEFAULT_CACHE, CloudOptions, CloudVoiceError, speak_cloud
     from scripts.ide_scene import (code_lines, editor_first_line, first_visible_line, initial_screen, quantize, step_events,
                                    terminal_tail, validate_ide_scene)
 except ModuleNotFoundError:  # direct execution, also under ``python -I``
     sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from cloud_voice import DEFAULT_CACHE, CloudOptions, CloudVoiceError, speak_cloud
     from ide_scene import (code_lines, editor_first_line, first_visible_line, initial_screen, quantize, step_events,
                            terminal_tail, validate_ide_scene)
 
 SCHEMA_VERSION = 1
 SCENE_TYPES = {"title", "list", "questions", "flow", "code", "compare", "ide"}
 COMPARE_PARTS = ("left", "right", "footer")
-VOICES = {"piper", "sapi"}
+VOICES = {"piper", "sapi", "openrouter"}
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
 SCALE = 1.5  # the layout was drawn for 1280x720; every measure is scaled to Full HD
@@ -178,6 +182,17 @@ def _screen_texts(scene: object) -> list[str]:
     return [text for text in texts if isinstance(text, str)]
 
 
+def validate_pronunciation(script: dict) -> list[str]:
+    """``pronunciation`` (local voices) and ``pronunciation_cloud`` (cloud voices) map text to spoken text."""
+
+    errors = []
+    for key in ("pronunciation", "pronunciation_cloud"):
+        mapping = script.get(key, {})
+        if not isinstance(mapping, dict) or not all(_is_text(k) and isinstance(v, str) for k, v in mapping.items()):
+            errors.append(f"{key} must map text to spoken text")
+    return errors
+
+
 def validate_video_script(script: object) -> list[str]:
     """Return every problem in a video script; an empty list means valid."""
 
@@ -192,11 +207,7 @@ def validate_video_script(script: object) -> list[str]:
     sources = script.get("source_ids")
     if not isinstance(sources, list) or not sources or not all(_is_text(s) for s in sources):
         errors.append("source_ids must list at least one source")
-    pronunciation = script.get("pronunciation", {})
-    if not isinstance(pronunciation, dict) or not all(
-        _is_text(k) and isinstance(v, str) for k, v in pronunciation.items()
-    ):
-        errors.append("pronunciation must map text to spoken text")
+    errors.extend(validate_pronunciation(script))
     scenes = script.get("scenes")
     if not isinstance(scenes, list) or not scenes:
         errors.append("scenes must be a non-empty list")
@@ -313,21 +324,85 @@ def speech_match(reference: str, heard: str) -> tuple[float, list[tuple[str, str
 # ---------------------------------------------------------------------------
 
 def synthesize(script: dict, out_dir: Path, voice: str = "piper", model: Path | None = None,
-               sapi_voice: str = "Microsoft Maria Desktop", sapi_rate: int = 2) -> list[Path]:
-    """Write one WAV per step. Piper needs ``model``; SAPI runs only on Windows."""
+               cloud: CloudOptions | None = None, fallback_model: Path | None = None) -> tuple[list[Path], str]:
+    """Write one WAV per step and return the paths and the voice actually used."""
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    lines = spoken_lines(script)
-    jobs = [(out_dir / f"{step_id}.wav", text) for step_id, text in lines]
-    return speak_texts(jobs, voice=voice, model=model, sapi_voice=sapi_voice, sapi_rate=sapi_rate)
+    steps = list(iter_steps(script))
+    paths = [out_dir / f"{step_id}.wav" for step_id, _, _, _ in steps]
+    used = speak_script_texts(paths, [say for _, say, _, _ in steps], script, voice=voice, model=model,
+                              cloud=cloud, fallback_model=fallback_model)
+    return paths, used
+
+
+def speak_script_texts(paths: list[Path], texts: list[str], script: dict, *, voice: str, model: Path | None,
+                       cloud: CloudOptions | None = None, fallback_model: Path | None = None,
+                       env: Mapping[str, str] = os.environ, opener=None,
+                       local_speak: Callable | None = None) -> str:
+    """Speak the script texts with one voice for all of them and return the voice used.
+
+    Cloud voices read ``pronunciation_cloud``; local voices read ``pronunciation``.
+    The ``openrouter`` voice sends the text outside the computer, so it requires
+    ``cloud.external_ok`` (the learner's consent) and ``OPENROUTER_API_KEY``. When
+    any cloud request fails, every text is spoken again with Piper when
+    ``fallback_model`` is given, so a lesson never mixes voices.
+    """
+
+    local_speak = local_speak or speak_texts
+    if voice != "openrouter":
+        pronounce = build_pronouncer(script.get("pronunciation", {}))
+        local_speak([(p, pronounce(t)) for p, t in zip(paths, texts)], voice=voice, model=model)
+        return voice
+    if cloud is None or not cloud.external_ok:
+        raise ValueError("the openrouter voice sends the lesson text outside the computer: "
+                         "pass --external-ok only after the learner consents")
+    api_key = env.get("OPENROUTER_API_KEY", "").strip()
+    if not api_key:
+        raise ValueError("the openrouter voice needs the OPENROUTER_API_KEY environment variable")
+    cloud_pronounce = build_pronouncer(script.get("pronunciation_cloud", {}))
+    try:
+        speak_cloud(paths, [cloud_pronounce(t) for t in texts], cloud, api_key,
+                    **({"opener": opener} if opener else {}))
+        return "openrouter"
+    except CloudVoiceError as error:
+        if fallback_model is None:
+            raise
+        print(f"WARNING: cloud voice failed ({error}); speaking everything with Piper", file=sys.stderr)
+    pronounce = build_pronouncer(script.get("pronunciation", {}))
+    local_speak([(p, pronounce(t)) for p, t in zip(paths, texts)], voice="piper", model=fallback_model)
+    return "piper"
+
+
+def add_speech_arguments(parser: argparse.ArgumentParser, env: Mapping[str, str] = os.environ) -> None:
+    """Voice options shared by the video and the audio review; defaults may come from the studio's environment."""
+
+    piper = Path(env["AI_TUTOR_PIPER_MODEL"]) if env.get("AI_TUTOR_PIPER_MODEL") else None
+    parser.add_argument("--voice", choices=sorted(VOICES), default="piper")
+    parser.add_argument("--model", type=Path, default=piper, help="Piper .onnx voice")
+    parser.add_argument("--cloud-model", default=env.get("AI_TUTOR_CLOUD_MODEL"))
+    parser.add_argument("--cloud-voice", default=env.get("AI_TUTOR_CLOUD_VOICE"))
+    parser.add_argument("--instructions", default=env.get("AI_TUTOR_CLOUD_INSTRUCTIONS", ""))
+    parser.add_argument("--external-ok", action="store_true",
+                        help="the learner consented to send this text to the cloud voice")
+    parser.add_argument("--fallback-model", type=Path, default=piper, help="Piper .onnx used when the cloud fails")
+    parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE)
+
+
+def cloud_options(args: argparse.Namespace) -> CloudOptions | None:
+    if args.voice != "openrouter":
+        return None
+    if not args.cloud_model or not args.cloud_voice:
+        raise SystemExit("the openrouter voice needs --cloud-model and --cloud-voice")
+    return CloudOptions(model=args.cloud_model, voice=args.cloud_voice, instructions=args.instructions or "",
+                        cache_dir=args.cache, external_ok=args.external_ok)
 
 
 def speak_texts(jobs: list[tuple[Path, str]], voice: str = "piper", model: Path | None = None,
                 sapi_voice: str = "Microsoft Maria Desktop", sapi_rate: int = 2) -> list[Path]:
     """Write each ``(path, text)`` as a WAV with the chosen voice; the text is already pronounced."""
 
-    if voice not in VOICES:
-        raise ValueError(f"voice must be one of {sorted(VOICES)}")
+    if voice not in VOICES - {"openrouter"}:
+        raise ValueError("speak_texts speaks local voices only (piper, sapi); use speak_script_texts")
     paths = [path for path, _ in jobs]
     if voice == "piper":
         if model is None:
@@ -809,6 +884,9 @@ def render_video(script: dict, audio_dir: Path, out: Path, frames_dir: Path) -> 
     for step_id, _, _, _ in iter_steps(script):
         with wave.open(str(audio_dir / f"{step_id}.wav")) as handle:
             params = params or handle.getparams()
+            if (handle.getframerate(), handle.getnchannels(), handle.getsampwidth()) != (
+                    params.framerate, params.nchannels, params.sampwidth):
+                raise ValueError(f"{step_id}.wav has a different audio format from the first step; speak again")
             frames = handle.readframes(handle.getnframes())
             speech = handle.getnframes() / handle.getframerate()
         pause_frames = int(PAUSE_SECONDS * params.framerate)
@@ -895,8 +973,7 @@ def main(argv: list[str] | None = None) -> int:
     speak = commands.add_parser("speak")
     speak.add_argument("script", type=Path)
     speak.add_argument("--out", type=Path, required=True)
-    speak.add_argument("--voice", choices=sorted(VOICES), default="piper")
-    speak.add_argument("--model", type=Path)
+    add_speech_arguments(speak)
     render = commands.add_parser("render")
     render.add_argument("script", type=Path)
     render.add_argument("--audio", type=Path, required=True)
@@ -912,8 +989,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate":
         print("VIDEO SCRIPT: PASS")
     elif args.command == "speak":
-        paths = synthesize(script, args.out, voice=args.voice, model=args.model)
-        print(f"SPEECH: {len(paths)} files")
+        try:
+            paths, used = synthesize(script, args.out, voice=args.voice, model=args.model, cloud=cloud_options(args),
+                                     fallback_model=args.fallback_model)
+        except (ValueError, CloudVoiceError) as error:
+            raise SystemExit(f"SPEECH: FAIL - {error}") from None
+        print(f"SPEECH: {len(paths)} files ({used})")
     elif args.command == "render":
         total = render_video(script, args.audio, args.out, args.frames)
         print(f"VIDEO: {args.out} ({total:.1f} s)")
