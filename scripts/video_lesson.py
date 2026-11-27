@@ -5,7 +5,8 @@ The pure part (script validation, pronunciation, timeline, subtitles and the
 speech check) uses only the standard library. Speech, drawing and assembly
 import their optional dependencies lazily:
 
-- speech: ``piper-tts`` (any OS) or the Windows SAPI voices (Windows only);
+- speech: ``piper-tts`` (any OS), the Windows SAPI voices (Windows only), or a cloud voice through
+  OpenRouter (``cloud_voice.py``, standard library only; sends the text out, so it needs consent);
 - frames: ``pillow`` and ``pygments``;
 - assembly: the ``ffmpeg`` executable;
 - speech check: ``faster-whisper``.

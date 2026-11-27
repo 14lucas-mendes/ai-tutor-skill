@@ -20,7 +20,7 @@ When the learner chooses tutor-made media (made locally instead of by NotebookLM
 2. **Verify before rendering.**
    - Run every code sample and output in the script.
    - Run `python scripts/video_lesson.py validate <script.json>`.
-3. **Speech.** Run `speak --voice piper --model <voice.onnx>` (any OS) or `--voice sapi` (Windows). The `pronunciation` map turns terms into their spoken form for the voice only; the subtitles keep the script text.
+3. **Speech.** Run `speak --voice piper --model <voice.onnx>` (any OS) or `--voice sapi` (Windows). The `pronunciation` map turns terms into their spoken form for the voice only; the subtitles keep the script text. A cloud voice is also available (see *Cloud voice* below).
 4. **Render.**
    - `render --audio <dir> --out <lesson.mp4> --frames <dir>` draws dark-theme frames (code highlighted line by line, unhighlighted lines dimmed) and joins them with the speech.
    - The video is 1920×1080 at 30 frames per second.
@@ -102,7 +102,7 @@ Aim for 4 to 6 minutes per part of a lesson. Each answer must come from the writ
 
 **Commands:**
 1. Run `validate`. It fails on a structural error, and it prints a warning when a line points at a screen.
-2. Run `render --out <review.mp3> --voice piper --model <voice.onnx>`. It writes the MP3 and a `.txt` transcript with times, tones and pauses.
+2. Run `render --out <review.mp3> --voice piper --model <voice.onnx>`. It writes the MP3 and a `.txt` transcript with times, tones and pauses. The cloud voice options below work here too.
 3. Run `check <script.json> <review.mp3>` to compare the speech with the script.
 
 **Registering:** register the item in `media-index.json` with `type: "audio"`, `provider: "local"`, the `.txt` as `transcript`, and `evidence_eligible: false`. Keep the MP3 out of version control.
@@ -117,9 +117,28 @@ Aim for 4 to 6 minutes per part of a lesson. Each answer must come from the writ
 
 Offer the recall style first; use the summary only when the learner chooses it. Neither style is evidence.
 
+### Cloud voice (OpenRouter)
+
+When the learner chooses a cloud voice, `speak` (video) and `render` (audio review) take `--voice openrouter`. Any OpenRouter speech model that returns WAV works, for example `google/gemini-2.5-pro-tts` with the voice `Charon`.
+
+- **Consent, every time.** The lesson text leaves the computer: it goes to OpenRouter and to the model's provider. Before each render, show the learner what will be sent and ask. Pass `--external-ok` only after the learner says yes; without it, the command refuses. Consent for one lesson part does not cover the next.
+- **Options:**
+  - `--cloud-model` and `--cloud-voice`;
+  - `--instructions`, an optional speaking style, such as "Brazilian Portuguese, calm teacher";
+  - `--fallback-model`, the Piper `.onnx` file;
+  - `--cache`, by default `~/.cache/ai-tutor/tts`.
+- **Defaults** may come from environment variables, so a launcher can set them once: `AI_TUTOR_PIPER_MODEL` (for `--model` and `--fallback-model`), `AI_TUTOR_CLOUD_MODEL`, `AI_TUTOR_CLOUD_VOICE` and `AI_TUTOR_CLOUD_INSTRUCTIONS`.
+- **Key:** the `OPENROUTER_API_KEY` environment variable. The learner stores it in the studio's `.env`, never in the study. The tutor never opens or prints that file.
+- **One voice per lesson:** if any request fails (network, credit, model), every text is spoken again with Piper from `--fallback-model`, with a `WARNING`. Without a fallback, the command stops with the error.
+- **Cache:** each generated line is cached by model, voice, instructions and text, so rendering again sends nothing and costs nothing.
+- **Pronunciation:** the cloud voice reads the original text. `pronunciation` stays for local voices. An optional `pronunciation_cloud` map fixes terms the cloud voice gets wrong.
+- **Registering:** in `media-index.json`, use `provider: "openrouter"` and name the model and voice in the output note.
+
 ### Studio environment
 
 Install the optional dependencies in one virtual environment of their own (the "studio"), outside the study and outside any synced folder (Google Drive, Dropbox, OneDrive), so the study stays free of binaries. The versions are pinned in `requirements-video.txt` at the skill root.
+
+On Windows, keep the studio out of `AppData`. The Claude desktop app virtualizes `AppData\Local`: what it writes there lands in a private copy that the learner's own terminals do not see. A folder such as `C:\Users\<user>\ai-tutor-studio` avoids this.
 
 ```text
 python -m venv <studio>/.venv
