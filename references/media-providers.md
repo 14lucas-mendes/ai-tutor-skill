@@ -129,8 +129,8 @@ When the learner chooses a cloud voice, `speak` (video) and `render` (audio revi
   - `--cache`, by default `~/.cache/ai-tutor/tts`.
 - **Defaults** may come from environment variables, so a launcher can set them once: `AI_TUTOR_PIPER_MODEL` (for `--model` and `--fallback-model`), `AI_TUTOR_CLOUD_MODEL`, `AI_TUTOR_CLOUD_VOICE` and `AI_TUTOR_CLOUD_INSTRUCTIONS`.
 - **Key:** the `OPENROUTER_API_KEY` environment variable. The learner stores it in the studio's `.env`, never in the study. The tutor never opens or prints that file.
-- **One voice per lesson:** if any request fails (network, credit, model), every text is spoken again with Piper from `--fallback-model`, with a `WARNING`. Without a fallback, the command stops with the error.
-- **Cache:** each generated line is cached by model, voice, instructions and text, so rendering again sends nothing and costs nothing.
+- **One voice per lesson:** if any request fails (network, credit, model, or audio that is not 16-bit PCM WAV), every text is spoken again with Piper from `--fallback-model`, with a `WARNING`. Without a fallback, the command stops with `SPEECH: FAIL`. A missing key or missing consent always stops the command, even with a fallback, because the fallback only covers request failures.
+- **Cache:** each generated line is cached by model, voice, instructions and text, so rendering again sends nothing and costs nothing. Lines fetched before a failure stay cached and are not paid twice. A broken cache file is discarded and fetched again. `--cache` has no environment default.
 - **Pronunciation:** the cloud voice reads the original text. `pronunciation` stays for local voices. An optional `pronunciation_cloud` map fixes terms the cloud voice gets wrong.
 - **Registering:** in `media-index.json`, use `provider: "openrouter"` and name the model and voice in the output note.
 

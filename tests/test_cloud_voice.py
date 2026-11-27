@@ -1,14 +1,42 @@
+import http.client
 import io
 import json
+import struct
 import tempfile
 import unittest
 import urllib.error
+import wave
 from pathlib import Path
 
 from scripts.cloud_voice import CloudOptions, CloudVoiceError, cache_key, openrouter_wav, speak_cloud
 
 KEY = "sk-or-test-SECRET"
-WAV = b"RIFF\x24\x00\x00\x00WAVEfmt " + b"\x00" * 24
+def make_wav(rate=24000, frames=240, width=2, channels=1) -> bytes:
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as handle:
+        handle.setnchannels(channels)
+        handle.setsampwidth(width)
+        handle.setframerate(rate)
+        handle.writeframes(b"\x01\x00" * frames * channels if width == 2 else b"\x01" * frames * channels)
+    return buffer.getvalue()
+
+
+WAV = make_wav()
+
+
+def streaming(audio: bytes) -> bytes:
+    """The same WAV with the RIFF and data sizes set to 0xFFFFFFFF, as a streaming encoder writes them."""
+
+    data = bytearray(audio)
+    data[4:8] = b"\xff\xff\xff\xff"
+    data[40:44] = b"\xff\xff\xff\xff"
+    return bytes(data)
+
+
+def float_wav() -> bytes:
+    data = bytearray(WAV)
+    data[20:22] = struct.pack("<H", 3)
+    return bytes(data)
 
 
 class FakeOpener:
@@ -31,6 +59,7 @@ def http_error(code=402, body=b'{"error": {"message": "Insufficient credits"}}')
 
 
 def options(tmp, **extra):
+    extra.setdefault("external_ok", True)
     return CloudOptions(model="google/gemini-2.5-pro-tts", voice="Charon", cache_dir=Path(tmp), **extra)
 
 
@@ -66,7 +95,59 @@ class RequestTests(unittest.TestCase):
                 openrouter_wav("Olá", options(tmp), KEY, opener=FakeOpener(b'{"error": "quota"}'))
 
 
+class WavCheckTests(unittest.TestCase):
+    def frames(self, audio):
+        with wave.open(io.BytesIO(audio)) as handle:
+            return handle.getnframes()
+
+    def test_streaming_header_is_normalized(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            audio = openrouter_wav("Olá", options(tmp), KEY, opener=FakeOpener(streaming(WAV)))
+            self.assertEqual(240, self.frames(audio))
+
+    def test_float_and_empty_wavs_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for bad in (float_wav(), make_wav(frames=0), make_wav(width=1)):
+                with self.assertRaises(CloudVoiceError):
+                    openrouter_wav("Olá", options(tmp), KEY, opener=FakeOpener(bad))
+
+    def test_network_protocol_errors_become_cloud_voice_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(CloudVoiceError):
+                openrouter_wav("Olá", options(tmp), KEY, opener=FakeOpener(http.client.IncompleteRead(b"")))
+
+    def test_empty_key_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(CloudVoiceError):
+                openrouter_wav("Olá", options(tmp), "", opener=FakeOpener())
+
+
 class CacheAndBatchTests(unittest.TestCase):
+    def test_speak_cloud_requires_consent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            opener = FakeOpener()
+            no_consent = CloudOptions(model="m", voice="v", cache_dir=Path(tmp))
+            with self.assertRaises(CloudVoiceError):
+                speak_cloud([Path(tmp) / "a.wav"], ["Olá"], no_consent, KEY, opener=opener)
+            self.assertEqual([], opener.requests)
+
+    def test_corrupt_cache_is_fetched_again(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            opts = options(tmp)
+            (Path(tmp) / f"{cache_key('Olá', opts)}.wav").write_bytes(b"RIFF broken")
+            opener = FakeOpener()
+            speak_cloud([Path(tmp) / "a.wav"], ["Olá"], opts, KEY, opener=opener)
+            self.assertEqual(1, len(opener.requests))
+            self.assertEqual(240, WavCheckTests.frames(None, (Path(tmp) / "a.wav").read_bytes()))
+
+    def test_mixed_formats_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "out"
+            out.mkdir()
+            with self.assertRaises(CloudVoiceError):
+                speak_cloud([out / "a.wav", out / "b.wav"], ["um", "dois"], options(tmp), KEY,
+                            opener=FakeOpener(make_wav(24000), make_wav(16000)))
+
     def test_cache_avoids_second_request(self):
         with tempfile.TemporaryDirectory() as tmp:
             opener = FakeOpener()
@@ -80,7 +161,7 @@ class CacheAndBatchTests(unittest.TestCase):
     def test_cache_key_changes_with_voice(self):
         with tempfile.TemporaryDirectory() as tmp:
             charon = options(tmp)
-            kore = CloudOptions(model=charon.model, voice="Kore", cache_dir=charon.cache_dir)
+            kore = CloudOptions(model=charon.model, voice="Kore", cache_dir=charon.cache_dir, external_ok=True)
             self.assertNotEqual(cache_key("Olá", charon), cache_key("Olá", kore))
             self.assertNotEqual(cache_key("Olá", charon), cache_key("Olá", options(tmp, instructions="calmo")))
 

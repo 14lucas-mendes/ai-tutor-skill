@@ -349,8 +349,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate":
         print("AUDIO SCRIPT: PASS")
     elif args.command == "render":
-        total = render_audio(script, args.out, voice=args.voice, model=args.model, cloud=cloud_options(args),
-                             fallback_model=args.fallback_model)
+        try:
+            total = render_audio(script, args.out, voice=args.voice, model=args.model, cloud=cloud_options(args),
+                                 fallback_model=args.fallback_model)
+        except (ValueError, RuntimeError) as error:  # missing consent or key; cloud failure without a fallback
+            raise SystemExit(f"SPEECH: FAIL - {error}") from None
         print(f"AUDIO: {args.out} ({total:.1f} s)")
     else:
         ratio, differences = check_audio(script, args.audio, model=args.model)

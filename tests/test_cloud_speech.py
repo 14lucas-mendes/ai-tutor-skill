@@ -100,6 +100,23 @@ class ValidationTests(unittest.TestCase):
         self.assertIn("pronunciation_cloud must map text to spoken text", validate_audio_script(audio))
 
 
+class CliErrorTests(unittest.TestCase):
+    def test_missing_consent_fails_without_traceback(self):
+        import subprocess
+        import sys
+
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "script.json"
+            path.write_text(json.dumps(VIDEO_SCRIPT), encoding="utf-8")
+            result = subprocess.run([sys.executable, "-B", str(root / "scripts" / "video_lesson.py"), "speak", str(path),
+                                     "--out", str(Path(tmp) / "audio"), "--voice", "openrouter", "--cloud-model", "m",
+                                     "--cloud-voice", "v"], capture_output=True, text=True, check=False)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("SPEECH: FAIL", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+
 class ArgumentTests(unittest.TestCase):
     def test_cli_defaults_come_from_env(self):
         env = {"AI_TUTOR_PIPER_MODEL": "v.onnx", "AI_TUTOR_CLOUD_MODEL": "google/gemini-2.5-pro-tts",

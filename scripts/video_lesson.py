@@ -338,7 +338,7 @@ def synthesize(script: dict, out_dir: Path, voice: str = "piper", model: Path | 
 def speak_script_texts(paths: list[Path], texts: list[str], script: dict, *, voice: str, model: Path | None,
                        cloud: CloudOptions | None = None, fallback_model: Path | None = None,
                        env: Mapping[str, str] = os.environ, opener=None,
-                       local_speak: Callable = None) -> str:
+                       local_speak: Callable | None = None) -> str:
     """Speak the script texts with one voice for all of them and return the voice used.
 
     Cloud voices read ``pronunciation_cloud``; local voices read ``pronunciation``.
@@ -884,6 +884,9 @@ def render_video(script: dict, audio_dir: Path, out: Path, frames_dir: Path) -> 
     for step_id, _, _, _ in iter_steps(script):
         with wave.open(str(audio_dir / f"{step_id}.wav")) as handle:
             params = params or handle.getparams()
+            if (handle.getframerate(), handle.getnchannels(), handle.getsampwidth()) != (
+                    params.framerate, params.nchannels, params.sampwidth):
+                raise ValueError(f"{step_id}.wav has a different audio format from the first step; speak again")
             frames = handle.readframes(handle.getnframes())
             speech = handle.getnframes() / handle.getframerate()
         pause_frames = int(PAUSE_SECONDS * params.framerate)
@@ -986,8 +989,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate":
         print("VIDEO SCRIPT: PASS")
     elif args.command == "speak":
-        paths, used = synthesize(script, args.out, voice=args.voice, model=args.model, cloud=cloud_options(args),
-                                 fallback_model=args.fallback_model)
+        try:
+            paths, used = synthesize(script, args.out, voice=args.voice, model=args.model, cloud=cloud_options(args),
+                                     fallback_model=args.fallback_model)
+        except (ValueError, CloudVoiceError) as error:
+            raise SystemExit(f"SPEECH: FAIL - {error}") from None
         print(f"SPEECH: {len(paths)} files ({used})")
     elif args.command == "render":
         total = render_video(script, args.audio, args.out, args.frames)
